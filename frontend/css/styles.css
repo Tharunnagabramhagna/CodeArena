@@ -2,4 +2,79 @@
 * {
     padding: 0;
     margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #070D19;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Navbar Logic */
+header {
+    display: flex;
+    /* Bring all the elements of navbar to center */
+    align-items: center;
+    /* Creates equal gaps between elements */
+    gap: 1.5rem;
+    padding: 12px 28px;
+    min-height: 76px;
+}
+
+/* Logo Logic */
+.brand {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    gap: 5px;
+}
+
+.head-logo {
+    color: white;
+    font-size: 1.75rem;
+}
+
+.brand-logo {
+    /* Minimizes the logo size */
+    height: 48px;
+    width: 48px;
+}
+
+/* Search-Bar Logo Part */
+.searchBar {
+    flex: 1; /* increases the search input size */
+    min-width: 0;
+    max-width: 660px; /* Limit for the increase of input */
+    background-color: #102246;
+    padding: 12px 16px;
+    border: 1px solid #1D3B6F;
+    border-radius: 5px;
+    color: white;
+}
+
+/* Login and Sign-up Logic Part */
+
+.auth-actions {
+    display: flex;
+    gap: 1.5rem;
+    /* margin-left: 200px; */
+}
+
+.login-link {
+    color: #E2E8F0;
+    background-color: #0D1933;
+}
+
+.signup-link {
+    color: #FFFFFF;
+    background-color: #4F46E5;
+}
+
+.login-link, .signup-link {
+    text-decoration: none;
+    border: 1px solid #294565;
+    border-radius: 10px;
+    padding: 12px 24px;
+    white-space: nowrap;
 }

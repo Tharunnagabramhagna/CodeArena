@@ -5,9 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CodeArena</title>
     <link rel="stylesheet" href="css/styles.css">
+    <!-- Browser Tab icon -->
+    <link rel="icon" type="image/png" href="assests/logo/codearena-favicon.png">
 </head>
 <body>
-    <h1>Welcome to codeArena!</h1>
+    <header>
+        <!-- Click Logo to come back to the home page -->
+        <a href="index.html" class="brand">
+            <!-- alt tells the browser what the image represents. (When the src is invalid) -->
+            <img src="assests/logo/codearena-logo.png" alt="CodeArena logo" class="brand-logo">
+            <h1 class="head-logo">Code Arena</h1>
+        </a>
+        <input type="search" 
+            aria-label="Search site"
+            placeholder="Search problems, topics,or anything..." 
+            class="searchBar">
+        <button class="theme-toggle" type="button" aria-label="Toggle theme">☼</button>
+        <div class="auth-actions">
+            <a href="pages/login.html" class="login-link">Login</a>
+            <a href="pages/signup.html" class="signup-link">Sign up</a>
+        </div>
+    </header>
+
+    <!-- The defer attribute tells the browser to download your JavaScript
+    file in the background (in parallel with HTML parsing) and execute it
+    only after the HTML document is completely parsed-->
     <script src="js/app.js" defer></script>
 </body>
 </html>
