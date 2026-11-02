@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In — CodeArena</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../assets/logo/codearena-favicon.png">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/auth.css">
+    <!-- Immediate Theme Application Script (Prevents Flash) -->
+    <script src="../js/theme.js"></script>
+</head>
+<body class="auth-page">
+
+    <!-- Top Minimal Brand Bar -->
+    <header class="auth-header">
+        <a href="../index.html" class="brand" title="Return to CodeArena Home">
+            <img src="../assets/logo/codearena-logo.png" alt="CodeArena logo" class="brand-logo">
+            <span class="head-logo">CodeArena</span>
+        </a>
+
+        <div class="auth-header-actions">
+            <button class="theme-toggle" type="button" aria-label="Toggle theme">☀</button>
+            <a href="../index.html" class="auth-return-link">← Back to Home</a>
+        </div>
+    </header>
+
+    <!-- Main Authentication Form Area -->
+    <main class="auth-main">
+        <div class="auth-card">
+            <div class="auth-card-header">
+                <img src="../assets/logo/codearena-logo.png" alt="CodeArena logo" class="auth-mark">
+                <h1 class="auth-title">Welcome back</h1>
+                <p class="auth-subtitle">Log in to your CodeArena account to practice coding challenges.</p>
+            </div>
+
+            <!-- Informative Notice Banner -->
+            <div class="auth-notice" role="status">
+                <span class="notice-icon" aria-hidden="true">ℹ</span>
+                <span>Frontend Preview: Real account login will connect to the Java Servlet &amp; JDBC backend in the upcoming phase.</span>
+            </div>
+
+            <!-- Feedback Message Box -->
+            <div class="auth-feedback" id="authFeedback" aria-live="polite"></div>
+
+            <form class="auth-form" id="loginForm" novalidate>
+                <div class="form-group">
+                    <label for="loginEmail">Email address</label>
+                    <input type="email" id="loginEmail" name="email" class="form-input" placeholder="name@example.com" required autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="loginPassword" name="password" class="form-input" placeholder="Enter your password" required autocomplete="current-password">
+                        <button type="button" class="toggle-password-btn" data-target="loginPassword" aria-label="Show password" title="Show password">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-options-row">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="rememberMe" id="rememberMe">
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" class="forgot-link" onclick="alert('Password reset functionality will be enabled with backend email services.'); return false;">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-auth">
+                    Log In <span aria-hidden="true">→</span>
+                </button>
+            </form>
+
+            <p class="auth-switch">
+                Don't have an account? <a href="signup.html">Sign up</a>
+            </p>
+        </div>
+    </main>
+
+    <footer class="auth-footer">
+        &copy; 2026 CodeArena. All rights reserved.
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/api.js" defer></script>
+    <script src="../js/auth.js" defer></script>
+</body>
+</html>
+

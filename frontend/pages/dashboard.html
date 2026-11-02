@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeArena — Student Dashboard</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../assets/logo/codearena-favicon.png">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <!-- Immediate Theme Application Script (Prevents Flash) -->
+    <script src="../js/theme.js"></script>
+    <script>
+        (function() {
+            if (localStorage.getItem('codearena-sidebar-collapsed') === 'true') {
+                document.documentElement.classList.add('sidebar-preload-collapsed');
+            }
+        })();
+    </script>
+</head>
+<body class="dashboard-body">
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
+    <div class="dashboard-layout" id="dashboardLayout">
+        <!-- ==================== COLLAPSIBLE SIDEBAR ==================== -->
+        <aside class="dashboard-sidebar" id="dashboardSidebar" aria-label="Dashboard Navigation">
+            <!-- Sidebar Header with Logo and Floating Edge Collapse Toggle -->
+            <div class="sidebar-header">
+                <a href="../index.html" class="sidebar-brand" title="Return to CodeArena Home">
+                    <img src="../assets/logo/codearena-logo.png" alt="CodeArena logo" class="brand-logo sidebar-brand-logo">
+                    <span class="brand-text">CodeArena</span>
+                </a>
+                <button class="sidebar-toggle-btn" id="sidebarToggleBtn" type="button" aria-expanded="true" aria-controls="dashboardSidebar" aria-label="Collapse sidebar" title="Collapse sidebar">
+                    <svg class="toggle-icon-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="sidebar-nav">
+                <ul class="sidebar-menu">
+                    <li class="sidebar-item active">
+                        <a href="dashboard.html" class="sidebar-link" data-tooltip="Dashboard" aria-current="page">
+                            <span class="nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                    <polyline points="9 22 9 12 15 12 15 22"/>
+                                </svg>
+                            </span>
+                            <span class="nav-label">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="compiler.html" class="sidebar-link" data-tooltip="Compiler">
+                            <span class="nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="16 18 22 12 16 6"/>
+                                    <polyline points="8 6 2 12 8 18"/>
+                                </svg>
+                            </span>
+                            <span class="nav-label">Compiler</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="practice.html" class="sidebar-link" data-tooltip="Practice">
+                            <span class="nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+                                    <path d="M6 6h10"/>
+                                    <path d="M6 10h10"/>
+                                </svg>
+                            </span>
+                            <span class="nav-label">Practice</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="contests.html" class="sidebar-link" data-tooltip="Contests">
+                            <span class="nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                                    <path d="M4 22h16"/>
+                                    <path d="M10 14.66V17c0 .55-.45 1-1 1H8c-.55 0-1 .45-1 1v1h10v-1c0-.55-.45-1-1-1h-1c-.55 0-1-.45-1-1v-2.34"/>
+                                    <path d="M6 4h12v7a6 6 0 0 1-12 0V4Z"/>
+                                </svg>
+                            </span>
+                            <span class="nav-label">Contests</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="learn.html" class="sidebar-link" data-tooltip="Learn">
+                            <span class="nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                                    <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                                </svg>
+                            </span>
+                            <span class="nav-label">Learn</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="ai_assistant.html" class="sidebar-link" data-tooltip="AI Assistant">
+                            <span class="nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                                </svg>
+                            </span>
+                            <span class="nav-label">AI Assistant</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="submissions.html" class="sidebar-link" data-tooltip="Submissions">
+                            <span class="nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                </svg>
+                            </span>
+                            <span class="nav-label">Submissions</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="progress.html" class="sidebar-link" data-tooltip="Progress">
+                            <span class="nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="18" y1="20" x2="18" y2="10"/>
+                                    <line x1="12" y1="20" x2="12" y2="4"/>
+                                    <line x1="6" y1="20" x2="6" y2="14"/>
+                                </svg>
+                            </span>
+                            <span class="nav-label">Progress</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="bookmarks.html" class="sidebar-link" data-tooltip="Bookmarks">
+                            <span class="nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+                                </svg>
+                            </span>
+                            <span class="nav-label">Bookmarks</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="settings.html" class="sidebar-link" data-tooltip="Settings">
+                            <span class="nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="3"/>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                                </svg>
+                            </span>
+                            <span class="nav-label">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Bottom Promotional Card -->
+            <div class="sidebar-promo-card">
+                <div class="promo-icon" aria-hidden="true">✦</div>
+                <h4 class="promo-title">Unlock your coding potential</h4>
+                <p class="promo-subtitle">Practice. Learn. Grow.</p>
+                <a href="practice.html" class="btn btn-primary promo-btn">Get Started →</a>
+            </div>
+        </aside>
+
+        <!-- ==================== MAIN CONTENT WRAPPER ==================== -->
+        <div class="dashboard-main-wrapper">
+            <!-- Dashboard Sticky Header -->
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <button class="mobile-drawer-btn" id="mobileDrawerBtn" type="button" aria-label="Toggle navigation menu">
+                        <span class="drawer-icon">☰</span>
+                    </button>
+                    <div class="header-search">
+                        <span class="search-icon" aria-hidden="true">🔍</span>
+                        <input type="search" class="dash-search-input" id="dashSearchInput" placeholder="Search problems, topics, or anything..." aria-label="Search problems, topics, or anything">
+                        <div class="search-feedback-popover" id="searchFeedbackPopover" style="display: none;" role="status">
+                            <p class="search-popover-text">Search index: Full-text search across 150+ Java challenges will be activated with the Java compiler integration in Phase 3.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <button class="theme-toggle" type="button" aria-label="Toggle theme">☀</button>
+
+                    <!-- Notification Control (Honest state without fabricated counts) -->
+                    <div class="notification-wrapper">
+                        <button class="notification-btn" id="notificationBtn" type="button" aria-expanded="false" aria-haspopup="true" aria-label="Notifications" title="Notifications">
+                            <span class="notif-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                                    <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                                </svg>
+                            </span>
+                        </button>
+
+                        <div class="notification-popover" id="notificationPopover" role="dialog" aria-label="Notifications" style="display: none;">
+                            <div class="notif-popover-header">
+                                <h4 class="notif-popover-title">Notifications</h4>
+                                <span class="notif-popover-tag">0 new</span>
+                            </div>
+                            <div class="notif-popover-body">
+                                <div class="notif-empty-icon" aria-hidden="true">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                                    </svg>
+                                </div>
+                                <p class="notif-empty-title">No notifications yet</p>
+                                <p class="notif-empty-desc">System announcements, contest alerts, and problem review updates will appear here once connected.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Default Guest Actions (Active when no backend session exists) -->
+                    <div class="guest-auth-actions" id="guestAuthActions">
+                        <a href="login.html" class="dash-auth-link dash-auth-login">Log In</a>
+                        <a href="signup.html" class="dash-auth-link dash-auth-signup">Sign Up</a>
+                    </div>
+
+                    <!-- Authenticated User Profile UI (Structured & Hidden until real backend integration) -->
+                    <div class="user-profile-area auth-hidden" id="userProfileArea" style="display: none;" aria-hidden="true">
+                        <button class="user-profile-trigger" id="userProfileTrigger" type="button" aria-expanded="false" aria-haspopup="true" aria-label="User account menu">
+                            <span class="user-avatar" id="userAvatar">U</span>
+                            <span class="user-info">
+                                <span class="user-name" id="userName">User</span>
+                                <span class="user-role" id="userRole">Student</span>
+                            </span>
+                            <svg class="dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="user-profile-menu" id="userProfileMenu" role="menu">
+                            <a href="progress.html" class="menu-item" role="menuitem">My Progress</a>
+                            <a href="submissions.html" class="menu-item" role="menuitem">Submissions</a>
+                            <a href="settings.html" class="menu-item" role="menuitem">Settings</a>
+                            <div class="menu-divider"></div>
+                            <button class="menu-item menu-logout" id="logoutBtn" role="menuitem" type="button">Log Out</button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content Canvas -->
+            <main class="dashboard-content" id="dashboardContent">
+                <!-- Row 1: Welcome Banner -->
+                <section class="welcome-banner" aria-labelledby="welcomeHeading">
+                    <div class="welcome-content">
+                        <div class="welcome-heading-row">
+                            <div class="welcome-icon" aria-hidden="true">&lt;/&gt;</div>
+                            <div class="welcome-text-block">
+                                <h1 id="welcomeHeading" class="welcome-title">Welcome to CodeArena</h1>
+                                <p class="welcome-subtitle">Your all-in-one platform to practice, learn and master Java.</p>
+                            </div>
+                        </div>
+
+                        <div class="welcome-shortcuts">
+                            <a href="compiler.html" class="shortcut-pill shortcut-compiler">
+                                <span class="shortcut-icon" aria-hidden="true">&lt;/&gt;</span>
+                                <span>Online Compiler</span>
+                            </a>
+                            <a href="practice.html" class="shortcut-pill shortcut-practice">
+                                <span class="shortcut-icon" aria-hidden="true">📖</span>
+                                <span>Practice Problems</span>
+                            </a>
+                            <a href="ai_assistant.html" class="shortcut-pill shortcut-ai">
+                                <span class="shortcut-icon" aria-hidden="true">✦</span>
+                                <span>AI Assistant</span>
+                            </a>
+                            <a href="progress.html" class="shortcut-pill shortcut-progress">
+                                <span class="shortcut-icon" aria-hidden="true">📊</span>
+                                <span>Track Progress</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="welcome-visual" aria-hidden="true">
+                        <!-- Stylized Laptop & Preview Graphic -->
+                        <div class="laptop-illustration">
+                            <div class="laptop-screen">
+                                <div class="laptop-dots">
+                                    <span class="ldot ldot-red"></span>
+                                    <span class="ldot ldot-yellow"></span>
+                                    <span class="ldot ldot-green"></span>
+                                </div>
+                                <div class="laptop-code-lines">
+                                    <div class="code-line line-1"></div>
+                                    <div class="code-line line-2"></div>
+                                    <div class="code-line line-3"></div>
+                                    <div class="code-line line-4"></div>
+                                    <div class="code-line line-5"></div>
+                                </div>
+                            </div>
+                            <div class="laptop-base"></div>
+                            <div class="laptop-badge">&lt;/&gt;</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Row 2: Platform Overview Statistics -->
+                <section class="stats-section" aria-labelledby="platformStatsHeading">
+                    <div class="section-title-bar">
+                        <div class="title-with-desc">
+                            <h2 id="platformStatsHeading" class="section-badge-title">Platform Overview</h2>
+                            <span class="section-badge-subtitle">Provisional catalogue figures · Dynamic database metrics synchronize in backend phase</span>
+                        </div>
+                        <span class="section-badge-tag">Provisional Catalogue Data</span>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat-card">
+                            <div class="stat-icon-wrapper stat-green" aria-hidden="true">
+                                <span class="stat-icon-symbol">✓</span>
+                            </div>
+                            <div class="stat-details">
+                                <span class="stat-label">Total Problems</span>
+                                <span class="stat-value">150+</span>
+                                <span class="stat-desc">Solve and improve</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon-wrapper stat-purple" aria-hidden="true">
+                                <span class="stat-icon-symbol">📖</span>
+                            </div>
+                            <div class="stat-details">
+                                <span class="stat-label">Topics</span>
+                                <span class="stat-value">12</span>
+                                <span class="stat-desc">Explore topics</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon-wrapper stat-amber" aria-hidden="true">
+                                <span class="stat-icon-symbol">🏆</span>
+                            </div>
+                            <div class="stat-details">
+                                <span class="stat-label">Contests</span>
+                                <span class="stat-value">5</span>
+                                <span class="stat-desc">Join and compete</span>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon-wrapper stat-blue" aria-hidden="true">
+                                <span class="stat-icon-symbol">📊</span>
+                            </div>
+                            <div class="stat-details">
+                                <span class="stat-label">Learning Resources</span>
+                                <span class="stat-value">50+</span>
+                                <span class="stat-desc">Guides &amp; tutorials</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Row 3: Two-Column Main Content Grid -->
+                <div class="dashboard-columns-grid">
+                    <!-- Left Column: Featured Problems -->
+                    <section class="dash-panel featured-problems-panel" aria-labelledby="featuredHeading">
+                        <div class="panel-header">
+                            <h2 id="featuredHeading" class="panel-title">Featured Problems</h2>
+                            <a href="problems.html" class="panel-link">View All →</a>
+                        </div>
+
+                        <div class="problem-list">
+                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Two Sum">
+                                <span class="diff-badge diff-easy">Easy</span>
+                                <div class="problem-info">
+                                    <h3 class="problem-name">Two Sum</h3>
+                                    <p class="problem-snippet">Find two numbers in an array that add up to a target.</p>
+                                </div>
+                                <span class="problem-arrow" aria-hidden="true">→</span>
+                            </article>
+
+                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Reverse a String">
+                                <span class="diff-badge diff-medium">Medium</span>
+                                <div class="problem-info">
+                                    <h3 class="problem-name">Reverse a String</h3>
+                                    <p class="problem-snippet">Reverse the given string.</p>
+                                </div>
+                                <span class="problem-arrow" aria-hidden="true">→</span>
+                            </article>
+
+                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Valid Parentheses">
+                                <span class="diff-badge diff-medium">Medium</span>
+                                <div class="problem-info">
+                                    <h3 class="problem-name">Valid Parentheses</h3>
+                                    <p class="problem-snippet">Check if the parentheses are valid.</p>
+                                </div>
+                                <span class="problem-arrow" aria-hidden="true">→</span>
+                            </article>
+
+                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Merge K Sorted Lists">
+                                <span class="diff-badge diff-hard">Hard</span>
+                                <div class="problem-info">
+                                    <h3 class="problem-name">Merge K Sorted Lists</h3>
+                                    <p class="problem-snippet">Merge k sorted linked lists into one sorted list.</p>
+                                </div>
+                                <span class="problem-arrow" aria-hidden="true">→</span>
+                            </article>
+
+                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Binary Search">
+                                <span class="diff-badge diff-easy">Easy</span>
+                                <div class="problem-info">
+                                    <h3 class="problem-name">Binary Search</h3>
+                                    <p class="problem-snippet">Find the target element using binary search.</p>
+                                </div>
+                                <span class="problem-arrow" aria-hidden="true">→</span>
+                            </article>
+                        </div>
+                    </section>
+
+                    <!-- Right Column: Quick Actions + Recent Activity -->
+                    <div class="dash-right-stack">
+                        <!-- Quick Actions Panel -->
+                        <section class="dash-panel quick-actions-panel" aria-labelledby="quickActionsHeading">
+                            <div class="panel-header">
+                                <h2 id="quickActionsHeading" class="panel-title">Quick Actions</h2>
+                            </div>
+
+                            <div class="quick-actions-grid">
+                                <a href="compiler.html" class="action-card action-compiler">
+                                    <div class="action-icon-box" aria-hidden="true">&lt;/&gt;</div>
+                                    <div class="action-text-box">
+                                        <h3 class="action-title">Open Compiler</h3>
+                                        <p class="action-subtitle">Write and run Java code</p>
+                                    </div>
+                                    <span class="action-arrow" aria-hidden="true">→</span>
+                                </a>
+
+                                <a href="practice.html" class="action-card action-practice">
+                                    <div class="action-icon-box" aria-hidden="true">📖</div>
+                                    <div class="action-text-box">
+                                        <h3 class="action-title">Practice Problems</h3>
+                                        <p class="action-subtitle">Solve and improve</p>
+                                    </div>
+                                    <span class="action-arrow" aria-hidden="true">→</span>
+                                </a>
+
+                                <a href="ai_assistant.html" class="action-card action-ai">
+                                    <div class="action-icon-box" aria-hidden="true">✦</div>
+                                    <div class="action-text-box">
+                                        <h3 class="action-title">Ask AI Assistant</h3>
+                                        <p class="action-subtitle">Get hints and explanations</p>
+                                    </div>
+                                    <span class="action-arrow" aria-hidden="true">→</span>
+                                </a>
+
+                                <a href="contests.html" class="action-card action-contests">
+                                    <div class="action-icon-box" aria-hidden="true">🏆</div>
+                                    <div class="action-text-box">
+                                        <h3 class="action-title">View Contests</h3>
+                                        <p class="action-subtitle">Compete and win</p>
+                                    </div>
+                                    <span class="action-arrow" aria-hidden="true">→</span>
+                                </a>
+                            </div>
+                        </section>
+
+                        <!-- Recent Activity Panel (Personal Progress - Empty State until real backend data) -->
+                        <section class="dash-panel recent-activity-panel" aria-labelledby="activityHeading">
+                            <div class="panel-header">
+                                <h2 id="activityHeading" class="panel-title">Recent Activity</h2>
+                                <a href="submissions.html" class="panel-link">View Submissions →</a>
+                            </div>
+
+                            <div class="panel-empty-state">
+                                <div class="empty-state-icon" aria-hidden="true">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <polyline points="12 6 12 12 16 14"/>
+                                    </svg>
+                                </div>
+                                <h3 class="empty-state-title">No activity yet</h3>
+                                <p class="empty-state-description">
+                                    Your problem submissions, evaluation results, and practice history will appear here once you start coding.
+                                </p>
+                                <a href="practice.html" class="btn btn-primary btn-sm empty-state-btn">
+                                    Start Your First Challenge <span aria-hidden="true">→</span>
+                                </a>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Dashboard JavaScript -->
+    <script src="../js/dashboard.js" defer></script>
+</body>
+</html>
+

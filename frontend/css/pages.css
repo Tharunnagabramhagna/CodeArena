@@ -1,0 +1,852 @@
+/* ==========================================================================
+   CodeArena — Public Homepage Styles (pages.css)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Shared Layout & Component Utilities
+   -------------------------------------------------------------------------- */
+
+.section-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.section-header {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto var(--spacing-xl);
+}
+
+.section-title {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+  letter-spacing: -0.02em;
+}
+
+.section-subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+a.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  gap: var(--spacing-xs);
+}
+
+.btn-lg {
+  padding: 12px 24px;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  border-radius: var(--radius-md);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.35);
+  transform: translateY(-2px);
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: 0 4px 14px var(--color-shadow);
+  transform: translateY(-2px);
+}
+
+/* --------------------------------------------------------------------------
+   2. Section A: Hero
+   -------------------------------------------------------------------------- */
+
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+  gap: var(--spacing-xl);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4.5rem var(--spacing-lg) 3.5rem;
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  background-color: rgba(79, 70, 229, 0.12);
+  color: var(--color-primary-hover);
+  border: 1px solid rgba(79, 70, 229, 0.28);
+  letter-spacing: 0.02em;
+}
+
+.hero-title {
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--color-text-primary);
+}
+
+.hero-title-accent {
+  background: linear-gradient(135deg, var(--color-primary-hover), var(--color-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.hero-description {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  max-width: 520px;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.hero-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-border);
+}
+
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-stat-number {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.hero-stat-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+/* Code Editor Preview Mock */
+.hero-visual {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.code-editor-mock {
+  width: 100%;
+  max-width: 500px;
+  background-color: #0B1326;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background-color: #070D19;
+  border-bottom: 1px solid #1D3B6F;
+}
+
+.editor-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dot-red {
+  background-color: #EF4444;
+}
+
+.dot-yellow {
+  background-color: #F59E0B;
+}
+
+.dot-green {
+  background-color: #10B981;
+}
+
+.editor-filename {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  color: #94A3B8;
+}
+
+.editor-code {
+  padding: 16px;
+  font-family: var(--font-family-mono);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #E2E8F0;
+  overflow-x: auto;
+}
+
+.code-keyword {
+  color: #818CF8;
+  font-weight: 600;
+}
+
+.code-class {
+  color: #38BDF8;
+  font-weight: 600;
+}
+
+.code-method {
+  color: #93C5FD;
+}
+
+.code-type {
+  color: #F472B6;
+}
+
+.code-number {
+  color: #FBBF24;
+}
+
+.code-string {
+  color: #34D399;
+}
+
+.editor-output {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background-color: #070D19;
+  border-top: 1px solid #1D3B6F;
+  font-family: var(--font-family-mono);
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.output-label {
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: #64748B;
+  background-color: #102246;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.output-text {
+  color: #CBD5E1;
+}
+
+.output-status {
+  color: #22C55E;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+/* --------------------------------------------------------------------------
+   3. Section B: Platform Features
+   -------------------------------------------------------------------------- */
+
+.features {
+  padding: 5rem 0;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.feature-card {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-lg);
+  height: 100%;
+  transition: transform var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-border-hover);
+  box-shadow: 0 8px 24px var(--color-shadow);
+}
+
+.feature-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: var(--spacing-md);
+}
+
+.feature-icon-blue {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: var(--color-secondary);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.feature-icon-purple {
+  background-color: rgba(79, 70, 229, 0.15);
+  color: var(--color-primary-hover);
+  border: 1px solid rgba(79, 70, 229, 0.3);
+}
+
+.feature-icon-green {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: var(--color-success);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.feature-icon-orange {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: var(--color-warning);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.feature-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.feature-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* --------------------------------------------------------------------------
+   4. Section C: How CodeArena Works
+   -------------------------------------------------------------------------- */
+
+.how-it-works {
+  background-color: var(--color-bg-surface);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  padding: 5rem 0;
+}
+
+.steps-grid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.step-card {
+  flex: 1;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  height: 100%;
+  transition: transform var(--transition-normal), border-color var(--transition-normal);
+}
+
+.step-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-border-hover);
+}
+
+.step-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: var(--font-size-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-md);
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+.step-connector {
+  width: 32px;
+  height: 2px;
+  background-color: var(--color-border);
+  flex-shrink: 0;
+}
+
+.step-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.step-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* --------------------------------------------------------------------------
+   5. Section D: Featured Problems
+   -------------------------------------------------------------------------- */
+
+.featured-problems {
+  padding: 5rem 0;
+}
+
+.problems-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.problem-card {
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: transform var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.problem-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-border-hover);
+  box-shadow: 0 8px 20px var(--color-shadow);
+}
+
+.problem-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.difficulty-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.difficulty-easy {
+  background-color: rgba(34, 197, 94, 0.15);
+  color: var(--color-success);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.difficulty-medium {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: var(--color-warning);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.difficulty-hard {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: var(--color-error);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.problem-topic {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.problem-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.problem-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.problems-cta {
+  text-align: center;
+  margin-top: var(--spacing-xl);
+}
+
+/* --------------------------------------------------------------------------
+   6. Section E: Why CodeArena?
+   -------------------------------------------------------------------------- */
+
+.why-codearena {
+  background-color: var(--color-bg-surface);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  padding: 5rem 0;
+}
+
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.why-item {
+  padding: var(--spacing-lg);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: transform var(--transition-normal), border-color var(--transition-normal);
+}
+
+.why-item:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-border-hover);
+}
+
+.why-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: rgba(79, 70, 229, 0.12);
+  color: var(--color-primary-hover);
+  border: 1px solid rgba(79, 70, 229, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.why-title {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.why-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* --------------------------------------------------------------------------
+   7. Section F: Final Call to Action
+   -------------------------------------------------------------------------- */
+
+.final-cta {
+  padding: 5rem 0;
+}
+
+.cta-content {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.16), rgba(59, 130, 246, 0.1));
+  border: 1px solid rgba(79, 70, 229, 0.32);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl) var(--spacing-lg);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-title {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+  letter-spacing: -0.02em;
+}
+
+.cta-description {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  max-width: 580px;
+  margin: 0 auto var(--spacing-lg);
+  line-height: 1.6;
+}
+
+.cta-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   8. Section G: Footer
+   -------------------------------------------------------------------------- */
+
+.site-footer {
+  background-color: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border);
+  padding: 4rem 0 2rem;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: var(--spacing-xl);
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.footer-brand .brand {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.footer-full-logo {
+  height: 34px;
+  width: auto;
+  max-width: 160px;
+  object-fit: contain;
+  display: block;
+  opacity: 0.95;
+  transition: opacity var(--transition-fast);
+}
+
+.footer-brand .brand:hover .footer-full-logo {
+  opacity: 1;
+}
+
+.footer-logo-text {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+}
+
+.footer-tagline {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  max-width: 280px;
+}
+
+.footer-links-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-heading {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.footer-links a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  transition: color var(--transition-normal);
+}
+
+.footer-links a:hover {
+  color: var(--color-primary);
+}
+
+.footer-bottom {
+  margin-top: 3rem;
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-border);
+  text-align: center;
+}
+
+.footer-copyright {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* --------------------------------------------------------------------------
+   9. Light Theme Adjustments
+   -------------------------------------------------------------------------- */
+
+[data-theme="light"] .hero-badge {
+  background-color: rgba(79, 70, 229, 0.08);
+  color: var(--color-primary);
+  border-color: rgba(79, 70, 229, 0.2);
+}
+
+[data-theme="light"] .code-editor-mock {
+  background-color: #0B1326;
+  border-color: #CBD5E1;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .cta-content {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(37, 99, 235, 0.05));
+  border-color: rgba(79, 70, 229, 0.2);
+}
+
+[data-theme="light"] .btn-primary:hover {
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.25);
+}
+
+/* --------------------------------------------------------------------------
+   10. Responsive Design Breakpoints
+   -------------------------------------------------------------------------- */
+
+/* Tablet (max-width: 1024px) */
+@media (max-width: 1024px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+    text-align: center;
+    padding: 3.5rem var(--spacing-lg) 2.5rem;
+  }
+
+  .hero-content {
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero-description {
+    margin: 0 auto;
+  }
+
+  .hero-actions {
+    justify-content: center;
+  }
+
+  .hero-stats {
+    justify-content: center;
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .steps-grid {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .step-connector {
+    display: none;
+  }
+
+  .step-card {
+    width: 100%;
+  }
+
+  .problems-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .why-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+  }
+}
+
+/* Mobile (max-width: 640px) */
+@media (max-width: 640px) {
+  .hero {
+    padding: 2.5rem var(--spacing-md) 2rem;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+  }
+
+  .hero-stats {
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    justify-content: center;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .problems-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .why-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cta-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .cta-actions .btn {
+    width: 100%;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  .code-editor-mock {
+    font-size: 0.78rem;
+  }
+
+  .editor-code {
+    padding: 12px;
+  }
+}

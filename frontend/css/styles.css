@@ -1,138 +1,577 @@
-/* Universal Line */
-* {
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
+/* ========================================
+   1. CSS Custom Properties (Design Tokens)
+   ======================================== */
+
+:root {
+  /* Dark theme (default) */
+  --color-bg-primary: #070D19;
+  --color-bg-secondary: #0D1933;
+  --color-bg-surface: #102246;
+  --color-bg-hover: #162747;
+  --color-primary: #4F46E5;
+  --color-primary-hover: #6366F1;
+  --color-secondary: #3B82F6;
+  --color-secondary-hover: #60A5FA;
+  --color-text-primary: #F1F5F9;
+  --color-text-secondary: #CBD5E1;
+  --color-text-muted: #64748B;
+  --color-border: #1D3B6F;
+  --color-border-hover: #3B82F6;
+  --color-focus-ring: #93C5FD;
+  --color-shadow: rgba(0, 0, 0, 0.3);
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+
+  /* Shared variables */
+  --font-family-base: 'Segoe UI', Arial, Helvetica, sans-serif;
+  --font-family-mono: 'Consolas', 'Courier New', monospace;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.75rem;
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+}
+
+[data-theme="light"] {
+  --color-bg-primary: #F8FAFC;
+  --color-bg-secondary: #FFFFFF;
+  --color-bg-surface: #F1F5F9;
+  --color-bg-hover: #E2E8F0;
+  --color-primary: #4F46E5;
+  --color-primary-hover: #4338CA;
+  --color-secondary: #2563EB;
+  --color-secondary-hover: #1D4ED8;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94A3B8;
+  --color-border: #CBD5E1;
+  --color-border-hover: #4F46E5;
+  --color-focus-ring: #4F46E5;
+  --color-shadow: rgba(0, 0, 0, 0.08);
+  --color-success: #16A34A;
+  --color-warning: #D97706;
+  --color-error: #DC2626;
+}
+
+/* ========================================
+   2. CSS Reset
+   ======================================== */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-    background-color: #070D19;
-    color: white;
-    font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
-/* Navbar Logic */
-header {
-    display: flex;
-    /* Bring all the elements of navbar to center */
-    align-items: center;
-    /* Creates equal gaps between elements */
-    gap: 1.5rem;
-    padding: 12px 28px;
-    min-height: 76px;
+img {
+  max-width: 100%;
+  display: block;
 }
 
-/* Logo Logic */
+ul,
+ol {
+  list-style: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* ========================================
+   3. Typography
+   ======================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+
+/* ========================================
+   4. Navbar / Header Styles
+   ======================================== */
+
+header,
+.site-header,
+.landing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  min-height: 64px;
+}
+
 .brand {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    gap: 5px;
-}
-
-.head-logo {
-    color: white;
-    font-size: 1.75rem;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-decoration: none;
 }
 
 .brand-logo {
-    /* Minimizes the logo size */
-    height: 48px;
-    width: 48px;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  display: block;
 }
 
-/* Search-Bar Logo Part */
-.searchBar {
-    flex: 1; /* increases the search input size */
-    min-width: 0;
-    max-width: 660px; /* Limit for the increase of input */
-    background-color: #102246;
-    padding: 12px 16px;
-    border: 1px solid #1D3B6F;
-    border-radius: 5px;
-    color: white;
+.brand-full-logo {
+  height: 38px;
+  width: auto;
+  max-width: 180px;
+  object-fit: contain;
+  display: block;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
 }
 
-/* Theme Toggle logic */
+[data-theme="light"] .brand-full-logo {
+  filter: drop-shadow(0 1px 2px rgba(15, 23, 42, 0.5)) drop-shadow(0 0 1px rgba(15, 23, 42, 0.35));
+}
+
+.brand:hover .brand-full-logo {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.head-logo {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.nav-links a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: var(--font-size-base);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-normal), background-color var(--transition-normal);
+}
+
+.nav-links a:hover {
+  color: var(--color-primary);
+}
+
+.nav-links a.active {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.search-bar {
+  flex: 1;
+  min-width: 0;
+  max-width: 520px;
+  padding: 10px 14px;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  font-family: var(--font-family-base);
+  transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.search-bar::placeholder {
+  color: var(--color-text-muted);
+}
+
+.search-bar:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
 .theme-toggle {
-    display: flex;
-    border: none;
-    /* Increase the size of button */
-    height: 40px;
-    width: 40px;
-    font-size: 1.2rem;
-    /* Center the item from height */
-    align-items: center;
-    /* Center the item from both ht and wt */
-    justify-content: center;
-    background-color: transparent; /* Blends into navbar */
-    color: #CBD5E1;
-    /* when user points to toggle we see a chnage in cursor */
-    cursor: pointer;
-    border-radius: 10px;
-    transition: all 0.2s ease;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  transition: color var(--transition-normal), background-color var(--transition-normal);
 }
 
 .theme-toggle:hover {
-    box-shadow: 1px;
-    transform: translateY(-2px);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-hover);
 }
 
-/* Highlights the borders of the element */
 .theme-toggle:focus-visible {
-    outline : 2px solid #93C5FD;
-    outline-offset: 3px;
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
 }
 
-/* Login and Sign-up Logic Part */
+.auth-actions,
+.landing-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
 
-.auth-actions {
-    display: flex;
-    gap: 1.5rem;
-    /* margin-left: 200px; */
+.login-link,
+.signup-link,
+.btn-get-started {
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--transition-normal),
+    border-color var(--transition-normal),
+    box-shadow var(--transition-normal),
+    transform var(--transition-normal);
 }
 
 .login-link {
-    color: #E2E8F0;
-    background-color: #0D1933;
-}
-
-.signup-link {
-    color: #FFFFFF;
-    background-color: #4F46E5;
-}
-
-.login-link, .signup-link {
-    text-decoration: none;
-    border: 1px solid #294565;
-    border-radius: 10px;
-    padding: 12px 24px;
-    white-space: nowrap;
-     /* Glowing Transition */
-    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
 }
 
 .login-link:hover {
-    background-color: #162747;
-    border: 1px solid #3B82F6;
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-border-hover);
+  color: var(--color-text-primary);
+  box-shadow: 0 2px 8px var(--color-shadow);
+  transform: translateY(-1px);
 }
 
-.login-link:hover, .signup-link:hover {
-    /* Glowing shadow */
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-    transform: translateY(-2px);
+.signup-link {
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
 }
 
 .signup-link:hover {
-    background-color: #6366F1;
-    border: 1px solid #818CF8;
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-border-hover);
+  box-shadow: 0 2px 8px var(--color-shadow);
+  transform: translateY(-1px);
 }
 
-/* Highlights the borders of both the elements */
-.login-link:focus-visible {
-    border : 2px solid #93C5FD
+/* Prominent Get Started CTA Button */
+.btn-get-started {
+  background: linear-gradient(135deg, #4F46E5, #3B82F6);
+  color: #FFFFFF;
+  font-weight: 600;
+  border: 1px solid rgba(129, 140, 248, 0.4);
+  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.signup-link:focus-visible {
-    border : 2px solid #93C5FD
+.btn-get-started:hover {
+  background: linear-gradient(135deg, #6366F1, #60A5FA);
+  border-color: rgba(165, 180, 252, 0.6);
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.5);
+  transform: translateY(-2px);
+  color: #FFFFFF;
+}
+
+.login-link:focus-visible,
+.signup-link:focus-visible,
+.btn-get-started:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.mobile-menu-btn {
+  display: none;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+}
+
+.mobile-menu-btn:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-hover);
+}
+
+/* ========================================
+   5. Reusable Component Styles
+   ======================================== */
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--transition-normal),
+    box-shadow var(--transition-normal),
+    transform var(--transition-normal);
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.btn-secondary {
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 0.82rem;
+}
+
+.btn-lg {
+  padding: 12px 24px;
+  font-size: 1rem;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.input-field {
+  padding: 10px 14px;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-family: var(--font-family-base);
+  transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.input-field::placeholder {
+  color: var(--color-text-muted);
+}
+
+.input-field:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.card {
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.card:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: 0 4px 12px var(--color-shadow);
+}
+
+a {
+  color: var(--color-secondary);
+  transition: color var(--transition-normal);
+}
+
+a:hover {
+  color: var(--color-secondary-hover);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ========================================
+   6. Responsive Breakpoints
+   ======================================== */
+
+/* Tablet */
+@media (max-width: 768px) {
+
+  header,
+  .site-header {
+    justify-content: space-between;
+    padding: var(--spacing-sm) var(--spacing-md);
+    gap: var(--spacing-sm);
+    position: relative;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .nav-links.active {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--spacing-md);
+    z-index: 999;
+    gap: var(--spacing-sm);
+  }
+
+  .search-bar {
+    max-width: 240px;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .head-logo {
+    font-size: var(--font-size-xl);
+  }
+
+  .brand-full-logo {
+    height: 34px;
+    max-width: 150px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+
+  header,
+  .site-header {
+    padding: 8px 12px;
+    gap: 6px;
+  }
+
+  .search-bar {
+    display: none;
+  }
+
+  .theme-toggle {
+    width: 36px;
+    height: 36px;
+    font-size: var(--font-size-lg);
+  }
+
+  .mobile-menu-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.25rem;
+  }
+
+  .auth-actions,
+  .landing-header-actions {
+    gap: 4px;
+  }
+
+  .login-link,
+  .signup-link,
+  .btn-get-started {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+
+  .head-logo {
+    font-size: 1.15rem;
+  }
+
+  .brand-logo {
+    width: 28px;
+    height: 28px;
+  }
+
+  .brand-full-logo {
+    height: 28px;
+    max-width: 125px;
+  }
+}
+
+/* ========================================
+   7. Accessibility
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
