@@ -3,63 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Progress — CodeArena</title>
+    <title>Learning Progress & Analytics — CodeArena</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="../assets/logo/codearena-favicon.png">
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/auth.css">
+    <link rel="stylesheet" href="../css/secondary.css">
     <!-- Immediate Theme Application Script (Prevents Flash) -->
     <script src="../js/theme.js"></script>
 </head>
-<body class="auth-page">
+<body class="secondary-page-body">
 
-    <!-- Top Minimal Brand Bar -->
-    <header class="auth-header">
-        <a href="../index.html" class="brand" title="Return to CodeArena Home">
-            <img src="../assets/logo/codearena-logo.png" alt="CodeArena logo" class="brand-logo">
-            <span class="head-logo">CodeArena</span>
-        </a>
+    <!-- Top Standard 60px Secondary Header -->
+    <header class="secondary-header">
+        <div class="secondary-header-left">
+            <a href="../index.html" class="secondary-brand-wrap" title="Return to CodeArena Home" aria-label="CodeArena Home">
+                <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo">
+            </a>
 
-        <div class="auth-header-actions">
-            <button class="theme-toggle" type="button" aria-label="Toggle theme">☀</button>
-            <a href="dashboard.html" class="auth-return-link">← Return to Dashboard</a>
+            <nav class="secondary-breadcrumbs" aria-label="Breadcrumbs">
+                <a href="../index.html">Home</a>
+                <span class="crumb-sep">/</span>
+                <a href="dashboard.html">Dashboard</a>
+                <span class="crumb-sep">/</span>
+                <span class="crumb-current">Learning Progress</span>
+            </nav>
+        </div>
+
+        <div class="secondary-header-actions">
+            <a href="practice.html" class="secondary-header-btn" title="Practice Hub">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+                    <path d="M6 6h10"></path>
+                    <path d="M6 10h10"></path>
+                </svg>
+                <span>Practice</span>
+            </a>
+            <a href="problems.html" class="secondary-header-btn" title="Problem Catalogue">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+                <span>Catalogue</span>
+            </a>
+            <button class="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle dark/light theme">☀</button>
         </div>
     </header>
 
-    <!-- Main Placeholder Canvas -->
-    <main class="auth-main">
-        <div class="auth-card" style="max-width: 520px; text-align: center;">
-            <div class="auth-card-header">
-                <div class="empty-state-icon" style="margin: 0 auto 10px; width: 56px; height: 56px; border-radius: 50%; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center; color: #60A5FA;" aria-hidden="true">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1='18' y1='20' x2='18' y2='10'/><line x1='12' y1='20' x2='12' y2='4'/><line x1='6' y1='20' x2='6' y2='14'/>
-                    </svg>
+    <!-- Main Progress Canvas -->
+    <main class="secondary-main">
+        <div class="secondary-container">
+
+            <!-- Hero Banner -->
+            <section class="feature-hero" aria-labelledby="progress-heading">
+                <div class="feature-hero-text">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <span class="preview-badge-pill">Analytics Preview</span>
+                    </div>
+                    <h1 id="progress-heading">Student Learning Analytics</h1>
+                    <p>
+                        Track your algorithmic growth, monitor your consistency streak, and visualize progress across data structure domains.
+                        Metrics reflect your active browser session and preview records.
+                    </p>
                 </div>
-                <h1 class="auth-title">Student Progress Tracking</h1>
-                <span class="auth-notice" style="margin: 6px auto; display: inline-flex; justify-content: center;">
-                    <span class="notice-icon">ℹ</span>
-                    <span>Planned for Phase 4 · Backend Integration In Progress</span>
-                </span>
-                <p class="auth-subtitle" style="margin-top: 10px; font-size: 0.9rem; line-height: 1.5;">
-                    Visualize topic proficiency, daily problem-solving streaks, and cumulative difficulty distribution over time.
-                </p>
+                <div class="feature-hero-stats">
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-val" style="color: var(--color-primary);" id="metricTotalSolved">0</div>
+                        <div class="hero-stat-lbl">Problems Solved</div>
+                    </div>
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-val" style="color: #4ADE80;" id="metricCompletionRate">0%</div>
+                        <div class="hero-stat-lbl">Completion Rate</div>
+                    </div>
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-val" style="color: #FBBF24;" id="metricCurrentStreak">0 Days</div>
+                        <div class="hero-stat-lbl">Practice Streak</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics Cards Grid -->
+            <div class="progress-analytics-grid">
+
+                <!-- Difficulty Distribution Card -->
+                <div class="analytics-card">
+                    <h2 class="analytics-card-title">Difficulty Distribution</h2>
+
+                    <div class="progress-bar-wrap">
+                        <div class="bar-meta">
+                            <span style="color: #4ADE80; font-weight: 600;">Easy Challenges</span>
+                            <span id="barTextEasy" style="color: var(--color-text-muted); font-size: 0.78rem;">0 / 6 (0%)</span>
+                        </div>
+                        <div class="bar-track">
+                            <div class="bar-fill easy" id="barFillEasy" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="progress-bar-wrap">
+                        <div class="bar-meta">
+                            <span style="color: #FBBF24; font-weight: 600;">Medium Challenges</span>
+                            <span id="barTextMedium" style="color: var(--color-text-muted); font-size: 0.78rem;">0 / 4 (0%)</span>
+                        </div>
+                        <div class="bar-track">
+                            <div class="bar-fill medium" id="barFillMedium" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="progress-bar-wrap">
+                        <div class="bar-meta">
+                            <span style="color: #F87171; font-weight: 600;">Hard Challenges</span>
+                            <span id="barTextHard" style="color: var(--color-text-muted); font-size: 0.78rem;">0 / 2 (0%)</span>
+                        </div>
+                        <div class="bar-track">
+                            <div class="bar-fill hard" id="barFillHard" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topic Mastery Breakdown Card -->
+                <div class="analytics-card">
+                    <h2 class="analytics-card-title">Algorithmic Domain Mastery</h2>
+                    <div id="topicMasteryContainer">
+                        <!-- Populated dynamically by progress.js -->
+                    </div>
+                </div>
+
+                <!-- Recent Activity Feed Card -->
+                <div class="analytics-card">
+                    <h2 class="analytics-card-title">Recent Session Activity</h2>
+                    <div id="recentActivityList">
+                        <!-- Populated dynamically by progress.js -->
+                    </div>
+                </div>
+
             </div>
 
-            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 12px;">
-                <a href="dashboard.html" class="btn btn-primary btn-auth" style="margin-top: 0; text-decoration: none;">
-                    Go to Student Dashboard <span aria-hidden="true">→</span>
-                </a>
-            </div>
-            
-            <p class="auth-switch" style="margin-top: 8px;">
-                <a href="../index.html">← Back to Public Homepage</a>
-            </p>
+            <!-- Coding Activity Heatmap Card -->
+            <section class="analytics-card" style="margin-bottom: 24px;" aria-labelledby="heatmap-heading">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <h2 id="heatmap-heading" class="analytics-card-title" style="margin: 0;">Daily Practice Consistency Grid (Past 9 Weeks)</h2>
+                    <div style="display: flex; align-items: center; gap: 6px; font-size: 0.74rem; color: var(--color-text-muted);">
+                        <span>Less</span>
+                        <div class="heatmap-cell" style="width: 10px; height: 10px;"></div>
+                        <div class="heatmap-cell level-1" style="width: 10px; height: 10px;"></div>
+                        <div class="heatmap-cell level-2" style="width: 10px; height: 10px;"></div>
+                        <div class="heatmap-cell level-3" style="width: 10px; height: 10px;"></div>
+                        <span>More</span>
+                    </div>
+                </div>
+                <div class="activity-heatmap-grid" id="activityHeatmapGrid" aria-label="Activity heatmap">
+                    <!-- 64 cells generated by progress.js -->
+                </div>
+            </section>
+
         </div>
     </main>
 
-    <footer class="auth-footer">
-        &copy; 2026 CodeArena. All rights reserved. Built for learners, by learners.
+    <!-- Standard Secondary Footer -->
+    <footer class="secondary-footer" role="contentinfo">
+        <div class="secondary-footer-container">
+            <div class="secondary-footer-brand-wrap">
+                <a href="../index.html" class="secondary-footer-brand" aria-label="CodeArena Home">
+                    <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo footer-full-logo">
+                </a>
+                <p class="secondary-footer-tagline">
+                    Master Java programming through deliberate practice. One challenge at a time.
+                </p>
+            </div>
+            <nav class="secondary-footer-nav" aria-label="Footer Navigation">
+                <a href="../index.html" class="secondary-footer-link">Home</a>
+                <a href="problems.html" class="secondary-footer-link">Problems</a>
+                <a href="compiler.html" class="secondary-footer-link">Compiler</a>
+                <a href="dashboard.html" class="secondary-footer-link">Dashboard</a>
+            </nav>
+            <p class="secondary-footer-copyright">
+                &copy; 2026 CodeArena. Built for learners, by learners.
+            </p>
+        </div>
     </footer>
+
+    <!-- Scripts -->
+    <script src="../js/api.js"></script>
+    <script src="../js/progress.js"></script>
 </body>
 </html>

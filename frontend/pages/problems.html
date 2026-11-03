@@ -6,60 +6,238 @@
     <title>Problem Catalogue — CodeArena</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="../assets/logo/codearena-favicon.png">
-    <!-- Stylesheets -->
+
+    <!-- CodeArena Design Tokens & Catalogue Styles -->
     <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/auth.css">
-    <!-- Immediate Theme Application Script (Prevents Flash) -->
+    <link rel="stylesheet" href="../css/problems.css">
+
+    <!-- Immediate Theme Application Script (Zero Flash) -->
     <script src="../js/theme.js"></script>
 </head>
-<body class="auth-page">
+<body class="problems-body">
 
-    <!-- Top Minimal Brand Bar -->
-    <header class="auth-header">
-        <a href="../index.html" class="brand" title="Return to CodeArena Home">
-            <img src="../assets/logo/codearena-logo.png" alt="CodeArena logo" class="brand-logo">
-            <span class="head-logo">CodeArena</span>
-        </a>
+    <!-- Top Workspace Header -->
+    <header class="problems-header">
+        <div class="problems-header-left">
+            <a href="../index.html" class="problems-brand-wrap" title="Return to CodeArena Home">
+                <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo">
+            </a>
 
-        <div class="auth-header-actions">
-            <button class="theme-toggle" type="button" aria-label="Toggle theme">☀</button>
-            <a href="dashboard.html" class="auth-return-link">← Return to Dashboard</a>
+            <nav class="problems-breadcrumbs" aria-label="Breadcrumb">
+                <a href="../index.html">Home</a>
+                <span class="crumb-sep">/</span>
+                <a href="dashboard.html">Dashboard</a>
+                <span class="crumb-sep">/</span>
+                <span class="crumb-current">Problems</span>
+            </nav>
+        </div>
+
+        <div class="problems-header-actions">
+            <a href="compiler.html" class="problems-header-btn" title="Open Online Java Compiler">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+                <span>Compiler</span>
+            </a>
+            <a href="dashboard.html" class="problems-header-btn" title="Return to Student Dashboard">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+            <button class="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle dark/light theme">☀</button>
         </div>
     </header>
 
-    <!-- Main Placeholder Canvas -->
-    <main class="auth-main">
-        <div class="auth-card" style="max-width: 520px; text-align: center;">
-            <div class="auth-card-header">
-                <div class="empty-state-icon" style="margin: 0 auto 10px; width: 56px; height: 56px; border-radius: 50%; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center; color: #60A5FA;" aria-hidden="true">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/>
-                    </svg>
+    <!-- Main Content Container -->
+    <main class="problems-main">
+        <div class="problems-container">
+
+            <!-- Hero Header Banner -->
+            <section class="catalogue-hero" aria-labelledby="catalogueHeading">
+                <div class="hero-text-block">
+                    <div class="catalogue-title-row">
+                        <h1 id="catalogueHeading" class="catalogue-title">Problem Catalogue</h1>
+                        <span class="catalogue-notice-tag">Preview Catalogue</span>
+                    </div>
+                    <p class="catalogue-subtitle">
+                        Explore challenges across foundational algorithms and data structures. Filter by difficulty or topic, sort by acceptance, and practice Java coding solutions.
+                    </p>
                 </div>
-                <h1 class="auth-title">Problem Catalogue</h1>
-                <span class="auth-notice" style="margin: 6px auto; display: inline-flex; justify-content: center;">
-                    <span class="notice-icon">ℹ</span>
-                    <span>Planned for Phase 3 · Backend Integration In Progress</span>
-                </span>
-                <p class="auth-subtitle" style="margin-top: 10px; font-size: 0.9rem; line-height: 1.5;">
-                    Explore challenges by difficulty, topic tags, and acceptance rates with search, filter, and sorting capabilities.
-                </p>
+
+                <div class="catalogue-hero-stats" aria-label="Catalogue Overview Stats">
+                    <div class="hero-stat-pill">
+                        <span class="hero-stat-val">12</span>
+                        <span class="hero-stat-lbl">Sample Set</span>
+                    </div>
+                    <div class="hero-stat-pill">
+                        <span class="hero-stat-val">7</span>
+                        <span class="hero-stat-lbl">Topics</span>
+                    </div>
+                    <div class="hero-stat-pill">
+                        <span class="hero-stat-val">3</span>
+                        <span class="hero-stat-lbl">Levels</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Search and Filter Controls -->
+            <section class="catalogue-controls-card" aria-label="Search and Filter Controls">
+                <div class="catalogue-controls-row">
+                    <!-- Search Input -->
+                    <div class="catalogue-search-wrap">
+                        <svg class="catalogue-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <div class="catalogue-search-wrapper">
+                            <input type="text" id="catalogueSearchInput" class="catalogue-search-input" placeholder="Search by problem title, topic, or keyword..." aria-label="Search problems" autocomplete="off">
+                            <div class="catalogue-search-suggestions" id="catalogueSearchSuggestions" role="listbox" aria-label="Search suggestions" style="display: none;"></div>
+                        </div>
+                        <button id="searchClearBtn" class="search-clear-btn" type="button" title="Clear search" aria-label="Clear search">✕</button>
+                    </div>
+
+                    <!-- Filters and Sorting -->
+                    <div class="catalogue-filters-wrap">
+                        <!-- Difficulty -->
+                        <div class="catalogue-select-control">
+                            <select id="difficultyFilter" class="filter-select" aria-label="Filter by Difficulty">
+                                <option value="All">All Difficulties</option>
+                                <option value="Easy">Easy</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Hard">Hard</option>
+                            </select>
+                            <svg class="select-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+
+                        <!-- Topic (Populated dynamically) -->
+                        <div class="catalogue-select-control">
+                            <select id="topicFilter" class="filter-select" aria-label="Filter by Topic">
+                                <option value="All">All Topics</option>
+                            </select>
+                            <svg class="select-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+
+                        <!-- Sort By -->
+                        <div class="catalogue-select-control">
+                            <select id="sortBySelect" class="filter-select" aria-label="Sort problems by">
+                                <option value="default">Sort: Default</option>
+                                <option value="difficulty">Sort: Difficulty</option>
+                                <option value="title">Sort: Title (A–Z)</option>
+                                <option value="acceptance">Sort: Acceptance Rate (Provisional)</option>
+                            </select>
+                            <svg class="select-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                        </div>
+
+                        <!-- Clear Action -->
+                        <button id="clearFiltersBtn" class="btn-clear-filters" type="button" title="Reset all active search and filter controls">
+                            <span>✕</span>
+                            <span>Reset Filters</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Summary Bar -->
+                <div class="catalogue-summary-bar">
+                    <div id="resultsCountText" class="results-count-text">Loading problem catalogue...</div>
+                    <div id="activeFilterChips" class="active-filter-chips" aria-label="Active Filters"></div>
+                </div>
+            </section>
+
+            <!-- Recently Viewed Problems Section (Phase 6) -->
+            <section class="recently-viewed-card" id="recentlyViewedSection" style="display: none;" aria-label="Recently Viewed Problems">
+                <div class="recently-viewed-header">
+                    <div class="recently-viewed-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>Recently Viewed Problems</span>
+                    </div>
+                    <button type="button" class="btn-clear-history" id="btnClearRecentlyViewed">Clear History</button>
+                </div>
+                <div class="recently-viewed-grid" id="recentlyViewedGrid"></div>
+            </section>
+
+            <!-- Loading Spinner State -->
+            <div id="catalogueLoadingState" class="catalogue-loading-state" style="display: none;" role="status">
+                <span class="loading-spinner" aria-hidden="true"></span>
+                <span>Loading problems...</span>
             </div>
 
-            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 12px;">
-                <a href="dashboard.html" class="btn btn-primary btn-auth" style="margin-top: 0; text-decoration: none;">
-                    Go to Student Dashboard <span aria-hidden="true">→</span>
-                </a>
-            </div>
-            
-            <p class="auth-switch" style="margin-top: 8px;">
-                <a href="../index.html">← Back to Public Homepage</a>
-            </p>
+            <!-- Problem Table Listing Card -->
+            <section class="catalogue-table-card" id="catalogueTableCard" aria-label="Problems Listing">
+                <div class="problems-table-wrap">
+                    <table class="problems-table">
+                        <thead>
+                            <tr>
+                                <th class="col-num" scope="col">#</th>
+                                <th class="col-title" scope="col">Title &amp; Description</th>
+                                <th class="col-diff" scope="col">Difficulty</th>
+                                <th class="col-topic" scope="col">Topic</th>
+                                <th class="col-acc" scope="col">Acceptance (Provisional)</th>
+                                <th class="col-action" scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="problemsTableBody">
+                            <!-- Populated dynamically by problems.js -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination Bar -->
+                <div class="catalogue-pagination-bar" id="cataloguePaginationBar">
+                    <div class="pagination-info" id="paginationInfo">Page 1 of 1</div>
+                    <nav class="pagination-nav" id="paginationNav" aria-label="Catalogue Pagination"></nav>
+                </div>
+            </section>
+
+            <!-- Empty Search Results State -->
+            <section class="catalogue-table-card" id="catalogueEmptyState" style="display: none;" aria-label="No Results">
+                <div class="catalogue-empty-state">
+                    <div class="empty-state-icon" aria-hidden="true">🔍</div>
+                    <h2 class="empty-state-title">No problems match your filters</h2>
+                    <p class="empty-state-message">
+                        Try adjusting your search query, or clear your difficulty and topic filters to see all available challenges.
+                    </p>
+                    <button id="resetEmptyBtn" class="problems-header-btn" type="button" style="height: 36px; padding: 0 16px; font-weight: 600;">
+                        Reset All Filters
+                    </button>
+                </div>
+            </section>
+
         </div>
     </main>
 
-    <footer class="auth-footer">
-        &copy; 2026 CodeArena. All rights reserved. Built for learners, by learners.
+
+    <!-- ======== Problem Catalogue Footer ======== -->
+    <footer class="catalogue-footer" role="contentinfo">
+        <div class="catalogue-footer-container">
+            <div class="catalogue-footer-brand-wrap">
+                <a href="../index.html" class="catalogue-footer-brand" aria-label="CodeArena Home">
+                    <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo footer-full-logo">
+                </a>
+                <p class="catalogue-footer-tagline">
+                    Master Java programming through deliberate practice. One challenge at a time.
+                </p>
+            </div>
+            <nav class="catalogue-footer-nav" aria-label="Catalogue Footer Navigation">
+                <a href="../index.html" class="catalogue-footer-link">Home</a>
+                <a href="compiler.html" class="catalogue-footer-link">Compiler</a>
+                <a href="dashboard.html" class="catalogue-footer-link">Dashboard</a>
+            </nav>
+            <div class="catalogue-footer-bottom">
+                <p class="catalogue-footer-copyright">
+                    &copy; 2026 CodeArena. Built for learners, by learners.
+                </p>
+            </div>
+        </div>
     </footer>
+
+    <!-- Scripts: CodeArena API & Problems Controller -->
+    <script src="../js/api.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/problems.js"></script>
 </body>
 </html>

@@ -1,0 +1,1058 @@
+/* ==========================================================================
+   CodeArena — Online Java Compiler Workspace Styles (compiler.css)
+   Professional Developer-Tool Aesthetic & Refined Accuracy
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Main Layout & Page Shell
+   -------------------------------------------------------------------------- */
+
+.compiler-body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-base);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.compiler-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 48px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 1px 3px var(--color-shadow);
+  gap: var(--spacing-md);
+  flex-shrink: 0;
+}
+
+.compiler-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: nowrap;
+}
+
+.compiler-brand-wrap {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.compiler-brand-wrap {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.compiler-brand-wrap .brand-full-logo {
+  height: 36px;
+  width: auto;
+  max-width: 130px;
+  aspect-ratio: 2122 / 741;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: block;
+}
+
+.compiler-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  color: var(--color-text-muted);
+}
+
+.compiler-breadcrumbs a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.compiler-breadcrumbs a:hover {
+  color: var(--color-primary);
+}
+
+.compiler-breadcrumbs .crumb-sep {
+  color: var(--color-border);
+  user-select: none;
+  font-size: 0.75rem;
+}
+
+.compiler-breadcrumbs .crumb-current {
+  color: var(--color-text-primary);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compiler-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.compiler-header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.compiler-header-btn:hover {
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-border-hover);
+  color: var(--color-text-primary);
+}
+
+/* --------------------------------------------------------------------------
+   2. Compiler Action Toolbar
+   -------------------------------------------------------------------------- */
+
+.compiler-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 20px;
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.toolbar-group-left,
+.toolbar-group-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lang-selector-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: 0.01em;
+  box-sizing: border-box;
+}
+
+.lang-selector-pill .lang-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #06B6D4;
+  box-shadow: 0 0 6px rgba(6, 182, 212, 0.5);
+}
+
+.editor-file-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  box-sizing: border-box;
+}
+
+.editor-file-tab .file-icon {
+  color: #F97316;
+  font-size: 0.85rem;
+}
+
+/* Toolbar Buttons */
+.btn-compiler {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+/* Dominant Primary Action: Run Code */
+.btn-compiler-run {
+  background: linear-gradient(135deg, #4F46E5, #3B82F6);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.12);
+  font-weight: 600;
+  padding: 0 14px;
+  box-shadow: 0 1px 3px rgba(79, 70, 229, 0.3);
+}
+
+.btn-compiler-run:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4338CA, #2563EB);
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-compiler-run:active:not(:disabled) {
+  transform: none;
+}
+
+.btn-compiler-run:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-compiler-run .key-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.22);
+  margin-left: 4px;
+  letter-spacing: 0.02em;
+}
+
+/* Secondary Actions */
+.btn-compiler-secondary {
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
+.btn-compiler-secondary:hover {
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-border-hover);
+  color: var(--color-text-primary);
+}
+
+.btn-compiler-danger {
+  background-color: var(--color-error);
+  color: #FFFFFF;
+  border-color: var(--color-error);
+  font-weight: 600;
+}
+
+.btn-compiler-danger:hover {
+  background-color: #DC2626;
+  border-color: #DC2626;
+}
+
+/* Status Indicator */
+.compiler-status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 500;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  box-sizing: border-box;
+}
+
+.compiler-status-indicator .status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--color-text-muted);
+}
+
+.compiler-status-indicator.status-running {
+  color: #38BDF8;
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.compiler-status-indicator.status-running .status-dot {
+  background-color: #38BDF8;
+  animation: pulseDot 1s infinite alternate;
+}
+
+.compiler-status-indicator.status-success {
+  color: var(--color-success);
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+.compiler-status-indicator.status-success .status-dot {
+  background-color: var(--color-success);
+}
+
+.compiler-status-indicator.status-diagnostic {
+  color: var(--color-warning);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.compiler-status-indicator.status-diagnostic .status-dot {
+  background-color: var(--color-warning);
+}
+
+.compiler-status-indicator.status-error {
+  color: var(--color-error);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.compiler-status-indicator.status-error .status-dot {
+  background-color: var(--color-error);
+}
+
+@keyframes pulseDot {
+  from { opacity: 0.4; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1.15); }
+}
+
+/* --------------------------------------------------------------------------
+   3. Workspace Dual-Pane Layout
+   -------------------------------------------------------------------------- */
+
+.compiler-workspace {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 55% 45%;
+  min-height: calc(100vh - 130px);
+  background-color: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+@media (max-width: 960px) {
+  .compiler-workspace {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. Editor Pane
+   -------------------------------------------------------------------------- */
+
+.editor-pane {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-secondary);
+  border-right: 1px solid var(--color-border);
+  position: relative;
+  min-height: 480px;
+}
+
+@media (max-width: 960px) {
+  .editor-pane {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+    min-height: 380px;
+  }
+}
+
+.editor-pane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
+  background-color: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border);
+  gap: var(--spacing-sm);
+}
+
+.editor-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editor-header-controls .pane-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.editor-header-controls .pane-subtitle {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.editor-canvas-container {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 420px;
+  overflow: hidden;
+}
+
+/* CodeMirror Core Overrides */
+.editor-canvas-container .CodeMirror {
+  height: 100%;
+  flex: 1;
+  font-family: var(--font-family-mono);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  padding: 6px 0;
+}
+
+/* Fallback Textarea Editor */
+.code-fallback-editor {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  min-height: 420px;
+  padding: 16px;
+  font-family: var(--font-family-mono);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border: none;
+  outline: none;
+  resize: none;
+  box-sizing: border-box;
+}
+
+.editor-footer-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 16px;
+  background-color: var(--color-bg-surface);
+  border-top: 1px solid var(--color-border);
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+  gap: 12px;
+}
+
+.footer-status-left,
+.footer-status-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-sep {
+  opacity: 0.4;
+}
+
+/* --------------------------------------------------------------------------
+   5. Console Pane (Tabbed Output / Input / Diagnostics)
+   -------------------------------------------------------------------------- */
+
+.console-pane {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-secondary);
+  min-height: 480px;
+}
+
+@media (max-width: 960px) {
+  .console-pane {
+    min-height: 380px;
+  }
+}
+
+.console-pane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background-color: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border);
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.console-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.console-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.console-tab-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.console-tab-btn.active {
+  color: var(--color-primary);
+  font-weight: 600;
+  border-bottom-color: var(--color-primary);
+}
+
+[data-theme="light"] .console-tab-btn.active {
+  color: #2563EB;
+  border-bottom-color: #2563EB;
+}
+
+.console-tab-btn .badge-count {
+  font-size: 0.7rem;
+  padding: 1px 5px;
+  border-radius: 10px;
+  background-color: var(--color-bg-surface);
+  color: var(--color-text-muted);
+}
+
+.console-tab-btn .badge-count.badge-error {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: var(--color-warning);
+  font-weight: 600;
+}
+
+.console-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Elegant Preview Mode Banner */
+.compiler-preview-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(59, 130, 246, 0.05);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.79rem;
+  color: var(--color-text-secondary);
+}
+
+.compiler-preview-banner .preview-tag {
+  display: inline-block;
+  padding: 1px 6px;
+  background-color: rgba(56, 189, 248, 0.15);
+  color: #38BDF8;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+[data-theme="light"] .compiler-preview-banner .preview-tag {
+  background-color: rgba(2, 132, 199, 0.12);
+  color: #0284C7;
+}
+
+.compiler-preview-banner .preview-text {
+  line-height: 1.4;
+}
+
+/* Console Panels */
+.console-content {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.console-panel {
+  flex: 1;
+  display: none;
+  flex-direction: column;
+  padding: 14px 16px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.console-panel.active {
+  display: flex;
+}
+
+/* Terminal Styling */
+.terminal-output {
+  margin: 0;
+  flex: 1;
+  font-family: var(--font-family-mono);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  background-color: var(--color-bg-primary);
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  min-height: 200px;
+}
+
+.terminal-empty {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* Honest Preview Metadata Bar */
+.terminal-stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 12px;
+  margin-bottom: 10px;
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+  flex-wrap: wrap;
+}
+
+.terminal-stats-bar .stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.terminal-stats-bar .stat-label {
+  color: var(--color-text-muted);
+}
+
+.terminal-stats-bar .stat-badge-preview {
+  color: #38BDF8;
+  font-weight: 600;
+}
+
+[data-theme="light"] .terminal-stats-bar .stat-badge-preview {
+  color: #0284C7;
+}
+
+.terminal-stats-bar .stat-badge-diagnostic {
+  color: var(--color-warning);
+  font-weight: 600;
+}
+
+/* Stdin Textarea */
+.stdin-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+}
+
+.stdin-hint {
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.stdin-textarea {
+  flex: 1;
+  min-height: 180px;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-mono);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.stdin-textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15);
+}
+
+/* Diagnostics & Error Callouts */
+.diagnostics-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.compile-error-card {
+  background-color: rgba(245, 158, 11, 0.08);
+  border-left: 3px solid var(--color-warning);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+
+.compile-error-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--color-warning);
+  margin-bottom: 4px;
+}
+
+.compile-error-message {
+  font-family: var(--font-family-mono);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.diagnostics-notice-box {
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   6. Custom CodeMirror Themes
+   -------------------------------------------------------------------------- */
+
+/* CodeArena Dark Theme */
+.cm-s-codearena-dark.CodeMirror {
+  background-color: #070D19;
+  color: #F1F5F9;
+}
+
+.cm-s-codearena-dark .CodeMirror-gutters {
+  background-color: #070D19;
+  border-right: 1px solid #1D3B6F;
+}
+
+.cm-s-codearena-dark .CodeMirror-linenumber {
+  color: #64748B;
+  padding: 0 10px 0 6px;
+}
+
+.cm-s-codearena-dark .CodeMirror-cursor {
+  border-left: 2px solid #38BDF8;
+}
+
+.cm-s-codearena-dark .CodeMirror-selected {
+  background: rgba(79, 70, 229, 0.35) !important;
+}
+
+.cm-s-codearena-dark .CodeMirror-focused .CodeMirror-selected {
+  background: rgba(79, 70, 229, 0.45) !important;
+}
+
+.cm-s-codearena-dark .CodeMirror-activeline-background {
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.cm-s-codearena-dark .CodeMirror-matchingbracket {
+  background: rgba(56, 189, 248, 0.22);
+  border-bottom: 2px solid #38BDF8;
+  color: #FFFFFF !important;
+}
+
+.cm-s-codearena-dark .cm-keyword {
+  color: #C084FC;
+  font-weight: 600;
+}
+
+.cm-s-codearena-dark .cm-type {
+  color: #38BDF8;
+  font-weight: 500;
+}
+
+.cm-s-codearena-dark .cm-def {
+  color: #60A5FA;
+  font-weight: 600;
+}
+
+.cm-s-codearena-dark .cm-string {
+  color: #34D399;
+}
+
+.cm-s-codearena-dark .cm-number {
+  color: #FBBF24;
+}
+
+.cm-s-codearena-dark .cm-comment {
+  color: #64748B;
+  font-style: italic;
+}
+
+.cm-s-codearena-dark .cm-operator {
+  color: #93C5FD;
+}
+
+.cm-s-codearena-dark .cm-variable {
+  color: #F1F5F9;
+}
+
+.cm-s-codearena-dark .cm-variable-2 {
+  color: #E2E8F0;
+}
+
+/* CodeArena Light Theme */
+.cm-s-codearena-light.CodeMirror {
+  background-color: #FFFFFF;
+  color: #0F172A;
+}
+
+.cm-s-codearena-light .CodeMirror-gutters {
+  background-color: #F8FAFC;
+  border-right: 1px solid #CBD5E1;
+}
+
+.cm-s-codearena-light .CodeMirror-linenumber {
+  color: #94A3B8;
+  padding: 0 10px 0 6px;
+}
+
+.cm-s-codearena-light .CodeMirror-cursor {
+  border-left: 2px solid #0284C7;
+}
+
+.cm-s-codearena-light .CodeMirror-selected {
+  background: rgba(199, 210, 254, 0.6) !important;
+}
+
+.cm-s-codearena-light .CodeMirror-focused .CodeMirror-selected {
+  background: rgba(199, 210, 254, 0.8) !important;
+}
+
+.cm-s-codearena-light .CodeMirror-activeline-background {
+  background: rgba(2, 132, 199, 0.05);
+}
+
+.cm-s-codearena-light .CodeMirror-matchingbracket {
+  background: rgba(2, 132, 199, 0.15);
+  border-bottom: 2px solid #0284C7;
+  color: #0F172A !important;
+}
+
+.cm-s-codearena-light .cm-keyword {
+  color: #7C3AED;
+  font-weight: 600;
+}
+
+.cm-s-codearena-light .cm-type {
+  color: #0284C7;
+  font-weight: 500;
+}
+
+.cm-s-codearena-light .cm-def {
+  color: #2563EB;
+  font-weight: 600;
+}
+
+.cm-s-codearena-light .cm-string {
+  color: #059669;
+}
+
+.cm-s-codearena-light .cm-number {
+  color: #D97706;
+}
+
+.cm-s-codearena-light .cm-comment {
+  color: #94A3B8;
+  font-style: italic;
+}
+
+.cm-s-codearena-light .cm-operator {
+  color: #475569;
+}
+
+.cm-s-codearena-light .cm-variable {
+  color: #0F172A;
+}
+
+.cm-s-codearena-light .cm-variable-2 {
+  color: #1E293B;
+}
+
+/* --------------------------------------------------------------------------
+   7. Modals, Shortcuts Table & Toast Notifications
+   -------------------------------------------------------------------------- */
+
+.compiler-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 16px var(--color-shadow);
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.compiler-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.compiler-toast.toast-success {
+  border-left: 3px solid var(--color-success);
+}
+
+.compiler-toast.toast-warning {
+  border-left: 3px solid var(--color-warning);
+}
+
+.compiler-toast.toast-error {
+  border-left: 3px solid var(--color-error);
+}
+
+/* Modal Dialog */
+.compiler-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.compiler-modal-overlay.active {
+  display: flex;
+}
+
+.compiler-modal {
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 30px var(--color-shadow);
+  max-width: 480px;
+  width: 100%;
+  padding: 22px;
+  box-sizing: border-box;
+}
+
+.compiler-modal-title {
+  margin: 0 0 8px 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.compiler-modal-text {
+  font-size: 0.84rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0 0 18px 0;
+}
+
+.compiler-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Shortcuts Table */
+.shortcuts-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.84rem;
+}
+
+.shortcuts-table td {
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.shortcuts-table tr:last-child td {
+  border-bottom: none;
+}
+
+.key-badge-modal {
+  display: inline-block;
+  padding: 2px 6px;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-family: var(--font-family-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+@media (max-width: 640px) {
+  .compiler-header {
+    padding: 0 10px;
+    gap: 8px;
+  }
+
+  .compiler-breadcrumbs {
+    font-size: 0.8rem;
+    gap: 6px;
+  }
+
+  .compiler-breadcrumbs .crumb-current {
+    max-width: 140px;
+  }
+}
+
+@media (max-width: 480px) {
+  .compiler-header-actions .compiler-header-btn span {
+    display: none;
+  }
+}

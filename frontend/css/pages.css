@@ -637,9 +637,9 @@ a.btn {
 }
 
 .footer-full-logo {
-  height: 34px;
+  height: 44px;
   width: auto;
-  max-width: 160px;
+  max-width: 220px;
   object-fit: contain;
   display: block;
   opacity: 0.95;

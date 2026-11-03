@@ -3,63 +3,320 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Settings — CodeArena</title>
+    <title>Application Settings — CodeArena</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="../assets/logo/codearena-favicon.png">
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/auth.css">
+    <link rel="stylesheet" href="../css/secondary.css">
     <!-- Immediate Theme Application Script (Prevents Flash) -->
     <script src="../js/theme.js"></script>
 </head>
-<body class="auth-page">
+<body class="secondary-page-body">
 
-    <!-- Top Minimal Brand Bar -->
-    <header class="auth-header">
-        <a href="../index.html" class="brand" title="Return to CodeArena Home">
-            <img src="../assets/logo/codearena-logo.png" alt="CodeArena logo" class="brand-logo">
-            <span class="head-logo">CodeArena</span>
-        </a>
+    <!-- Top Standard 60px Secondary Header -->
+    <header class="secondary-header">
+        <div class="secondary-header-left">
+            <a href="../index.html" class="secondary-brand-wrap" title="Return to CodeArena Home" aria-label="CodeArena Home">
+                <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo">
+            </a>
 
-        <div class="auth-header-actions">
-            <button class="theme-toggle" type="button" aria-label="Toggle theme">☀</button>
-            <a href="dashboard.html" class="auth-return-link">← Return to Dashboard</a>
+            <nav class="secondary-breadcrumbs" aria-label="Breadcrumbs">
+                <a href="../index.html">Home</a>
+                <span class="crumb-sep">/</span>
+                <a href="dashboard.html">Dashboard</a>
+                <span class="crumb-sep">/</span>
+                <span class="crumb-current">Settings</span>
+            </nav>
+        </div>
+
+        <div class="secondary-header-actions">
+            <a href="dashboard.html" class="secondary-header-btn" title="Student Dashboard">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+            <button class="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle dark/light theme">☀</button>
         </div>
     </header>
 
-    <!-- Main Placeholder Canvas -->
-    <main class="auth-main">
-        <div class="auth-card" style="max-width: 520px; text-align: center;">
-            <div class="auth-card-header">
-                <div class="empty-state-icon" style="margin: 0 auto 10px; width: 56px; height: 56px; border-radius: 50%; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center; color: #60A5FA;" aria-hidden="true">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx='12' cy='12' r='3'/><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z'/>
-                    </svg>
+    <!-- Main Settings Canvas -->
+    <main class="secondary-main">
+        <div class="secondary-container" style="max-width: 900px;">
+
+            <!-- Hero Banner -->
+            <section class="feature-hero" aria-labelledby="settings-heading">
+                <div class="feature-hero-text">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <span class="preview-badge-pill">Local Preferences</span>
+                    </div>
+                    <h1 id="settings-heading">Platform Preferences</h1>
+                    <p>
+                        Customise your coding environment, CodeMirror editor behaviors, theme appearance, and interface layouts.
+                        Settings are safely saved to your local browser storage.
+                    </p>
                 </div>
-                <h1 class="auth-title">Account & Workspace Settings</h1>
-                <span class="auth-notice" style="margin: 6px auto; display: inline-flex; justify-content: center;">
-                    <span class="notice-icon">ℹ</span>
-                    <span>Planned for Phase 4 · Backend Integration In Progress</span>
-                </span>
-                <p class="auth-subtitle" style="margin-top: 10px; font-size: 0.9rem; line-height: 1.5;">
-                    Configure editor keybindings, font size, default Java compiler flags, notifications, and profile details.
-                </p>
+            </section>
+
+            <!-- Appearance Section -->
+            <section class="settings-card" aria-labelledby="sec-appearance">
+                <h2 id="sec-appearance" class="settings-card-title">
+                    <span>🎨</span>
+                    <span>Appearance & Visual Theme</span>
+                </h2>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>Platform Theme</h4>
+                        <p>Select between CodeArena's deep dark mode or high-contrast light mode.</p>
+                    </div>
+                    <select id="settingThemeSelect" class="feature-select" aria-label="Select theme">
+                        <option value="dark">Dark Theme (Deep Slate)</option>
+                        <option value="light">Light Theme (Daylight)</option>
+                    </select>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>High Contrast Code Highlighting</h4>
+                        <p>Enhance keyword, token, and string contrast inside the CodeMirror code editor.</p>
+                    </div>
+                    <label class="switch-toggle" aria-label="Toggle high contrast">
+                        <input type="checkbox" id="settingHighContrast">
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- Code Editor Preferences -->
+            <section class="settings-card" aria-labelledby="sec-editor">
+                <h2 id="sec-editor" class="settings-card-title">
+                    <span>⌨️</span>
+                    <span>Code Editor Configuration</span>
+                    <span class="preview-badge-pill" style="margin-left: auto; font-size: 0.68rem; background-color: rgba(34, 197, 94, 0.12); color: #4ADE80; border-color: rgba(34, 197, 94, 0.3);">Active Live Configuration</span>
+                </h2>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>Editor Font Size</h4>
+                        <p>Adjust the typography scale inside the Online Compiler and Problem Workspaces.</p>
+                    </div>
+                    <select id="settingFontSize" class="feature-select" aria-label="Editor Font Size">
+                        <option value="12px">12px (Compact)</option>
+                        <option value="14px" selected>14px (Recommended)</option>
+                        <option value="16px">16px (Medium)</option>
+                        <option value="18px">18px (Large)</option>
+                    </select>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>Tab Indentation Size</h4>
+                        <p>Number of spaces inserted when pressing Tab in the Java editor.</p>
+                    </div>
+                    <select id="settingTabSize" class="feature-select" aria-label="Tab Indentation Size">
+                        <option value="2">2 Spaces</option>
+                        <option value="4" selected>4 Spaces (Standard Java)</option>
+                    </select>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>Auto-Close Brackets & Quotes</h4>
+                        <p>Automatically insert matching closing characters for (), [], {}, and quotes.</p>
+                    </div>
+                    <label class="switch-toggle" aria-label="Toggle auto-close brackets">
+                        <input type="checkbox" id="settingAutoCloseBrackets" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>Show Gutter Line Numbers</h4>
+                        <p>Display line count gutter on the left side of the code editor.</p>
+                    </div>
+                    <label class="switch-toggle" aria-label="Toggle line numbers">
+                        <input type="checkbox" id="settingLineNumbers" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>Include Default Return in Starter Code</h4>
+                        <p>Pre-populate placeholder return statement in problem workspace starter templates.</p>
+                    </div>
+                    <label class="switch-toggle" aria-label="Toggle default return statement">
+                        <input type="checkbox" id="settingDefaultReturn" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- Interface & Practice Preferences -->
+            <section class="settings-card" aria-labelledby="sec-interface">
+                <h2 id="sec-interface" class="settings-card-title">
+                    <span>⚡</span>
+                    <span>Interface & Practice Workflow</span>
+                    <span class="preview-badge-pill warning" style="margin-left: auto; font-size: 0.68rem;">Demonstration Preview</span>
+                </h2>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>Interface Density</h4>
+                        <p>Adjust padding and spacing across tables, cards, and toolbars.</p>
+                    </div>
+                    <select id="settingDensitySelect" class="settings-select" aria-label="Interface Density">
+                        <option value="comfortable">Comfortable (Default)</option>
+                        <option value="compact">Compact (Power User)</option>
+                    </select>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>Reduced Motion Override</h4>
+                        <p>Disable transitions and animations regardless of operating system defaults.</p>
+                    </div>
+                    <label class="switch-toggle" aria-label="Toggle reduced motion">
+                        <input type="checkbox" id="settingReducedMotion">
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>Execution Timer</h4>
+                        <p>Show millisecond elapsed timer on compilation and sample test executions.</p>
+                    </div>
+                    <label class="switch-toggle" aria-label="Toggle execution timer">
+                        <input type="checkbox" id="settingExecutionTimer" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>Auto-Run Tests on Ctrl+S</h4>
+                        <p>Trigger sample test runner automatically when pressing Ctrl+S or Cmd+S.</p>
+                    </div>
+                    <label class="switch-toggle" aria-label="Toggle auto-run on save">
+                        <input type="checkbox" id="settingAutoRun">
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>Compact Workspace Toolbar</h4>
+                        <p>Display icon-only buttons in the problem editor bar to maximize code area.</p>
+                    </div>
+                    <label class="switch-toggle" aria-label="Toggle compact toolbar">
+                        <input type="checkbox" id="settingCompactToolbar">
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- Notification Preview -->
+            <section class="settings-card" aria-labelledby="sec-notifications">
+                <h2 id="sec-notifications" class="settings-card-title">
+                    <span>🔔</span>
+                    <span>Notification Previews</span>
+                    <span class="preview-badge-pill warning" style="margin-left: auto; font-size: 0.68rem;">Demonstration Preview</span>
+                </h2>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>Contest Round Reminders</h4>
+                        <p>Preview in-browser alerts 15 minutes before scheduled tournament rounds begin.</p>
+                    </div>
+                    <label class="switch-toggle" aria-label="Toggle contest notifications">
+                        <input type="checkbox" id="settingNotifyContests" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-row-info">
+                        <h4>Daily Practice Streak Alerts</h4>
+                        <p>Gentle reminders to practice coding challenges and maintain daily learning streaks.</p>
+                    </div>
+                    <label class="switch-toggle" aria-label="Toggle streak notifications">
+                        <input type="checkbox" id="settingNotifyStreaks" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- Account Profile (Honest Preview) -->
+            <section class="settings-card" aria-labelledby="sec-profile">
+                <h2 id="sec-profile" class="settings-card-title">
+                    <span>👤</span>
+                    <span>Student Profile & Security</span>
+                </h2>
+
+                <div style="background-color: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 44px; height: 44px; border-radius: 50%; background-color: var(--color-primary); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">
+                            GL
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; color: var(--color-text-primary);">Guest Learner (Session Profile)</div>
+                            <div style="font-size: 0.78rem; color: var(--color-text-muted);">Unauthenticated Browser Session · Phase 4 Preview</div>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.82rem; color: var(--color-text-muted); margin: 10px 0 0 0; line-height: 1.45;">
+                        Full account profiles, password updates, multi-factor authentication, and verified progress syncing will connect through Spring Boot and MySQL in Phase 5.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Save & Reset Action Controls -->
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-bottom: 36px;">
+                <button type="button" class="secondary-header-btn" id="btnResetSettings" style="height: 38px; padding: 0 18px;">
+                    Reset to Defaults
+                </button>
+                <button type="button" class="prob-btn-solve" id="btnSaveSettings" style="height: 38px; padding: 0 22px; font-weight: 600;">
+                    Save Preferences
+                </button>
             </div>
 
-            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 12px;">
-                <a href="dashboard.html" class="btn btn-primary btn-auth" style="margin-top: 0; text-decoration: none;">
-                    Go to Student Dashboard <span aria-hidden="true">→</span>
-                </a>
-            </div>
-            
-            <p class="auth-switch" style="margin-top: 8px;">
-                <a href="../index.html">← Back to Public Homepage</a>
-            </p>
+            <!-- Toast Notification Feedback -->
+            <div id="settingsToast" class="compiler-toast" role="alert" style="display: none;"></div>
+
         </div>
     </main>
 
-    <footer class="auth-footer">
-        &copy; 2026 CodeArena. All rights reserved. Built for learners, by learners.
+    <!-- Standard Secondary Footer -->
+    <footer class="secondary-footer" role="contentinfo">
+        <div class="secondary-footer-container">
+            <div class="secondary-footer-brand-wrap">
+                <a href="../index.html" class="secondary-footer-brand" aria-label="CodeArena Home">
+                    <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo footer-full-logo">
+                </a>
+                <p class="secondary-footer-tagline">
+                    Master Java programming through deliberate practice. One challenge at a time.
+                </p>
+            </div>
+            <nav class="secondary-footer-nav" aria-label="Footer Navigation">
+                <a href="../index.html" class="secondary-footer-link">Home</a>
+                <a href="problems.html" class="secondary-footer-link">Problems</a>
+                <a href="compiler.html" class="secondary-footer-link">Compiler</a>
+                <a href="dashboard.html" class="secondary-footer-link">Dashboard</a>
+            </nav>
+            <p class="secondary-footer-copyright">
+                &copy; 2026 CodeArena. Built for learners, by learners.
+            </p>
+        </div>
     </footer>
+
+    <!-- Scripts -->
+    <script src="../js/toast.js"></script>
+    <script src="../js/settings.js"></script>
 </body>
 </html>

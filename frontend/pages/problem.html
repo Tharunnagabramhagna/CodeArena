@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problem Workspace — CodeArena</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../assets/logo/codearena-favicon.png">
+
+    <!-- CodeMirror 5 Local Distribution Stylesheets -->
+    <link rel="stylesheet" href="../vendor/codemirror/lib/codemirror.css">
+
+    <!-- CodeArena Design System & Workspace Styles -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/compiler.css">
+    <link rel="stylesheet" href="../css/workspace.css">
+
+    <!-- Immediate Theme Application Script (Zero Flash) -->
+    <script src="../js/theme.js"></script>
+</head>
+<body class="workspace-body">
+
+    <!-- Top Workspace Header Bar -->
+    <header class="workspace-header">
+        <div class="workspace-header-left">
+            <a href="../index.html" class="workspace-brand-wrap" title="Return to CodeArena Home">
+                <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo">
+            </a>
+
+            <nav class="workspace-breadcrumbs" aria-label="Breadcrumb">
+                <a href="../index.html">Home</a>
+                <span class="crumb-sep">/</span>
+                <a href="problems.html">Problems</a>
+                <span class="crumb-sep">/</span>
+                <span class="crumb-current" id="breadcrumbProblemTitle">Loading...</span>
+            </nav>
+        </div>
+
+        <div class="workspace-header-actions">
+            <a href="problems.html" class="workspace-header-btn" title="Return to Problem Catalogue">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+                <span>Problems</span>
+            </a>
+            <a href="compiler.html" class="workspace-header-btn" title="Open Full Java Compiler">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+                <span>Compiler</span>
+            </a>
+            <a href="dashboard.html" class="workspace-header-btn" title="Return to Student Dashboard">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+            <button class="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle dark/light theme">☀</button>
+        </div>
+    </header>
+
+    <!-- Main Dual-Pane Workspace Canvas -->
+    <main class="workspace-main">
+
+        <!-- Problem Not Found State (Activated when ID is missing or invalid) -->
+        <div id="problemNotFoundView" class="problem-not-found-container" style="display: none;">
+            <div class="problem-not-found-card">
+                <div class="not-found-icon-wrap">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <h2 class="not-found-title">Problem Not Found</h2>
+                <p class="not-found-desc" id="notFoundMessage">
+                    The requested problem does not exist or has been removed from the catalogue.
+                </p>
+                <div class="not-found-actions">
+                    <a href="problems.html" class="btn-workspace-action btn-workspace-submit" style="display: inline-flex; text-decoration: none; align-items: center; gap: 8px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        <span>Browse Problem Catalogue</span>
+                    </a>
+                    <a href="dashboard.html" class="btn-editor-tool" style="display: inline-flex; text-decoration: none; align-items: center; gap: 6px; height: 34px; padding: 0 16px;">
+                        <span>Student Dashboard</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEFT PANEL: Problem Reference & Specifications -->
+        <section class="problem-reference-pane" id="problemReferencePane" aria-label="Problem Reference">
+            <!-- Left Pane Tabs -->
+            <div class="pane-tabs-bar" role="tablist">
+                <button class="pane-tab-btn active" id="tabBtnDescription" role="tab" aria-selected="true" data-tab="desc">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    <span>Description</span>
+                </button>
+                <button class="pane-tab-btn" id="tabBtnSubmissions" role="tab" aria-selected="false" data-tab="sub">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span>Submissions</span>
+                    <span class="pane-tab-tag" id="submissionsTabTag">Preview</span>
+                </button>
+            </div>
+
+            <!-- Scrollable Content View: Description -->
+            <div class="problem-scroll-container" id="descriptionScrollContainer">
+
+                <!-- Problem Title & Meta Header -->
+                <div class="problem-header-block">
+                    <div class="problem-headline-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                        <h1 class="problem-title-text" id="problemTitleText">Loading problem...</h1>
+                        <button id="btnBookmarkProblem" class="workspace-header-btn" type="button" title="Bookmark this challenge" aria-label="Bookmark this challenge" style="height: 28px; font-size: 0.78rem; flex-shrink: 0;">
+                            <span class="bookmark-icon" aria-hidden="true">🔖</span>
+                            <span id="bookmarkBtnText">Bookmark</span>
+                        </button>
+                    </div>
+                    <div class="problem-badges-row">
+                        <span id="problemDiffBadge" class="diff-badge diff-easy">Easy</span>
+                        <span id="problemTopicTag" class="topic-tag-pill">Topic</span>
+                        <span id="problemAccLabel" class="acc-meta-label">Acceptance: <strong>—</strong> (Provisional)</span>
+                    </div>
+                </div>
+
+                <!-- Problem Statement Description -->
+                <div class="problem-body-section">
+                    <h2 class="section-label-heading">Problem Description</h2>
+                    <div class="problem-rich-text" id="problemDescriptionHtml">
+                        Loading problem description...
+                    </div>
+                </div>
+
+                <!-- Input & Output Specifications -->
+                <div class="problem-body-section" id="specSection">
+                    <h2 class="section-label-heading">Input Format</h2>
+                    <div class="spec-callout-box" id="inputFormatText">
+                        Loading input specification...
+                    </div>
+                </div>
+
+                <div class="problem-body-section" id="outputSpecSection">
+                    <h2 class="section-label-heading">Output Format</h2>
+                    <div class="spec-callout-box" id="outputFormatText">
+                        Loading output specification...
+                    </div>
+                </div>
+
+                <!-- Public Sample Test Cases Examples -->
+                <div class="problem-body-section">
+                    <h2 class="section-label-heading">Examples</h2>
+                    <div class="example-cards-list" id="exampleCardsList">
+                        <!-- Populated dynamically from sampleTestCases -->
+                    </div>
+                </div>
+
+                <!-- Constraints Section -->
+                <div class="problem-body-section">
+                    <h2 class="section-label-heading">Constraints</h2>
+                    <ul class="constraints-list" id="constraintsList">
+                        <!-- Populated dynamically -->
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Submissions Panel View (Secondary Tab) -->
+            <div class="problem-scroll-container submissions-panel-view" id="submissionsScrollView" style="display: none;">
+                <div class="submissions-notice-banner">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span>Guest Session Preview: Submissions are stored temporarily in this browser session. Persistent database history connects in Phase 4.</span>
+                </div>
+
+                <div id="submissionsListContainer">
+                    <p style="font-size: 0.86rem; color: var(--color-text-muted); font-style: italic;">
+                        No submissions yet for this problem. Click &quot;Submit Solution&quot; to demonstrate simulated evaluation.
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Vertical Resizable Splitter (Problem Reference / Code Workspace) -->
+        <div class="workspace-splitter-vertical" id="workspaceSplitterV" role="separator" aria-orientation="vertical" aria-label="Resize panels" tabindex="0" title="Drag to resize problem and editor panels (Use Left/Right arrow keys to nudge)">
+            <div class="splitter-handle-v" aria-hidden="true"></div>
+        </div>
+
+        <!-- RIGHT PANEL: Coding Workspace, Editor & Console -->
+        <section class="coding-workspace-pane" id="codingWorkspacePane" aria-label="Coding Workspace">
+
+                        <!-- Editor Toolbar Bar (Stage 3.4.8 Reorganized 4-Group Architecture) -->
+            <div class="editor-toolbar-bar" role="toolbar" aria-label="Editor Controls">
+                <!-- Group A: Editor Information -->
+                <div class="toolbar-group toolbar-group-info" role="group" aria-label="Editor Information">
+                    <div class="target-lang-badge" title="Target Language: Java (OpenJDK 17)">
+                        <span class="lang-dot" aria-hidden="true"></span>
+                        <span class="lang-text">Target: Java (OpenJDK 17)</span>
+                        <span class="lang-text-compact">Java 17</span>
+                    </div>
+                    <span class="active-file-indicator" title="Current Active File">
+                        <span aria-hidden="true">☕</span>
+                        <span class="file-name">Solution.java</span>
+                    </span>
+                </div>
+
+                <!-- Group B: Workspace Layout Presets -->
+                <div class="toolbar-group toolbar-group-layout" role="group" aria-label="Workspace Layout Presets">
+                    <button id="btnLayoutExpandEditor" class="btn-editor-tool btn-layout-tool" type="button" title="Expand Code Editor (Collapse Console)">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <polyline points="9 21 3 21 3 15"></polyline>
+                            <line x1="21" y1="3" x2="14" y2="10"></line>
+                            <line x1="3" y1="21" x2="10" y2="14"></line>
+                        </svg>
+                        <span class="toolbar-btn-text">Editor</span>
+                    </button>
+                    <button id="btnLayoutExpandConsole" class="btn-editor-tool btn-layout-tool" type="button" title="Expand Test Console">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                        <span class="toolbar-btn-text">Console</span>
+                    </button>
+                    <button id="btnLayoutReset" class="btn-editor-tool btn-layout-tool" type="button" title="Reset layout to default">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                            <path d="M21 3v5h-5"></path>
+                            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                            <path d="M3 21v-5h5"></path>
+                        </svg>
+                        <span class="toolbar-btn-text">Default</span>
+                    </button>
+                </div>
+
+                <!-- Group C: Code Preferences -->
+                <div class="toolbar-group toolbar-group-pref" role="group" aria-label="Code Preferences">
+                    <label class="starter-return-toggle" id="starterReturnToggleWrap" title="Toggle default placeholder return statement in starter code">
+                        <input type="checkbox" id="chkIncludeDefaultReturn" checked>
+                        <span class="return-toggle-switch" aria-hidden="true"></span>
+                        <span class="return-toggle-label">Default Return</span>
+                        <span class="return-toggle-label-compact">Return</span>
+                    </label>
+                    <div class="editor-quick-font" style="display: inline-flex; align-items: center; gap: 4px; margin-left: 8px;">
+                        <button id="btnWorkspaceFontDec" class="btn-editor-tool" type="button" title="Decrease font size" aria-label="Decrease font size" style="padding: 2px 8px; font-size: 0.75rem;">A-</button>
+                        <span id="workspaceFontSizeDisplay" style="font-size: 0.72rem; color: var(--color-text-muted); min-width: 26px; text-align: center;">14px</span>
+                        <button id="btnWorkspaceFontInc" class="btn-editor-tool" type="button" title="Increase font size" aria-label="Increase font size" style="padding: 2px 8px; font-size: 0.75rem;">A+</button>
+                    </div>
+                </div>
+
+                <!-- Group D: Code Actions -->
+                <div class="toolbar-group toolbar-group-actions" role="group" aria-label="Code Actions">
+                    <button id="btnResetCode" class="btn-editor-tool" type="button" title="Reset to default starter template">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                        </svg>
+                        <span class="toolbar-btn-text">Reset</span>
+                    </button>
+                    <button id="btnCopyCode" class="btn-editor-tool" type="button" title="Copy code to clipboard">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span class="toolbar-btn-text">Copy</span>
+                    </button>
+                    <button id="btnShortcutsHelp" class="btn-editor-tool" type="button" title="View Keyboard Shortcuts">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+                            <path d="M6 8h.001M10 8h.001M14 8h.001M18 8h.001M8 12h.001M12 12h.001M16 12h.001M7 16h10"></path>
+                        </svg>
+                        <span class="toolbar-btn-text">Shortcuts</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CodeMirror Editor Area / Fallback Container -->
+            <div class="editor-wrapper-area" id="editorWrapperArea">
+                <div id="codeMirrorTarget" style="height: 100%; display: flex; flex-direction: column;"></div>
+
+                <!-- Styled Fallback Textarea Editor -->
+                <textarea id="fallbackEditor" class="code-fallback-editor" spellcheck="false" aria-label="Java Code Editor Fallback"></textarea>
+
+                <noscript>
+                    <div style="padding: 12px 16px; background-color: var(--color-bg-surface); border-bottom: 1px solid var(--color-border); font-size: 0.82rem;">
+                        <strong>JavaScript is required for CodeMirror syntax highlighting.</strong> Edit source code in the fallback editor below.
+                    </div>
+                </noscript>
+            </div>
+
+            <!-- Editor Status Footer -->
+            <footer class="editor-footer-status">
+                <div class="footer-left">
+                    <span id="cursorPosDisplay">Ln 1, Col 1</span>
+                    <span style="opacity: 0.4;">·</span>
+                    <span>UTF-8</span>
+                    <span style="opacity: 0.4;">·</span>
+                    <span>Spaces: 4</span>
+                </div>
+                <div class="footer-right">
+                    <span>Target: OpenJDK 17 (Preview)</span>
+                </div>
+            </footer>
+
+            <!-- Horizontal Resizable Splitter (Code Editor / Test Console) -->
+            <div class="workspace-splitter-horizontal" id="workspaceSplitterH" role="separator" aria-orientation="horizontal" aria-label="Resize test console" tabindex="0" title="Drag to resize editor and console (Use Up/Down arrow keys to nudge)">
+                <div class="splitter-handle-h" aria-hidden="true"></div>
+            </div>
+
+            <!-- Bottom Console: Sample Test Cases & Execution Verdicts -->
+            <div class="testcase-console-area" id="testCaseConsoleArea">
+                <!-- Console Header Tabs -->
+                <div class="console-header-tabs" role="tablist">
+                    <div class="console-tab-group" id="consoleTabGroup">
+                        <button class="console-tab-btn active" id="tabBtnTestCases" role="tab" aria-selected="true" data-tab="cases" draggable="true" title="Drag to reorder tabs">
+                            <span class="tab-drag-grip" aria-hidden="true">⋮⋮</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                <path d="M7 15h10M7 9h10"></path>
+                            </svg>
+                            <span>Test Cases</span>
+                        </button>
+                        <button class="console-tab-btn" id="tabBtnTestResults" role="tab" aria-selected="false" data-tab="results" draggable="true" title="Drag to reorder tabs">
+                            <span class="tab-drag-grip" aria-hidden="true">⋮⋮</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Test Results</span>
+                            <span class="console-badge-count">Preview</span>
+                        </button>
+                        <button class="console-tab-btn" id="tabBtnDiagnostics" role="tab" aria-selected="false" data-tab="diagnostics" draggable="true" title="Drag to reorder tabs">
+                            <span class="tab-drag-grip" aria-hidden="true">⋮⋮</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            <span>Diagnostics</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Console Panels Container -->
+                <div class="console-content-container">
+
+                    <!-- Panel 1: Test Cases (Active by default) -->
+                    <div class="testcases-panel" id="panelTestCases">
+                        <div class="testcase-pill-selectors" id="testCasePillsRow">
+                            <!-- Populated with Case 1, Case 2 buttons -->
+                        </div>
+                        <div class="testcase-data-grid">
+                            <div class="testcase-data-block">
+                                <span class="testcase-data-label">Sample Input:</span>
+                                <div class="testcase-data-box" id="testCaseInputDisplay">Loading...</div>
+                            </div>
+                            <div class="testcase-data-block">
+                                <span class="testcase-data-label">Expected Output:</span>
+                                <div class="testcase-data-box" id="testCaseExpectedDisplay">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panel 2: Test Results (Preview) -->
+                    <div class="testresults-panel" id="panelTestResults">
+                        <div class="results-verdict-banner banner-info" id="resultsVerdictBanner">
+                            <div class="verdict-title-group">
+                                <span class="verdict-title-text" id="verdictTitleText">Ready for Sample Preview</span>
+                                <span class="verdict-badge-honest" id="verdictBadgeHonest">Preview Only</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="verdict-notice-text" id="verdictNoticeText">Click &quot;Run Sample Tests&quot; (Ctrl+Enter)</span>
+                                <button type="button" class="btn-clear-results" id="btnClearResults" title="Reset preview results" style="display: none;">Clear</button>
+                            </div>
+                        </div>
+
+                        <!-- Results Case Selector Pills -->
+                        <div class="testcase-pill-selectors" id="resultsCasePillsRow">
+                            <!-- Populated dynamically with Case 1, Case 2 selector pills -->
+                        </div>
+
+                        <!-- Results Case Detail Block -->
+                        <div class="results-case-detail" id="resultsCaseDetail">
+                            <div class="results-case-header">
+                                <span class="results-case-num" id="resultsCaseNumText">Case 1</span>
+                                <span class="results-status-badge" id="resultsStatusBadge">Not Executed — Preview Only</span>
+                            </div>
+
+                            <div class="testcase-data-grid">
+                                <div class="testcase-data-block">
+                                    <span class="testcase-data-label">Sample Input:</span>
+                                    <div class="testcase-data-box" id="resultsInputDisplay">—</div>
+                                </div>
+                                <div class="testcase-data-block">
+                                    <span class="testcase-data-label">Expected Output:</span>
+                                    <div class="testcase-data-box" id="resultsExpectedDisplay">—</div>
+                                </div>
+                            </div>
+
+                            <div class="testcase-data-block" style="margin-top: 4px;">
+                                <span class="testcase-data-label">Simulated Output:</span>
+                                <div class="testcase-data-box execution-unavailable-box" id="resultsActualDisplay">Execution unavailable — frontend preview only.</div>
+                            </div>
+                        </div>
+
+                        <div class="preview-disclaimer-card" id="resultsDisclaimerCard">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                            <span><strong>Preview Notice:</strong> Public sample cases demonstrate input/output specification matching. Actual Java code execution, System.in streaming, and hidden test-case evaluation require the Phase 4 Java backend engine.</span>
+                        </div>
+                    </div>
+
+                    <!-- Panel 3: Diagnostics -->
+                    <div class="diagnostics-panel" id="panelDiagnostics">
+                        <pre class="diagnostics-terminal-box" id="diagnosticsTerminalBox">No syntax or structural issues detected.</pre>
+                        <p style="font-size: 0.78rem; color: var(--color-text-muted); margin: 4px 0 0 0;">
+                            Client-side structural checks assist with brace matching and class declarations before submission.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Bottom Action Bar (Run Sample Tests & Submit Solution) -->
+            <div class="workspace-action-bar">
+                <div class="action-bar-status" id="workspaceStatusIndicator">
+                    <span class="status-dot"></span>
+                    <span id="workspaceStatusText">Ready · Preview Mode</span>
+                </div>
+
+                <div class="action-bar-buttons">
+                    <button id="btnRunSampleTests" class="btn-workspace-action btn-workspace-run" type="button" title="Run code against public sample test cases">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        <span>Run Sample Tests</span>
+                        <kbd class="key-badge">Ctrl+Enter</kbd>
+                    </button>
+
+                    <button id="btnSubmitSolution" class="btn-workspace-action btn-workspace-submit" type="button" title="Submit solution for simulated evaluation">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Submit Solution</span>
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="workspace-modal-overlay" id="resetModalOverlay" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+        <div class="workspace-modal">
+            <h2 class="workspace-modal-title" id="resetModalTitle">Reset Solution Template?</h2>
+            <p class="workspace-modal-text">
+                Are you sure you want to restore the problem's default starter code? Any unsaved changes in this editor session will be replaced.
+            </p>
+            <div class="modal-return-option" id="modalReturnOptionWrap">
+                <label class="starter-return-toggle modal-toggle" id="modalReturnToggleWrap" title="Control whether default placeholder return statement is restored">
+                    <input type="checkbox" id="chkModalIncludeReturn" checked>
+                    <span class="return-toggle-switch" aria-hidden="true"></span>
+                    <span class="return-toggle-label">Include default placeholder return statement</span>
+                </label>
+            </div>
+            <div class="workspace-modal-actions">
+                <button id="btnCancelReset" class="workspace-header-btn" type="button" style="height: 32px; padding: 0 14px;">Cancel</button>
+                <button id="btnConfirmReset" class="workspace-header-btn" type="button" style="height: 32px; padding: 0 14px; background: var(--color-error); border-color: var(--color-error); color: #FFF; font-weight: 600;">Reset Template</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guest Authentication Required Access Gate Modal (Phase 4 Guest Gate) -->
+    <div class="workspace-modal-overlay" id="guestAuthModalOverlay" role="dialog" aria-modal="true" aria-labelledby="guestAuthModalTitle" style="display: none;">
+        <div class="workspace-modal" style="max-width: 460px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(79, 70, 229, 0.15); border: 1px solid rgba(79, 70, 229, 0.3); display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0;" aria-hidden="true">🔒</div>
+                <div>
+                    <h2 class="workspace-modal-title" id="guestAuthModalTitle" style="margin: 0; font-size: 1.15rem;">Authentication Required</h2>
+                    <span style="font-size: 0.74rem; color: var(--color-primary); font-weight: 600; text-transform: uppercase;">Practice Solution Gate</span>
+                </div>
+            </div>
+            <p class="workspace-modal-text" id="guestAuthModalDesc" style="margin-bottom: 14px; font-size: 0.88rem; line-height: 1.55; color: var(--color-text-secondary);">
+                Logging in is required to run sample tests or submit practice solutions. Sign in to your CodeArena account to execute Java code against practice test cases.
+            </p>
+            <div style="font-size: 0.8rem; color: var(--color-text-muted); background: var(--color-bg-surface); padding: 10px 14px; border-radius: 6px; border: 1px solid var(--color-border); margin-bottom: 20px; line-height: 1.45;">
+                ℹ️ <strong>Guest Access Notice:</strong> As a guest, you are free to explore problem descriptions, study starter code, write and edit Java code, and copy solutions. Test execution and submission require an active account.
+            </div>
+            <div class="workspace-modal-actions" style="display: flex; gap: 8px; justify-content: flex-end; align-items: center; flex-wrap: wrap;">
+                <button id="btnGuestCancel" class="workspace-header-btn" type="button" style="height: 34px; padding: 0 14px;">Continue Browsing</button>
+                <a href="signup.html" class="workspace-header-btn" style="height: 34px; padding: 0 14px; text-decoration: none; display: inline-flex; align-items: center;">Sign Up</a>
+                <a href="login.html" class="workspace-header-btn" style="height: 34px; padding: 0 16px; background: var(--color-primary); border-color: var(--color-primary); color: #FFF; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center;">Log In</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div class="workspace-modal-overlay" id="shortcutsModalOverlay" role="dialog" aria-modal="true" aria-labelledby="shortcutsModalTitle">
+        <div class="workspace-modal">
+            <h2 class="workspace-modal-title" id="shortcutsModalTitle">Workspace Shortcuts</h2>
+            <div class="workspace-modal-text">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.84rem;">
+                    <tbody>
+                        <tr style="border-bottom: 1px solid var(--color-border);">
+                            <td style="padding: 8px 0;"><strong>Ctrl + Enter</strong> / <strong>Cmd + Enter</strong></td>
+                            <td style="padding: 8px 0; color: var(--color-text-secondary);">Run Sample Tests (Preview Action)</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--color-border);">
+                            <td style="padding: 8px 0;"><strong>Tab</strong></td>
+                            <td style="padding: 8px 0; color: var(--color-text-secondary);">Indent 4 spaces</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--color-border);">
+                            <td style="padding: 8px 0;"><strong>Ctrl + S</strong> / <strong>Cmd + S</strong></td>
+                            <td style="padding: 8px 0; color: var(--color-text-secondary);">Shortcut prompt to Run Sample Tests</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0;"><strong>Esc</strong></td>
+                            <td style="padding: 8px 0; color: var(--color-text-secondary);">Close dialogs or modals</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="workspace-modal-actions">
+                <button id="btnCloseShortcuts" class="workspace-header-btn" type="button" style="height: 32px; padding: 0 14px;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="compiler-toast" id="workspaceToast" role="alert" aria-live="assertive"></div>
+
+    <!-- Scripts: Genuine Local CodeMirror 5 Distribution -->
+    <script src="../vendor/codemirror/lib/codemirror.js"></script>
+    <script src="../vendor/codemirror/mode/clike/clike.js"></script>
+    <script src="../vendor/codemirror/addon/edit/matchbrackets.js"></script>
+    <script src="../vendor/codemirror/addon/edit/closebrackets.js"></script>
+    <script src="../vendor/codemirror/addon/selection/active-line.js"></script>
+
+    <!-- CodeArena Services & Workspace Controller (Planned for Stage 3.4 Interactive Execution) -->
+    <!-- Canonical problem details retrieved via problemService.getProblemById inside workspace.js -->
+    <script src="../js/api.js"></script>
+    <script src="../js/workspace.js"></script>
+</body>
+</html>

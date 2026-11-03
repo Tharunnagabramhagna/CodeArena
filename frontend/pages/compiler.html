@@ -6,60 +6,327 @@
     <title>Online Java Compiler — CodeArena</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="../assets/logo/codearena-favicon.png">
-    <!-- Stylesheets -->
+
+    <!-- CodeMirror 5 Local Distribution Stylesheet -->
+    <link rel="stylesheet" href="../vendor/codemirror/lib/codemirror.css">
+
+    <!-- CodeArena Design System & Workspace Styles -->
     <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/auth.css">
-    <!-- Immediate Theme Application Script (Prevents Flash) -->
+    <link rel="stylesheet" href="../css/compiler.css">
+
+    <!-- Immediate Theme Application Script (Zero Flash) -->
     <script src="../js/theme.js"></script>
 </head>
-<body class="auth-page">
+<body class="compiler-body">
 
-    <!-- Top Minimal Brand Bar -->
-    <header class="auth-header">
-        <a href="../index.html" class="brand" title="Return to CodeArena Home">
-            <img src="../assets/logo/codearena-logo.png" alt="CodeArena logo" class="brand-logo">
-            <span class="head-logo">CodeArena</span>
-        </a>
+    <!-- Top Workspace Header -->
+    <header class="compiler-header">
+        <div class="compiler-header-left">
+            <h1 class="sr-only">CodeArena Online Java Compiler</h1>
+            <a href="../index.html" class="compiler-brand-wrap" title="Return to CodeArena Home">
+                <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo">
+            </a>
 
-        <div class="auth-header-actions">
-            <button class="theme-toggle" type="button" aria-label="Toggle theme">☀</button>
-            <a href="dashboard.html" class="auth-return-link">← Return to Dashboard</a>
+            <nav class="compiler-breadcrumbs" aria-label="Breadcrumb">
+                <a href="../index.html">Home</a>
+                <span class="crumb-sep">/</span>
+                <a href="dashboard.html">Dashboard</a>
+                <span class="crumb-sep">/</span>
+                <span class="crumb-current">Java Compiler</span>
+            </nav>
+        </div>
+
+        <div class="compiler-header-actions">
+            <a href="problems.html" class="compiler-header-btn" title="Explore Coding Problems">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+                <span>Problems</span>
+            </a>
+            <a href="dashboard.html" class="compiler-header-btn" title="Go to Dashboard">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+            <button class="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle dark/light theme">☀</button>
         </div>
     </header>
 
-    <!-- Main Placeholder Canvas -->
-    <main class="auth-main">
-        <div class="auth-card" style="max-width: 520px; text-align: center;">
-            <div class="auth-card-header">
-                <div class="empty-state-icon" style="margin: 0 auto 10px; width: 56px; height: 56px; border-radius: 50%; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center; color: #60A5FA;" aria-hidden="true">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points='16 18 22 12 16 6'/><polyline points='8 6 2 12 8 18'/>
-                    </svg>
-                </div>
-                <h1 class="auth-title">Online Java Compiler</h1>
-                <span class="auth-notice" style="margin: 6px auto; display: inline-flex; justify-content: center;">
-                    <span class="notice-icon">ℹ</span>
-                    <span>Planned for Phase 3 · Backend Integration In Progress</span>
-                </span>
-                <p class="auth-subtitle" style="margin-top: 10px; font-size: 0.9rem; line-height: 1.5;">
-                    The browser-based Java compiler environment will support in-browser code compilation, stdin input streams, execution sandboxing, and standard output streaming via our upcoming Java backend services.
-                </p>
+    <!-- Compiler Action Toolbar -->
+    <div class="compiler-toolbar" role="toolbar" aria-label="Compiler Controls">
+        <div class="toolbar-group-left">
+            <div class="lang-selector-pill" title="Target Language Environment: Java (OpenJDK 17)">
+                <span class="lang-dot"></span>
+                <span>Target: Java (OpenJDK 17)</span>
             </div>
 
-            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 12px;">
-                <a href="dashboard.html" class="btn btn-primary btn-auth" style="margin-top: 0; text-decoration: none;">
-                    Go to Student Dashboard <span aria-hidden="true">→</span>
-                </a>
+            <div class="editor-file-tab" title="Active Java source file">
+                <span class="file-icon">&#9749;</span>
+                <span>Main.java</span>
             </div>
-            
-            <p class="auth-switch" style="margin-top: 8px;">
-                <a href="../index.html">← Back to Public Homepage</a>
-            </p>
         </div>
+
+        <div class="toolbar-group-right">
+            <!-- Dominant Primary Action: Run Code -->
+            <button id="btnRunCode" class="btn-compiler btn-compiler-run" type="button" title="Run simulated preview (Ctrl + Enter)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <span>Run Code</span>
+                <kbd class="key-badge">Ctrl+Enter</kbd>
+            </button>
+
+            <!-- Secondary Actions -->
+            <button id="btnResetCode" class="btn-compiler btn-compiler-secondary" type="button" title="Reset editor to default Java template">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+                <span>Reset</span>
+            </button>
+
+            <button id="btnCopyCode" class="btn-compiler btn-compiler-secondary" type="button" title="Copy Java code to clipboard">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>Copy</span>
+            </button>
+
+            <button id="btnClearConsole" class="btn-compiler btn-compiler-secondary" type="button" title="Clear console outputs">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                <span>Clear Console</span>
+            </button>
+
+            <!-- Status Indicator -->
+            <div id="compilerStatusIndicator" class="compiler-status-indicator" role="status" aria-live="polite">
+                <span class="status-dot"></span>
+                <span id="compilerStatusText">Ready · Preview Mode</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dual-Pane Workspace Canvas -->
+    <main class="compiler-workspace">
+
+        <!-- Left: Code Editor Pane -->
+        <section class="editor-pane" aria-label="Code Editor">
+            <div class="editor-pane-header">
+                <div class="editor-header-controls">
+                    <span class="pane-title">Source Code</span>
+                    <span class="pane-subtitle">Main.java · Java Mode</span>
+                </div>
+                <div class="editor-header-controls">
+                    <button id="btnEditorFontDec" class="compiler-header-btn" type="button" title="Decrease editor font size" aria-label="Decrease font size">A-</button>
+                    <span id="compilerFontSizeDisplay" style="font-size: 0.76rem; color: var(--color-text-muted); min-width: 28px; text-align: center;">14px</span>
+                    <button id="btnEditorFontInc" class="compiler-header-btn" type="button" title="Increase editor font size" aria-label="Increase font size">A+</button>
+                    <button id="btnCompilerCopyCode" class="compiler-header-btn" type="button" title="Copy code to clipboard">Copy</button>
+                    <button id="btnShortcutsHelp" class="compiler-header-btn" type="button" title="View Keyboard Shortcuts">
+                        ⌨ Shortcuts
+                    </button>
+                </div>
+            </div>
+
+            <!-- Editor Target Container -->
+            <div class="editor-canvas-container" id="editorCanvasContainer">
+                <div id="codeMirrorTarget" style="height: 100%; display: flex; flex-direction: column;"></div>
+
+                <!-- Textarea Fallback for non-CodeMirror environments -->
+                <textarea id="fallbackEditor" class="code-fallback-editor" spellcheck="false" style="display: none;" aria-label="Java Code Editor Fallback"></textarea>
+
+                <noscript>
+                    <div style="padding: 16px; background-color: var(--color-bg-surface); border-bottom: 1px solid var(--color-border); font-size: 0.85rem;">
+                        <strong>JavaScript is required for CodeMirror syntax highlighting.</strong> You may edit source code in the fallback editor below.
+                    </div>
+                </noscript>
+            </div>
+
+            <!-- Editor Footer Status -->
+            <footer class="editor-footer-status">
+                <div class="footer-status-left">
+                    <span class="status-item" id="cursorPositionDisplay">Ln 1, Col 1</span>
+                    <span class="status-sep">·</span>
+                    <span class="status-item">UTF-8</span>
+                    <span class="status-sep">·</span>
+                    <span class="status-item">Spaces: 4</span>
+                </div>
+                <div class="footer-status-right">
+                    <span class="status-item">Target: OpenJDK 17 (Preview)</span>
+                </div>
+            </footer>
+        </section>
+
+        <!-- Right: Console Pane -->
+        <section class="console-pane" aria-label="Execution Console">
+            <div class="console-pane-header">
+                <!-- Tabs -->
+                <div class="console-tabs" role="tablist">
+                    <button class="console-tab-btn active" id="tabBtnStdout" role="tab" aria-selected="true" aria-controls="panelStdout" data-tab="stdout">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="4 17 10 11 4 5"></polyline>
+                            <line x1="12" y1="19" x2="20" y2="19"></line>
+                        </svg>
+                        <span>Output (stdout)</span>
+                    </button>
+
+                    <button class="console-tab-btn" id="tabBtnStdin" role="tab" aria-selected="false" aria-controls="panelStdin" data-tab="stdin">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                            <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"></path>
+                        </svg>
+                        <span>Input (stdin)</span>
+                    </button>
+
+                    <button class="console-tab-btn" id="tabBtnStderr" role="tab" aria-selected="false" aria-controls="panelStderr" data-tab="stderr">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <span>Diagnostics (Preview)</span>
+                        <span class="badge-count badge-error" id="stderrCountBadge" style="display: none;">0</span>
+                    </button>
+                </div>
+
+                <div class="console-header-actions">
+                    <button id="btnCopyConsoleOutput" class="compiler-header-btn" type="button" title="Copy current console text">
+                        <span>Copy Output</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Honest & Elegant Preview Disclaimer Banner -->
+            <div class="compiler-preview-banner" role="note">
+                <span class="preview-tag">Preview Mode</span>
+                <span class="preview-text">Client-side simulated preview. Genuine OpenJDK 17 remote compilation engine connects in Phase 4.</span>
+            </div>
+
+            <!-- Console Panels -->
+            <div class="console-content">
+
+                <!-- Panel 1: stdout -->
+                <div class="console-panel active" id="panelStdout" role="tabpanel" aria-labelledby="tabBtnStdout">
+                    <!-- Honest Preview Metadata Strip (No fake runtime ms, memory MB, or exit codes) -->
+                    <div class="terminal-stats-bar" id="terminalStatsBar" style="display: none;">
+                        <span class="stat-pill"><span class="stat-label">Environment:</span> <strong>Client-Side Preview</strong></span>
+                        <span class="stat-pill"><span class="stat-label">Target Runtime:</span> <strong>Java 17 (Phase 4 Backend)</strong></span>
+                        <span class="stat-pill"><span class="stat-label">Preview State:</span> <strong id="statStatus" class="stat-badge-preview">Preview Completed</strong></span>
+                    </div>
+
+                    <pre class="terminal-output" id="stdoutTerminal"><span class="terminal-empty">Click &quot;Run Code&quot; or press Ctrl + Enter to compile and run your Java program.</span></pre>
+                </div>
+
+                <!-- Panel 2: stdin -->
+                <div class="console-panel" id="panelStdin" role="tabpanel" aria-labelledby="tabBtnStdin">
+                    <div class="stdin-container">
+                        <p class="stdin-hint">
+                            <strong>Simulated Standard Input:</strong> Supply values below to simulate <code>System.in</code> (e.g. <code>Scanner</code>). In this preview phase, input handling is demonstrated client-side. Live input stream processing will be executed by OpenJDK 17 in Phase 4.
+                        </p>
+                        <textarea id="stdinTextarea" class="stdin-textarea" placeholder="Enter standard input values here (one value per line)..."></textarea>
+                        <div style="display: flex; justify-content: flex-end;">
+                            <button id="btnClearStdin" class="compiler-header-btn" type="button">Clear Input</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 3: stderr / diagnostics -->
+                <div class="console-panel" id="panelStderr" role="tabpanel" aria-labelledby="tabBtnStderr">
+                    <div class="diagnostics-container">
+                        <div id="diagnosticsErrorList"></div>
+                        <pre class="terminal-output" id="stderrTerminal"><span class="terminal-empty">No structural issues detected in client preview. (Full Java compiler checks connect in Phase 4).</span></pre>
+
+                        <div class="diagnostics-notice-box">
+                            <strong>Client-Side Preview Diagnostics:</strong>
+                            <p style="margin: 4px 0 0 0;">
+                                Structural checks on the frontend (such as brace balancing and class structure) provide immediate syntax assistance in the browser before code is submitted to a remote compiler. In Phase 4, the genuine OpenJDK <code>javac</code> compiler will provide byte-accurate compilation logs.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
     </main>
 
-    <footer class="auth-footer">
-        &copy; 2026 CodeArena. All rights reserved. Built for learners, by learners.
-    </footer>
+    <!-- Reset Confirmation Modal -->
+    <div class="compiler-modal-overlay" id="resetModalOverlay" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+        <div class="compiler-modal">
+            <h2 class="compiler-modal-title" id="resetModalTitle">Reset Java Editor?</h2>
+            <p class="compiler-modal-text">
+                Are you sure you want to restore the default starter template? Any unsaved edits will be replaced.
+            </p>
+            <div class="compiler-modal-actions">
+                <button id="btnCancelReset" class="btn-compiler btn-compiler-secondary" type="button">Cancel</button>
+                <button id="btnConfirmReset" class="btn-compiler btn-compiler-danger" type="button">Reset Template</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div class="compiler-modal-overlay" id="shortcutsModalOverlay" role="dialog" aria-modal="true" aria-labelledby="shortcutsModalTitle">
+        <div class="compiler-modal">
+            <h2 class="compiler-modal-title" id="shortcutsModalTitle">Keyboard Shortcuts</h2>
+            <div class="compiler-modal-text">
+                <table class="shortcuts-table">
+                    <tbody>
+                        <tr>
+                            <td><kbd class="key-badge-modal">Ctrl + Enter</kbd> / <kbd class="key-badge-modal">Cmd + Enter</kbd></td>
+                            <td>Run simulated preview</td>
+                        </tr>
+                        <tr>
+                            <td><kbd class="key-badge-modal">Tab</kbd></td>
+                            <td>Indent 4 spaces (smart indent)</td>
+                        </tr>
+                        <tr>
+                            <td><kbd class="key-badge-modal">Ctrl + F</kbd> / <kbd class="key-badge-modal">Cmd + F</kbd></td>
+                            <td>Find in code</td>
+                        </tr>
+                        <tr>
+                            <td><kbd class="key-badge-modal">Ctrl + /</kbd> / <kbd class="key-badge-modal">Cmd + /</kbd></td>
+                            <td>Toggle line comment</td>
+                        </tr>
+                        <tr>
+                            <td><kbd class="key-badge-modal">Ctrl + S</kbd> / <kbd class="key-badge-modal">Cmd + S</kbd></td>
+                            <td>Prevent browser save &amp; prompt Run</td>
+                        </tr>
+                        <tr>
+                            <td><kbd class="key-badge-modal">Esc</kbd></td>
+                            <td>Close active dialog or modal</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="compiler-modal-actions">
+                <button id="btnCloseShortcuts" class="btn-compiler btn-compiler-secondary" type="button">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="compiler-toast" id="compilerToast" role="alert" aria-live="assertive"></div>
+
+    <!-- Scripts: Genuine Local CodeMirror 5 Distribution -->
+    <script src="../vendor/codemirror/lib/codemirror.js"></script>
+    <script src="../vendor/codemirror/mode/clike/clike.js"></script>
+    <script src="../vendor/codemirror/addon/edit/matchbrackets.js"></script>
+    <script src="../vendor/codemirror/addon/edit/closebrackets.js"></script>
+    <script src="../vendor/codemirror/addon/selection/active-line.js"></script>
+
+    <!-- CodeArena Services & Compiler Controller -->
+    <script src="../js/api.js"></script>
+    <script src="../js/compiler.js"></script>
 </body>
 </html>

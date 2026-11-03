@@ -32,6 +32,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // --------------------------------------------------------------------------
     // 2. Login Form Client-Side Validation & API Service Dispatch
     // --------------------------------------------------------------------------
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    if (forgotPasswordLink && loginFeedback) {
+        forgotPasswordLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            showFeedback(loginFeedback, 'Password reset will be enabled when backend email service is connected.', 'info');
+        });
+    }
+
     const loginForm = document.getElementById('loginForm');
     const loginFeedback = document.getElementById('authFeedback');
 

@@ -3,63 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bookmarked Challenges — CodeArena</title>
+    <title>Saved Bookmarks — CodeArena</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="../assets/logo/codearena-favicon.png">
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/auth.css">
+    <link rel="stylesheet" href="../css/secondary.css">
     <!-- Immediate Theme Application Script (Prevents Flash) -->
     <script src="../js/theme.js"></script>
 </head>
-<body class="auth-page">
+<body class="secondary-page-body">
 
-    <!-- Top Minimal Brand Bar -->
-    <header class="auth-header">
-        <a href="../index.html" class="brand" title="Return to CodeArena Home">
-            <img src="../assets/logo/codearena-logo.png" alt="CodeArena logo" class="brand-logo">
-            <span class="head-logo">CodeArena</span>
-        </a>
+    <!-- Top Standard 60px Secondary Header -->
+    <header class="secondary-header">
+        <div class="secondary-header-left">
+            <a href="../index.html" class="secondary-brand-wrap" title="Return to CodeArena Home" aria-label="CodeArena Home">
+                <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo">
+            </a>
 
-        <div class="auth-header-actions">
-            <button class="theme-toggle" type="button" aria-label="Toggle theme">☀</button>
-            <a href="dashboard.html" class="auth-return-link">← Return to Dashboard</a>
+            <nav class="secondary-breadcrumbs" aria-label="Breadcrumbs">
+                <a href="../index.html">Home</a>
+                <span class="crumb-sep">/</span>
+                <a href="dashboard.html">Dashboard</a>
+                <span class="crumb-sep">/</span>
+                <span class="crumb-current">Bookmarks</span>
+            </nav>
+        </div>
+
+        <div class="secondary-header-actions">
+            <a href="problems.html" class="secondary-header-btn" title="View Problem Catalogue">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+                <span>Catalogue</span>
+            </a>
+            <a href="compiler.html" class="secondary-header-btn" title="Online Java Compiler">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+                <span>Compiler</span>
+            </a>
+            <button class="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle dark/light theme">☀</button>
         </div>
     </header>
 
-    <!-- Main Placeholder Canvas -->
-    <main class="auth-main">
-        <div class="auth-card" style="max-width: 520px; text-align: center;">
-            <div class="auth-card-header">
-                <div class="empty-state-icon" style="margin: 0 auto 10px; width: 56px; height: 56px; border-radius: 50%; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center; color: #60A5FA;" aria-hidden="true">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d='m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z'/>
-                    </svg>
-                </div>
-                <h1 class="auth-title">Bookmarked Challenges</h1>
-                <span class="auth-notice" style="margin: 6px auto; display: inline-flex; justify-content: center;">
-                    <span class="notice-icon">ℹ</span>
-                    <span>Planned for Phase 4 · Backend Integration In Progress</span>
-                </span>
-                <p class="auth-subtitle" style="margin-top: 10px; font-size: 0.9rem; line-height: 1.5;">
-                    Access your saved problem lists, starred algorithm patterns, and revision questions for interview preparation.
-                </p>
-            </div>
+    <!-- Main Bookmarks Canvas -->
+    <main class="secondary-main">
+        <div class="secondary-container">
 
-            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 12px;">
-                <a href="dashboard.html" class="btn btn-primary btn-auth" style="margin-top: 0; text-decoration: none;">
-                    Go to Student Dashboard <span aria-hidden="true">→</span>
+            <!-- Hero Banner -->
+            <section class="feature-hero" aria-labelledby="bookmarks-heading">
+                <div class="feature-hero-text">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <span class="preview-badge-pill">Guest Local Storage</span>
+                    </div>
+                    <h1 id="bookmarks-heading">Bookmarked Challenges</h1>
+                    <p>
+                        Keep track of problems you want to practice later, review before interviews, or solve again.
+                        Bookmarks are stored locally in your browser storage during this preview.
+                    </p>
+                </div>
+                <div class="feature-hero-stats">
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-val" id="bookmarksCountBadge">0</div>
+                        <div class="hero-stat-lbl">Saved</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Search, Filter & Sort Row -->
+            <section class="feature-controls-row" aria-label="Bookmarks Controls">
+                <div class="search-input-wrap">
+                    <span class="search-icon-left" aria-hidden="true">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </span>
+                    <input type="text" id="bookmarksSearchInput" placeholder="Search bookmarked challenges..." aria-label="Search bookmarked challenges">
+                    <button type="button" class="clear-icon-btn" id="clearBookmarksSearch" aria-label="Clear search">✕</button>
+                </div>
+
+                <div class="filter-group-wrap">
+                    <select id="bookmarksDiffFilter" class="feature-select" aria-label="Filter bookmarks by difficulty">
+                        <option value="All">All Difficulties</option>
+                        <option value="Easy">Easy</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                    <select id="bookmarksTopicFilter" class="feature-select" aria-label="Filter bookmarks by topic">
+                        <option value="All">All Topics</option>
+                    </select>
+
+                    <select id="bookmarksSortSelect" class="feature-select" aria-label="Sort bookmarks">
+                        <option value="title-asc">Title (A-Z)</option>
+                        <option value="title-desc">Title (Z-A)</option>
+                        <option value="diff-asc">Difficulty (Easy → Hard)</option>
+                        <option value="diff-desc">Difficulty (Hard → Easy)</option>
+                    </select>
+
+                    <button type="button" class="secondary-header-btn" id="clearAllBookmarksBtn" title="Remove all saved bookmarks" style="color: #EF4444; border-color: rgba(239, 68, 68, 0.3);">
+                        Clear All
+                    </button>
+                </div>
+            </section>
+
+            <!-- Bookmarks Grid -->
+            <section class="practice-cards-grid" id="bookmarksListGrid" aria-label="Saved Bookmarks List">
+                <!-- Populated dynamically by bookmarks.js -->
+            </section>
+
+            <!-- Empty State -->
+            <div class="feature-empty-state" id="bookmarksEmptyState" style="display: none;" role="status">
+                <span class="feature-empty-icon" aria-hidden="true">🔖</span>
+                <h3 class="feature-empty-title">No Bookmarked Problems Found</h3>
+                <p class="feature-empty-desc">
+                    You haven't bookmarked any challenges matching your filters. Browse the catalogue to find and save interesting algorithmic problems.
+                </p>
+                <a href="problems.html" class="prob-btn-solve" style="margin: 0 auto; display: inline-flex;">
+                    Browse Problem Catalogue <span aria-hidden="true">→</span>
                 </a>
             </div>
-            
-            <p class="auth-switch" style="margin-top: 8px;">
-                <a href="../index.html">← Back to Public Homepage</a>
-            </p>
+
         </div>
     </main>
 
-    <footer class="auth-footer">
-        &copy; 2026 CodeArena. All rights reserved. Built for learners, by learners.
+    <!-- Standard Secondary Footer -->
+    <footer class="secondary-footer" role="contentinfo">
+        <div class="secondary-footer-container">
+            <div class="secondary-footer-brand-wrap">
+                <a href="../index.html" class="secondary-footer-brand" aria-label="CodeArena Home">
+                    <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo footer-full-logo">
+                </a>
+                <p class="secondary-footer-tagline">
+                    Master Java programming through deliberate practice. One challenge at a time.
+                </p>
+            </div>
+            <nav class="secondary-footer-nav" aria-label="Footer Navigation">
+                <a href="../index.html" class="secondary-footer-link">Home</a>
+                <a href="problems.html" class="secondary-footer-link">Problems</a>
+                <a href="practice.html" class="secondary-footer-link">Practice</a>
+                <a href="dashboard.html" class="secondary-footer-link">Dashboard</a>
+            </nav>
+            <p class="secondary-footer-copyright">
+                &copy; 2026 CodeArena. Built for learners, by learners.
+            </p>
+        </div>
     </footer>
+
+    <!-- Scripts -->
+    <script src="../js/api.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/bookmarks.js"></script>
 </body>
 </html>

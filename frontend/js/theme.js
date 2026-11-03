@@ -1,10 +1,29 @@
-// theme.js — CodeArena Theme Toggle
+// theme.js — CodeArena Theme Toggle & Preferences Loader
 
-// Apply saved theme immediately to prevent flash
+// Apply saved theme and display preferences immediately to prevent flash (safely guarded against storage exceptions)
 (function() {
-    const saved = localStorage.getItem('codearena-theme');
-    if (saved === 'light') {
-        document.documentElement.setAttribute('data-theme', 'light');
+    try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+            const saved = window.localStorage.getItem('codearena-theme');
+            if (saved === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+            const settingsRaw = window.localStorage.getItem('codearena_user_settings');
+            if (settingsRaw) {
+                const settings = JSON.parse(settingsRaw);
+                if (settings.interfaceDensity === 'compact') {
+                    document.documentElement.setAttribute('data-density', 'compact');
+                }
+                if (settings.reducedMotion === true) {
+                    document.documentElement.setAttribute('data-reduced-motion', 'true');
+                }
+                if (settings.compactToolbar === true) {
+                    document.documentElement.setAttribute('data-compact-toolbar', 'true');
+                }
+            }
+        }
+    } catch (e) {
+        // Fall back gracefully to default dark theme if storage is disabled or throws SecurityError
     }
 })();
 
@@ -18,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateToggleButtons(theme) {
         toggleBtns.forEach(function(btn) {
-            btn.textContent = theme === 'dark' ? '☀' : '☾';
+            btn.textContent = theme === 'dark' ? '☀️' : '🌙';
             btn.setAttribute('aria-label',
                 theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'
             );
@@ -32,8 +51,17 @@ document.addEventListener('DOMContentLoaded', function() {
             document.documentElement.removeAttribute('data-theme');
         }
         try {
-            localStorage.setItem('codearena-theme', theme);
-        } catch (e) {}
+            if (typeof window !== 'undefined' && window.localStorage) {
+                window.localStorage.setItem('codearena-theme', theme);
+                // Also synchronize with user settings if present
+                const settingsRaw = window.localStorage.getItem('codearena_user_settings');
+                let settings = settingsRaw ? JSON.parse(settingsRaw) : {};
+                settings.theme = theme;
+                window.localStorage.setItem('codearena_user_settings', JSON.stringify(settings));
+            }
+        } catch (e) {
+            // Silently fallback if storage is restricted or quotas exceeded
+        }
         updateToggleButtons(theme);
     }
 

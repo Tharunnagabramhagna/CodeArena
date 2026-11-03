@@ -178,8 +178,14 @@
                         <span class="drawer-icon">☰</span>
                     </button>
                     <div class="header-search">
-                        <span class="search-icon" aria-hidden="true">🔍</span>
-                        <input type="search" class="dash-search-input" id="dashSearchInput" placeholder="Search problems, topics, or anything..." aria-label="Search problems, topics, or anything">
+                        <span class="search-icon" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </span>
+                        <input type="search" class="dash-search-input" id="dashSearchInput" placeholder="Search problems, topics, or anything..." aria-label="Search problems, topics, or anything" autocomplete="off">
+                        <div class="dash-search-suggestions" id="dashSearchSuggestions" role="listbox" aria-label="Search suggestions" style="display: none;"></div>
                         <div class="search-feedback-popover" id="searchFeedbackPopover" style="display: none;" role="status">
                             <p class="search-popover-text">Search index: Full-text search across 150+ Java challenges will be activated with the Java compiler integration in Phase 3.</p>
                         </div>
@@ -191,29 +197,59 @@
 
                     <!-- Notification Control (Honest state without fabricated counts) -->
                     <div class="notification-wrapper">
-                        <button class="notification-btn" id="notificationBtn" type="button" aria-expanded="false" aria-haspopup="true" aria-label="Notifications" title="Notifications">
+                        <button class="notification-btn" id="notificationBtn" type="button" aria-expanded="false" aria-haspopup="true" aria-label="Notifications" title="Notifications" style="position: relative;">
                             <span class="notif-icon" aria-hidden="true">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
                                     <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
                                 </svg>
                             </span>
+                            <span class="notif-badge" id="notifBadge">2</span>
                         </button>
 
                         <div class="notification-popover" id="notificationPopover" role="dialog" aria-label="Notifications" style="display: none;">
                             <div class="notif-popover-header">
                                 <h4 class="notif-popover-title">Notifications</h4>
-                                <span class="notif-popover-tag">0 new</span>
+                                <span class="notif-popover-tag" id="notifHeaderTag">Sample (2 new)</span>
                             </div>
-                            <div class="notif-popover-body">
-                                <div class="notif-empty-icon" aria-hidden="true">
-                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                                    </svg>
+                            <div class="notif-preview-disclaimer" style="padding: 8px 14px; background: rgba(59, 130, 246, 0.08); border-bottom: 1px solid var(--border-color, #1e293b); font-size: 0.72rem; color: var(--color-text-muted, #94a3b8); display: flex; align-items: center; gap: 6px;">
+                                <span aria-hidden="true">ℹ️</span>
+                                <span>Sample platform announcements — live user alerts activate with backend integration.</span>
+                            </div>
+                            <div class="notif-tabs" role="tablist">
+                                <button type="button" class="notif-tab-btn active" data-tab="all" role="tab">All</button>
+                                <button type="button" class="notif-tab-btn" data-tab="system" role="tab">System</button>
+                                <button type="button" class="notif-tab-btn" data-tab="contests" role="tab">Contests</button>
+                            </div>
+                            <div class="notif-popover-body" id="notifListContainer">
+                                <div class="notif-item unread" data-category="system">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
+                                        <div class="notif-item-title">Platform Update: Phase 6 Refinements Active</div>
+                                        <span class="sample-data-badge" style="font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; background: rgba(59, 130, 246, 0.15); color: var(--color-primary, #60a5fa); font-weight: 500;">Sample</span>
+                                    </div>
+                                    <div class="notif-item-desc">Advanced search suggestions, CodeMirror live preferences, and recently viewed problems are now live.</div>
+                                    <div class="notif-item-time">Platform Announcement</div>
                                 </div>
-                                <p class="notif-empty-title">No notifications yet</p>
-                                <p class="notif-empty-desc">System announcements, contest alerts, and problem review updates will appear here once connected.</p>
+                                <div class="notif-item unread" data-category="contests">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
+                                        <div class="notif-item-title">Weekly Java Contest #42 Open</div>
+                                        <span class="sample-data-badge" style="font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; background: rgba(59, 130, 246, 0.15); color: var(--color-primary, #60a5fa); font-weight: 500;">Sample</span>
+                                    </div>
+                                    <div class="notif-item-desc">Registration preview is open for the upcoming weekend tournament. Test your algorithmic speed!</div>
+                                    <div class="notif-item-time">Platform Announcement</div>
+                                </div>
+                                <div class="notif-item" data-category="system">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
+                                        <div class="notif-item-title">Java 17 Curriculum Update</div>
+                                        <span class="sample-data-badge" style="font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; background: rgba(59, 130, 246, 0.15); color: var(--color-primary, #60a5fa); font-weight: 500;">Sample</span>
+                                    </div>
+                                    <div class="notif-item-desc">New interactive lessons on Java Lambdas and Streams are ready in the Learning Centre.</div>
+                                    <div class="notif-item-time">Platform Announcement</div>
+                                </div>
+                            </div>
+                            <div class="notif-footer-actions">
+                                <button type="button" class="notif-action-link" id="btnMarkNotifsRead">Mark all as read</button>
+                                <a href="contests.html" class="notif-action-link">View Contests &rarr;</a>
                             </div>
                         </div>
                     </div>
@@ -306,9 +342,9 @@
                     <div class="section-title-bar">
                         <div class="title-with-desc">
                             <h2 id="platformStatsHeading" class="section-badge-title">Platform Overview</h2>
-                            <span class="section-badge-subtitle">Provisional catalogue figures · Dynamic database metrics synchronize in backend phase</span>
+                            <span class="section-badge-subtitle">Canonical catalogue figures · Synchronized across active problem modules</span>
                         </div>
-                        <span class="section-badge-tag">Provisional Catalogue Data</span>
+                        <span class="section-badge-tag">Canonical Catalogue Data</span>
                     </div>
                     <div class="stats-row">
                         <div class="stat-card">
@@ -317,8 +353,8 @@
                             </div>
                             <div class="stat-details">
                                 <span class="stat-label">Total Problems</span>
-                                <span class="stat-value">150+</span>
-                                <span class="stat-desc">Solve and improve</span>
+                                <span class="stat-value" id="dashStatProblems">12</span>
+                                <span class="stat-desc">Canonical challenges</span>
                             </div>
                         </div>
 
@@ -328,8 +364,8 @@
                             </div>
                             <div class="stat-details">
                                 <span class="stat-label">Topics</span>
-                                <span class="stat-value">12</span>
-                                <span class="stat-desc">Explore topics</span>
+                                <span class="stat-value" id="dashStatTopics">10</span>
+                                <span class="stat-desc">Targeted categories</span>
                             </div>
                         </div>
 
@@ -339,8 +375,8 @@
                             </div>
                             <div class="stat-details">
                                 <span class="stat-label">Contests</span>
-                                <span class="stat-value">5</span>
-                                <span class="stat-desc">Join and compete</span>
+                                <span class="stat-value" id="dashStatContests">4</span>
+                                <span class="stat-desc">Tournament schedules</span>
                             </div>
                         </div>
 
@@ -349,9 +385,9 @@
                                 <span class="stat-icon-symbol">📊</span>
                             </div>
                             <div class="stat-details">
-                                <span class="stat-label">Learning Resources</span>
-                                <span class="stat-value">50+</span>
-                                <span class="stat-desc">Guides &amp; tutorials</span>
+                                <span class="stat-label">Learning Paths</span>
+                                <span class="stat-value" id="dashStatLearn">14</span>
+                                <span class="stat-desc">Core curriculum paths</span>
                             </div>
                         </div>
                     </div>
@@ -367,7 +403,7 @@
                         </div>
 
                         <div class="problem-list">
-                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Two Sum">
+                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Two Sum" data-id="two-sum">
                                 <span class="diff-badge diff-easy">Easy</span>
                                 <div class="problem-info">
                                     <h3 class="problem-name">Two Sum</h3>
@@ -376,7 +412,7 @@
                                 <span class="problem-arrow" aria-hidden="true">→</span>
                             </article>
 
-                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Reverse a String">
+                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Reverse a String" data-id="reverse-string">
                                 <span class="diff-badge diff-medium">Medium</span>
                                 <div class="problem-info">
                                     <h3 class="problem-name">Reverse a String</h3>
@@ -385,7 +421,7 @@
                                 <span class="problem-arrow" aria-hidden="true">→</span>
                             </article>
 
-                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Valid Parentheses">
+                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Valid Parentheses" data-id="valid-parentheses">
                                 <span class="diff-badge diff-medium">Medium</span>
                                 <div class="problem-info">
                                     <h3 class="problem-name">Valid Parentheses</h3>
@@ -394,7 +430,7 @@
                                 <span class="problem-arrow" aria-hidden="true">→</span>
                             </article>
 
-                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Merge K Sorted Lists">
+                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Merge K Sorted Lists" data-id="merge-k-sorted-lists">
                                 <span class="diff-badge diff-hard">Hard</span>
                                 <div class="problem-info">
                                     <h3 class="problem-name">Merge K Sorted Lists</h3>
@@ -403,7 +439,7 @@
                                 <span class="problem-arrow" aria-hidden="true">→</span>
                             </article>
 
-                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Binary Search">
+                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Binary Search" data-id="binary-search">
                                 <span class="diff-badge diff-easy">Easy</span>
                                 <div class="problem-info">
                                     <h3 class="problem-name">Binary Search</h3>
@@ -491,6 +527,8 @@
     </div>
 
     <!-- Dashboard JavaScript -->
+    <script src="../js/api.js"></script>
+    <script src="../js/toast.js"></script>
     <script src="../js/dashboard.js" defer></script>
 </body>
 </html>
