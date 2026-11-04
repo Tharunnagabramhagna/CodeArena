@@ -49,7 +49,7 @@
                 </svg>
                 <span>Compiler</span>
             </a>
-            <button class="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle dark/light theme">☀</button>
+            <button class="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme"><svg class="theme-icon theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg></button>
         </div>
     </header>
 
@@ -195,6 +195,82 @@
             </p>
         </div>
     </footer>
+
+    <!-- CodeArena Pro Subscription Upgrade Modal -->
+    <div class="subscription-modal-overlay" id="subscriptionModalOverlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="subModalTitle">
+        <div class="subscription-modal">
+            <div class="sub-modal-header">
+                <button type="button" class="sub-modal-close-btn" id="btnCloseSubModal" aria-label="Close modal">✕</button>
+                <span class="sub-modal-tag">⭐ CodeArena Pro Membership</span>
+                <h2 id="subModalTitle" class="sub-modal-title">Unlock Premium Challenges</h2>
+                <p class="sub-modal-subtitle">
+                    This challenge is part of the 50 curated CodeArena Pro problems covering advanced algorithms, segment trees, interval DP, and complex graph patterns.
+                </p>
+            </div>
+
+            <!-- Problem preview card -->
+            <div class="sub-preview-card" id="subModalProblemPreview">
+                <div class="sub-preview-info">
+                    <span class="badge-pro">PRO</span>
+                    <span class="sub-preview-title" id="subModalPreviewTitle">Challenge Title</span>
+                    <span class="diff-badge" id="subModalPreviewDiff">Hard</span>
+                    <span style="font-size: 0.8rem; color: var(--color-text-muted);" id="subModalPreviewTopic">Topic</span>
+                </div>
+                <span style="font-size: 0.82rem; color: var(--color-primary); font-weight: 600;">Requires Pro Access</span>
+            </div>
+
+            <!-- Subscription Plans (Transparent Pricing) -->
+            <div class="pricing-plans-grid">
+                <!-- Monthly Plan -->
+                <div class="pricing-card-preview" id="cardPlanMonthly">
+                    <div class="pricing-card-header">
+                        <h3 class="pricing-plan-name">Monthly Plan</h3>
+                        <div class="pricing-price-row">
+                            <span class="pricing-currency-amount">$5</span>
+                            <span class="pricing-period">/ month</span>
+                        </div>
+                        <div class="pricing-billing-terms">Billed monthly ($5/month). Flexible month-to-month access. Cancel anytime.</div>
+                        <div class="pricing-note">Annualized equivalent: $60 per year</div>
+                    </div>
+                    <ul class="pricing-benefits">
+                        <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> 50 Curated Premium DSA Problems</li>
+                        <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> Advanced Graph, DP & Tree Challenges</li>
+                        <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> Progressive 3-Level Problem Hints</li>
+                        <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> Priority Test Case Execution Preview</li>
+                    </ul>
+                    <button type="button" class="pricing-action-btn btn-plan-select" data-plan="monthly" id="btnSelectMonthly">
+                        Activate Monthly ($5/mo)
+                    </button>
+                </div>
+
+                <!-- Annual Plan -->
+                <div class="pricing-card-preview" id="cardPlanAnnual">
+                    <div class="pricing-card-header">
+                        <h3 class="pricing-plan-name">Annual Plan</h3>
+                        <div class="pricing-price-row">
+                            <span class="pricing-currency-amount">$199</span>
+                            <span class="pricing-period">/ year</span>
+                        </div>
+                        <div class="pricing-billing-terms">Billed annually ($199/year). Single annual payment commitment.</div>
+                        <div class="pricing-note">Note: Standard annual rate ($199/yr) vs monthly billing ($5/mo).</div>
+                    </div>
+                    <ul class="pricing-benefits">
+                        <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> 50 Curated Premium DSA Problems</li>
+                        <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> Advanced Graph, DP & Tree Challenges</li>
+                        <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> Progressive 3-Level Problem Hints</li>
+                        <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> 12-Month Pro Preview Membership</li>
+                    </ul>
+                    <button type="button" class="pricing-action-btn btn-plan-select" data-plan="annual" id="btnSelectAnnual">
+                        Activate Annual ($199/yr)
+                    </button>
+                </div>
+            </div>
+
+            <div class="sub-modal-footer-disclaimer">
+                <span>ℹ️ Client-side preview membership. No real credit card or payment processing is executed. Clicking an activation button toggles your local session state to Pro preview.</span>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts: Services & Practice Controller -->
     <script src="../js/api.js"></script>

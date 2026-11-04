@@ -57,7 +57,7 @@
                 </svg>
                 <span>Dashboard</span>
             </a>
-            <button class="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle dark/light theme">☀</button>
+            <button class="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme"><svg class="theme-icon theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg></button>
         </div>
     </header>
 
@@ -136,6 +136,9 @@
                     <button id="btnShortcutsHelp" class="compiler-header-btn" type="button" title="View Keyboard Shortcuts">
                         ⌨ Shortcuts
                     </button>
+                    <button id="btnResetSplit" class="compiler-header-btn" type="button" title="Reset split ratio to default (55% editor / 45% output)">
+                        ⇋ 55:45
+                    </button>
                 </div>
             </div>
 
@@ -167,6 +170,11 @@
                 </div>
             </footer>
         </section>
+
+        <!-- Resizable Vertical Splitter (Editor vs Console) -->
+        <div class="compiler-splitter" id="compilerSplitter" role="separator" aria-orientation="vertical" aria-label="Resize editor and output panels" tabindex="0" title="Drag to adjust split ratio between editor and output (Double-click to reset, or use Left/Right arrow keys)">
+            <div class="compiler-splitter-handle" aria-hidden="true"></div>
+        </div>
 
         <!-- Right: Console Pane -->
         <section class="console-pane" aria-label="Execution Console">

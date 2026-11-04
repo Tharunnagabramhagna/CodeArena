@@ -25,11 +25,18 @@
 }
 
 .auth-header .brand-full-logo {
-  height: 36px;
+  height: 52px;
   width: auto;
   max-width: 200px;
+  aspect-ratio: 2122 / 741;
   object-fit: contain;
   display: block;
+  transition: opacity var(--transition-fast), transform var(--transition-fast), filter var(--transition-normal);
+}
+
+[data-theme="light"] .auth-header .brand-full-logo,
+[data-theme="light"] .brand-full-logo {
+  filter: invert(1) hue-rotate(180deg) contrast(1.1) saturate(1.15);
 }
 
 .auth-header .brand {

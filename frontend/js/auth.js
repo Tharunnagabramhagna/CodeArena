@@ -86,7 +86,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (window.CodeArenaAPI && window.CodeArenaAPI.authService) {
                     const result = await window.CodeArenaAPI.authService.login({ email, password, rememberMe });
                     if (result.success) {
-                        showFeedback(loginFeedback, 'Authentication successful.', 'info');
+                        showFeedback(loginFeedback, 'Authentication successful (Preview Session). Redirecting...', 'info');
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const redirectUrl = urlParams.get('redirect') || 'dashboard.html';
+                        setTimeout(function () {
+                            window.location.href = redirectUrl;
+                        }, 500);
                     } else {
                         showFeedback(loginFeedback, result.message, 'info');
                     }
@@ -171,7 +176,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (window.CodeArenaAPI && window.CodeArenaAPI.authService) {
                     const result = await window.CodeArenaAPI.authService.register({ fullName: name, email, password });
                     if (result.success) {
-                        showFeedback(signupFeedback, 'Registration successful.', 'info');
+                        showFeedback(signupFeedback, 'Registration successful (Preview Session). Redirecting...', 'info');
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const redirectUrl = urlParams.get('redirect') || 'dashboard.html';
+                        setTimeout(function () {
+                            window.location.href = redirectUrl;
+                        }, 500);
                     } else {
                         showFeedback(signupFeedback, result.message, 'info');
                     }

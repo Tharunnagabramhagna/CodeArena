@@ -50,19 +50,13 @@
   display: inline-flex;
   align-items: center;
   text-decoration: none;
-}
-
-.secondary-brand-wrap {
-  display: inline-flex;
-  align-items: center;
-  text-decoration: none;
   flex-shrink: 0;
 }
 
 .secondary-brand-wrap .brand-full-logo {
-  height: 36px;
+  height: 52px;
   width: auto;
-  max-width: 130px;
+  max-width: 200px;
   aspect-ratio: 2122 / 741;
   object-fit: contain;
   flex-shrink: 0;
@@ -1697,4 +1691,15 @@
 
 .btn-retry-quiz:hover {
   background-color: rgba(239, 68, 68, 0.15);
+}
+
+/* Interactive Button Text Selection Prevention */
+button,
+.prob-btn-solve,
+.secondary-header-btn,
+.compiler-header-btn,
+.workspace-header-btn,
+.btn-editor-tool {
+  -webkit-user-select: none;
+  user-select: none;
 }

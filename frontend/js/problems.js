@@ -12,9 +12,11 @@
         search: '',
         difficulty: 'All',
         topic: 'All',
+        pattern: 'All',
+        access: 'All',
         sortBy: 'default',
         page: 1,
-        limit: 6 // 6 items per page provides a balanced view and demonstrates pagination with 12 problems
+        limit: 8
     };
 
     // DOM Elements Cache
@@ -26,10 +28,47 @@
     async function init() {
         cacheElements();
         bindEvents();
+
+        // Read query parameters for deep linking
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('search')) {
+            state.search = urlParams.get('search');
+            if (dom.searchInput) dom.searchInput.value = state.search;
+            if (dom.searchClearBtn) dom.searchClearBtn.style.display = 'block';
+        }
+        if (urlParams.has('difficulty')) {
+            state.difficulty = urlParams.get('difficulty');
+            if (dom.difficultyFilter) dom.difficultyFilter.value = state.difficulty;
+        }
+        if (urlParams.has('topic')) {
+            state.topic = urlParams.get('topic');
+        }
+        if (urlParams.has('pattern')) {
+            state.pattern = urlParams.get('pattern');
+        }
+        if (urlParams.has('access')) {
+            state.access = urlParams.get('access');
+            if (dom.accessFilter) dom.accessFilter.value = state.access;
+        }
+
         await loadTopics();
+        await loadPatterns(state.topic);
         await loadProblems();
         initRecentlyViewed();
         initSearchSuggestions();
+        updateHeroStats();
+
+        if (urlParams.has('upgrade') || urlParams.has('modal')) {
+            setTimeout(function () {
+                openSubscriptionModal({
+                    id: 'alien-dictionary',
+                    title: 'Alien Dictionary',
+                    difficulty: 'Hard',
+                    topic: 'Graphs',
+                    pattern: 'Topological Sort'
+                });
+            }, 100);
+        }
     }
 
     /**
@@ -44,8 +83,24 @@
             // Filters & Sort
             difficultyFilter: document.getElementById('difficultyFilter'),
             topicFilter: document.getElementById('topicFilter'),
+            patternFilter: document.getElementById('patternFilter'),
+            accessFilter: document.getElementById('accessFilter'),
             sortBySelect: document.getElementById('sortBySelect'),
             clearFiltersBtn: document.getElementById('clearFiltersBtn'),
+            heroTotalProblems: document.getElementById('heroTotalProblems'),
+            heroFreeProblems: document.getElementById('heroFreeProblems'),
+            heroPremiumProblems: document.getElementById('heroPremiumProblems'),
+            heroTotalTopics: document.getElementById('heroTotalTopics'),
+            heroTotalPatterns: document.getElementById('heroTotalPatterns'),
+
+            // Subscription Modal
+            subModal: document.getElementById('subscriptionModalOverlay'),
+            closeSubModalBtn: document.getElementById('btnCloseSubModal'),
+            subModalPreviewTitle: document.getElementById('subModalPreviewTitle'),
+            subModalPreviewDiff: document.getElementById('subModalPreviewDiff'),
+            subModalPreviewTopic: document.getElementById('subModalPreviewTopic'),
+            btnSelectMonthly: document.getElementById('btnSelectMonthly'),
+            btnSelectAnnual: document.getElementById('btnSelectAnnual'),
 
             // Summary & Chips
             resultsCountText: document.getElementById('resultsCountText'),
@@ -87,14 +142,67 @@
                         const opt = document.createElement('option');
                         opt.value = topic;
                         opt.textContent = topic;
+                        if (topic === state.topic) opt.selected = true;
                         dom.topicFilter.appendChild(opt);
                     });
+                    if (state.topic !== 'All') dom.topicFilter.value = state.topic;
                 }
             }
         } catch (err) {
             console.error('[CodeArena Catalogue] Failed to load topics:', err);
         }
     }
+
+    /**
+     * Populates algorithmic patterns dynamically based on selected topic.
+     */
+    async function loadPatterns(selectedTopic) {
+        if (!dom.patternFilter) return;
+
+        try {
+            if (window.CodeArenaAPI && window.CodeArenaAPI.problemService && window.CodeArenaAPI.problemService.getPatterns) {
+                const res = await window.CodeArenaAPI.problemService.getPatterns(selectedTopic || 'All');
+                if (res.success && Array.isArray(res.data)) {
+                    dom.patternFilter.innerHTML = '<option value="All">All Patterns</option>';
+                    res.data.forEach(function (pattern) {
+                        const opt = document.createElement('option');
+                        opt.value = pattern;
+                        opt.textContent = pattern;
+                        if (pattern === state.pattern) opt.selected = true;
+                        dom.patternFilter.appendChild(opt);
+                    });
+                    // If current state pattern is not available in new list, reset to All
+                    if (state.pattern !== 'All' && !res.data.includes(state.pattern)) {
+                        state.pattern = 'All';
+                        dom.patternFilter.value = 'All';
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('[CodeArena Catalogue] Failed to load patterns:', err);
+        }
+    }
+
+    /**
+     * Updates hero header statistic counters dynamically from canonical data.
+     */
+    async function updateHeroStats() {
+        try {
+            if (window.CodeArenaAPI && window.CodeArenaAPI.problemService && window.CodeArenaAPI.problemService.getStats) {
+                const sRes = await window.CodeArenaAPI.problemService.getStats();
+                if (sRes.success && sRes.data) {
+                    const st = sRes.data;
+                    if (dom.heroTotalProblems) dom.heroTotalProblems.textContent = String(st.totalProblems || 200);
+                    if (dom.heroFreeProblems) dom.heroFreeProblems.textContent = String(st.freeProblems || 150);
+                    if (dom.heroPremiumProblems) dom.heroPremiumProblems.textContent = String(st.premiumProblems || 50);
+                    if (dom.heroTotalTopics) dom.heroTotalTopics.textContent = String(st.topicsCount || 12);
+                    if (dom.heroTotalPatterns) dom.heroTotalPatterns.textContent = String(st.patternsCount || 63);
+                    return;
+                }
+            }
+        } catch (err) {}
+    }
+
 
     /**
      * Binds UI events for search, filters, sorting, and pagination.
@@ -140,12 +248,58 @@
             });
         }
 
-        // Topic Filter
+        // Topic Filter (dynamically reloads pattern options)
         if (dom.topicFilter) {
-            dom.topicFilter.addEventListener('change', function () {
+            dom.topicFilter.addEventListener('change', async function () {
                 state.topic = dom.topicFilter.value;
+                state.pattern = 'All';
+                state.page = 1;
+                await loadPatterns(state.topic);
+                loadProblems();
+            });
+        }
+
+        // Pattern Filter
+        if (dom.patternFilter) {
+            dom.patternFilter.addEventListener('change', function () {
+                state.pattern = dom.patternFilter.value;
                 state.page = 1;
                 loadProblems();
+            });
+        }
+
+        // Access Filter (All, Free, Premium)
+        if (dom.accessFilter) {
+            dom.accessFilter.addEventListener('change', function () {
+                state.access = dom.accessFilter.value;
+                state.page = 1;
+                loadProblems();
+            });
+        }
+
+        // Subscription Modal actions
+        if (dom.closeSubModalBtn) {
+            dom.closeSubModalBtn.addEventListener('click', closeSubscriptionModal);
+        }
+        if (dom.subModal) {
+            dom.subModal.addEventListener('click', function (e) {
+                if (e.target === dom.subModal) closeSubscriptionModal();
+            });
+        }
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && dom.subModal && dom.subModal.style.display === 'flex') {
+                closeSubscriptionModal();
+            }
+        });
+
+        if (dom.btnSelectMonthly) {
+            dom.btnSelectMonthly.addEventListener('click', function () {
+                activatePlanAndRefresh('monthly');
+            });
+        }
+        if (dom.btnSelectAnnual) {
+            dom.btnSelectAnnual.addEventListener('click', function () {
+                activatePlanAndRefresh('annual');
             });
         }
 
@@ -182,6 +336,8 @@
             if (state.search) params.search = state.search;
             if (state.difficulty !== 'All') params.difficulty = state.difficulty;
             if (state.topic !== 'All') params.topic = state.topic;
+            if (state.pattern !== 'All') params.pattern = state.pattern;
+            if (state.access !== 'All') params.access = state.access;
             if (state.sortBy !== 'default') params.sortBy = state.sortBy;
 
             let response = null;
@@ -247,13 +403,37 @@
                 ? problem.provisionalStats.acceptanceRate
                 : '—';
 
+            const isPro = Boolean(problem.isPremium);
+            const userIsPro = Boolean(
+                window.CodeArenaAPI &&
+                window.CodeArenaAPI.subscriptionService &&
+                window.CodeArenaAPI.subscriptionService.isPremium()
+            );
+            const isLocked = isPro && !userIsPro;
+
+            const accessBadgeHtml = isPro
+                ? `<span class="badge-pro" title="CodeArena Pro Challenge">PRO</span>`
+                : `<span class="badge-free" title="Free Community Challenge">FREE</span>`;
+
+            const lockIconHtml = isLocked
+                ? `<span class="pro-lock-icon" title="CodeArena Pro Subscription Required" aria-label="Locked">🔒</span>`
+                : '';
+
+            const solveLabel = isLocked ? '🔒 Unlock Pro' : 'Solve →';
+            const solveTitle = isLocked ? `Unlock Pro Challenge: ${escapeHtml(problem.title)}` : `Solve ${escapeHtml(problem.title)}`;
+
             tr.innerHTML = `
                 <td class="col-num">${rowNumber}</td>
                 <td class="col-title">
                     <div class="problem-title-cell">
-                        <a href="problem.html?id=${encodeURIComponent(problem.id)}" class="problem-link-title" title="Open ${escapeHtml(problem.title)}">
-                            <span>${escapeHtml(problem.title)}</span>
-                        </a>${bookmarkIconHtml}
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            ${lockIconHtml}
+                            <a href="problem.html?id=${encodeURIComponent(problem.id)}" class="problem-link-title ${isLocked ? 'link-locked' : ''}" data-id="${escapeHtml(problem.id)}" title="${solveTitle}">
+                                <span>${escapeHtml(problem.title)}</span>
+                            </a>
+                            ${accessBadgeHtml}
+                            ${bookmarkIconHtml}
+                        </div>
                         <p class="problem-snippet-text">${escapeHtml(problem.snippet || '')}</p>
                     </div>
                 </td>
@@ -270,15 +450,86 @@
                     </div>
                 </td>
                 <td class="col-action">
-                    <a href="problem.html?id=${encodeURIComponent(problem.id)}" class="btn-solve-problem" title="Solve ${escapeHtml(problem.title)}">
-                        <span>Solve</span>
-                        <span aria-hidden="true">→</span>
-                    </a>
+                    <button type="button" class="btn-solve-problem ${isLocked ? 'btn-solve-locked' : ''}" data-id="${escapeHtml(problem.id)}" title="${solveTitle}">
+                        <span>${solveLabel}</span>
+                    </button>
                 </td>
             `;
 
+            // Attach click interceptors for locked problems
+            const solveBtn = tr.querySelector('.btn-solve-problem');
+            const linkTitle = tr.querySelector('.problem-link-title');
+
+            function handleProblemClick(e) {
+                if (isLocked) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openSubscriptionModal(problem);
+                } else {
+                    window.location.href = `problem.html?id=${encodeURIComponent(problem.id)}`;
+                }
+            }
+
+            if (solveBtn) solveBtn.addEventListener('click', handleProblemClick);
+            if (linkTitle) linkTitle.addEventListener('click', handleProblemClick);
+
             dom.tableBody.appendChild(tr);
         });
+    }
+
+    let pendingModalProblem = null;
+
+    /**
+     * Opens the subscription upgrade modal for locked premium challenges.
+     */
+    function openSubscriptionModal(problem) {
+        pendingModalProblem = problem || null;
+        if (problem) {
+            if (dom.subModalPreviewTitle) dom.subModalPreviewTitle.textContent = problem.title || 'Premium Challenge';
+            if (dom.subModalPreviewDiff) {
+                dom.subModalPreviewDiff.textContent = problem.difficulty || 'Hard';
+                dom.subModalPreviewDiff.className = `diff-badge ${getDifficultyClass(problem.difficulty)}`;
+            }
+            if (dom.subModalPreviewTopic) dom.subModalPreviewTopic.textContent = `${problem.topic || 'Advanced DSA'}${problem.pattern ? ' • ' + problem.pattern : ''}`;
+        }
+        if (dom.subModal) {
+            dom.subModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    /**
+     * Closes the subscription upgrade modal.
+     */
+    function closeSubscriptionModal() {
+        if (dom.subModal) {
+            dom.subModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        pendingModalProblem = null;
+    }
+
+    /**
+     * Activates the selected preview membership plan and reloads the problem list.
+     */
+    function activatePlanAndRefresh(planId) {
+        if (window.CodeArenaAPI && window.CodeArenaAPI.subscriptionService) {
+            window.CodeArenaAPI.subscriptionService.upgradePlan(planId);
+            if (window.CodeArenaAPI.authService && !window.CodeArenaAPI.authService.isAuthenticated()) {
+                window.CodeArenaAPI.authService.demoLogin(planId);
+            }
+            if (window.CodeArenaToast && typeof window.CodeArenaToast.success === 'function') {
+                window.CodeArenaToast.success(`Activated ${planId === 'annual' ? 'Pro Annual ($199/yr)' : 'Pro Monthly ($5/mo)'} preview membership!`);
+            }
+            const targetProb = pendingModalProblem;
+            closeSubscriptionModal();
+            loadProblems();
+            if (targetProb) {
+                setTimeout(function () {
+                    window.location.href = `problem.html?id=${encodeURIComponent(targetProb.id || targetProb.slug)}`;
+                }, 350);
+            }
+        }
     }
 
     /**
@@ -347,9 +598,20 @@
         if (state.topic !== 'All') {
             activeFilters.push({
                 label: `Topic: ${state.topic}`,
-                clear: function () {
+                clear: async function () {
                     state.topic = 'All';
                     if (dom.topicFilter) dom.topicFilter.value = 'All';
+                    await loadPatterns('All');
+                }
+            });
+        }
+
+        if (state.pattern !== 'All') {
+            activeFilters.push({
+                label: `Pattern: ${state.pattern}`,
+                clear: function () {
+                    state.pattern = 'All';
+                    if (dom.patternFilter) dom.patternFilter.value = 'All';
                 }
             });
         }
@@ -418,27 +680,50 @@
         });
         dom.paginationNav.appendChild(prevBtn);
 
-        // Numeric Page Buttons
-        for (let p = 1; p <= totalPages; p++) {
-            const pageBtn = document.createElement('button');
-            pageBtn.type = 'button';
-            pageBtn.className = 'page-btn' + (p === currentPage ? ' active' : '');
-            pageBtn.textContent = String(p);
-            pageBtn.setAttribute('aria-label', `Go to page ${p}`);
-            if (p === currentPage) {
-                pageBtn.setAttribute('aria-current', 'page');
+        // Numeric Page Buttons with smart windowing for larger collections
+        const pagesToRender = [];
+        if (totalPages <= 7) {
+            for (let p = 1; p <= totalPages; p++) pagesToRender.push(p);
+        } else {
+            pagesToRender.push(1);
+            if (currentPage > 3) pagesToRender.push('...');
+            const startWindow = Math.max(2, currentPage - 1);
+            const endWindow = Math.min(totalPages - 1, currentPage + 1);
+            for (let p = startWindow; p <= endWindow; p++) {
+                if (!pagesToRender.includes(p)) pagesToRender.push(p);
             }
-            (function (pageNum) {
+            if (currentPage < totalPages - 2) pagesToRender.push('...');
+            if (!pagesToRender.includes(totalPages)) pagesToRender.push(totalPages);
+        }
+
+        pagesToRender.forEach(function (item) {
+            if (item === '...') {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'pagination-ellipsis';
+                ellipsis.textContent = '…';
+                ellipsis.style.padding = '0 6px';
+                ellipsis.style.color = 'var(--color-text-muted)';
+                dom.paginationNav.appendChild(ellipsis);
+            } else {
+                const p = item;
+                const pageBtn = document.createElement('button');
+                pageBtn.type = 'button';
+                pageBtn.className = 'page-btn' + (p === currentPage ? ' active' : '');
+                pageBtn.textContent = String(p);
+                pageBtn.setAttribute('aria-label', `Go to page ${p}`);
+                if (p === currentPage) {
+                    pageBtn.setAttribute('aria-current', 'page');
+                }
                 pageBtn.addEventListener('click', function () {
-                    if (state.page !== pageNum) {
-                        state.page = pageNum;
+                    if (state.page !== p) {
+                        state.page = p;
                         loadProblems();
                         scrollToCatalogue();
                     }
                 });
-            })(p);
-            dom.paginationNav.appendChild(pageBtn);
-        }
+                dom.paginationNav.appendChild(pageBtn);
+            }
+        });
 
         // Next Button
         const nextBtn = document.createElement('button');
@@ -466,12 +751,16 @@
         state.sortBy = 'default';
         state.page = 1;
 
+        state.pattern = 'All';
+
         if (dom.searchInput) dom.searchInput.value = '';
         if (dom.searchClearBtn) dom.searchClearBtn.style.display = 'none';
         if (dom.difficultyFilter) dom.difficultyFilter.value = 'All';
         if (dom.topicFilter) dom.topicFilter.value = 'All';
+        if (dom.patternFilter) dom.patternFilter.value = 'All';
         if (dom.sortBySelect) dom.sortBySelect.value = 'default';
 
+        loadPatterns('All');
         loadProblems();
     }
 

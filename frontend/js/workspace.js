@@ -72,6 +72,12 @@
             // Layout Containers & Panes
             problemNotFoundView: document.getElementById('problemNotFoundView'),
             notFoundMessage: document.getElementById('notFoundMessage'),
+            premiumLockView: document.getElementById('problemPremiumLockView'),
+            lockProblemTitle: document.getElementById('lockProblemTitle'),
+            lockProblemDiff: document.getElementById('lockProblemDiff'),
+            lockProblemTopic: document.getElementById('lockProblemTopic'),
+            btnLockUpgradeMonthly: document.getElementById('btnLockUpgradeMonthly'),
+            btnLockUpgradeAnnual: document.getElementById('btnLockUpgradeAnnual'),
             problemReferencePane: document.getElementById('problemReferencePane'),
             codingWorkspacePane: document.getElementById('codingWorkspacePane'),
             breadcrumbProblemTitle: document.getElementById('breadcrumbProblemTitle'),
@@ -89,11 +95,34 @@
 
             // Left Pane Tabs
             tabBtnDescription: document.getElementById('tabBtnDescription'),
+            tabBtnHints: document.getElementById('tabBtnHints'),
             tabBtnSubmissions: document.getElementById('tabBtnSubmissions'),
+            hintsProgressTag: document.getElementById('hintsProgressTag'),
             submissionsTabTag: document.getElementById('submissionsTabTag'),
             descriptionScrollContainer: document.getElementById('descriptionScrollContainer'),
+            hintsScrollView: document.getElementById('hintsScrollView'),
             submissionsScrollView: document.getElementById('submissionsScrollView'),
             submissionsListContainer: document.getElementById('submissionsListContainer'),
+            hintsUnlockedCountBadge: document.getElementById('hintsUnlockedCountBadge'),
+            btnResetHints: document.getElementById('btnResetHints'),
+            hintCard1: document.getElementById('hintCard1'),
+            hintCard2: document.getElementById('hintCard2'),
+            hintCard3: document.getElementById('hintCard3'),
+            hintStatusPill1: document.getElementById('hintStatusPill1'),
+            hintStatusPill2: document.getElementById('hintStatusPill2'),
+            hintStatusPill3: document.getElementById('hintStatusPill3'),
+            hintLockedView1: document.getElementById('hintLockedView1'),
+            hintLockedView2: document.getElementById('hintLockedView2'),
+            hintLockedView3: document.getElementById('hintLockedView3'),
+            hintUnlockedView1: document.getElementById('hintUnlockedView1'),
+            hintUnlockedView2: document.getElementById('hintUnlockedView2'),
+            hintUnlockedView3: document.getElementById('hintUnlockedView3'),
+            hintContent1: document.getElementById('hintContent1'),
+            hintContent2: document.getElementById('hintContent2'),
+            hintContent3: document.getElementById('hintContent3'),
+            btnRevealHint1: document.getElementById('btnRevealHint1'),
+            btnRevealHint2: document.getElementById('btnRevealHint2'),
+            btnRevealHint3: document.getElementById('btnRevealHint3'),
 
             // Stage 3.4.7 Starter Return Statement Elements
             starterReturnToggleWrap: document.getElementById('starterReturnToggleWrap'),
@@ -197,8 +226,40 @@
             const res = await window.CodeArenaAPI.problemService.getProblemById(cleanId);
             if (res && res.success && res.data) {
                 currentProblem = res.data;
+
+                // Check Pro Access
+                const isProProblem = Boolean(currentProblem.isPremium);
+                const userIsPro = Boolean(
+                    window.CodeArenaAPI &&
+                    window.CodeArenaAPI.subscriptionService &&
+                    window.CodeArenaAPI.subscriptionService.isPremium()
+                );
+
+                if (isProProblem && !userIsPro) {
+                    renderPremiumLock(currentProblem);
+                    return;
+                }
+
+                if (dom.premiumLockView) dom.premiumLockView.style.display = 'none';
+                if (dom.problemReferencePane) dom.problemReferencePane.style.display = 'flex';
+                if (dom.codingWorkspacePane) dom.codingWorkspacePane.style.display = 'flex';
                 renderProblemData(currentProblem);
                 updateReturnToggleUI();
+
+                // URL tab and hint deep-linking support
+                const tabParam = params.get('tab');
+                if (tabParam === 'hints') {
+                    switchLeftPaneTab('hints');
+                } else if (tabParam === 'sub' || tabParam === 'submissions') {
+                    switchLeftPaneTab('sub');
+                }
+                if (params.has('unlockedHints')) {
+                    const count = parseInt(params.get('unlockedHints'), 10);
+                    if (!isNaN(count) && count >= 0 && count <= 3) {
+                        setUnlockedHintsCount(cleanId, count);
+                        renderHints(currentProblem);
+                    }
+                }
 
                 // Draft preservation (Phase 6)
                 let initialCode = getStarterCode(currentProblem, includeDefaultReturn);
@@ -230,6 +291,50 @@
      * Renders a polished Not-Found state when an ID is missing or invalid.
      * Does NOT initialize an editor with unrelated problem code.
      */
+
+    function renderPremiumLock(problem) {
+        if (!dom.premiumLockView) return;
+        if (dom.problemNotFoundView) dom.problemNotFoundView.style.display = 'none';
+        if (dom.problemReferencePane) dom.problemReferencePane.style.display = 'none';
+        if (dom.codingWorkspacePane) dom.codingWorkspacePane.style.display = 'none';
+
+        if (dom.lockProblemTitle) dom.lockProblemTitle.textContent = problem.title || 'Pro Challenge';
+        if (dom.lockProblemDiff) {
+            dom.lockProblemDiff.textContent = problem.difficulty || 'Hard';
+            dom.lockProblemDiff.className = 'diff-badge diff-' + String(problem.difficulty || 'hard').toLowerCase();
+        }
+        if (dom.lockProblemTopic) dom.lockProblemTopic.textContent = `${problem.topic || 'DSA'} • ${problem.pattern || 'Pattern'}`;
+
+        dom.premiumLockView.style.display = 'flex';
+
+        function handleUpgrade(planId) {
+            if (window.CodeArenaAPI && window.CodeArenaAPI.subscriptionService) {
+                window.CodeArenaAPI.subscriptionService.upgradePlan(planId);
+                if (window.CodeArenaAPI.authService && !window.CodeArenaAPI.authService.isAuthenticated()) {
+                    window.CodeArenaAPI.authService.demoLogin(planId);
+                }
+                if (window.CodeArenaToast) {
+                    window.CodeArenaToast.success(`Activated ${planId === 'annual' ? 'Pro Annual ($199/yr)' : 'Pro Monthly ($5/mo)'} preview membership! Challenge unlocked.`);
+                }
+                dom.premiumLockView.style.display = 'none';
+                if (dom.problemReferencePane) dom.problemReferencePane.style.display = 'flex';
+                if (dom.codingWorkspacePane) dom.codingWorkspacePane.style.display = 'flex';
+                renderProblemData(problem);
+                updateRecentlyViewed(problem);
+                if (codeEditor && typeof codeEditor.refresh === 'function') {
+                    setTimeout(() => codeEditor.refresh(), 100);
+                }
+            }
+        }
+
+        if (dom.btnLockUpgradeMonthly) {
+            dom.btnLockUpgradeMonthly.onclick = () => handleUpgrade('monthly');
+        }
+        if (dom.btnLockUpgradeAnnual) {
+            dom.btnLockUpgradeAnnual.onclick = () => handleUpgrade('annual');
+        }
+    }
+
     function renderNotFound(problemId) {
         currentProblem = null;
         document.title = 'Problem Not Found — CodeArena Workspace';
@@ -259,6 +364,7 @@
     function renderProblemData(p) {
         // Document & Breadcrumb
         document.title = `${p.title} — CodeArena Workspace`;
+        renderHints(p);
         if (dom.breadcrumbProblemTitle) dom.breadcrumbProblemTitle.textContent = p.title;
 
         // Headline & Badges
@@ -1239,26 +1345,171 @@
     /**
      * Binds global events that should exist even if no problem is loaded (e.g. modals, tabs).
      */
-    function bindGlobalEvents() {
-        // Left Pane Tabs (Description vs Submissions)
-        if (dom.tabBtnDescription && dom.tabBtnSubmissions) {
-            dom.tabBtnDescription.addEventListener('click', function () {
-                dom.tabBtnDescription.classList.add('active');
-                dom.tabBtnSubmissions.classList.remove('active');
-                if (dom.descriptionScrollContainer) dom.descriptionScrollContainer.style.display = 'flex';
-                if (dom.submissionsScrollView) dom.submissionsScrollView.style.display = 'none';
-            });
 
-            dom.tabBtnSubmissions.addEventListener('click', function () {
-                dom.tabBtnSubmissions.classList.add('active');
-                dom.tabBtnDescription.classList.remove('active');
-                if (dom.descriptionScrollContainer) dom.descriptionScrollContainer.style.display = 'none';
-                if (dom.submissionsScrollView) dom.submissionsScrollView.style.display = 'flex';
-                if (currentProblem) {
-                    loadSubmissions(currentProblem.id);
-                }
-            });
+    /* ==========================================================================
+       Feature 2: Progressive Hints Controller
+       ========================================================================== */
+
+    function switchLeftPaneTab(tab) {
+        if (!dom.tabBtnDescription || !dom.tabBtnHints || !dom.tabBtnSubmissions) return;
+
+        dom.tabBtnDescription.classList.toggle('active', tab === 'desc');
+        dom.tabBtnDescription.setAttribute('aria-selected', tab === 'desc' ? 'true' : 'false');
+
+        dom.tabBtnHints.classList.toggle('active', tab === 'hints');
+        dom.tabBtnHints.setAttribute('aria-selected', tab === 'hints' ? 'true' : 'false');
+
+        dom.tabBtnSubmissions.classList.toggle('active', tab === 'sub');
+        dom.tabBtnSubmissions.setAttribute('aria-selected', tab === 'sub' ? 'true' : 'false');
+
+        if (dom.descriptionScrollContainer) {
+            dom.descriptionScrollContainer.style.display = (tab === 'desc') ? 'flex' : 'none';
         }
+        if (dom.hintsScrollView) {
+            dom.hintsScrollView.style.display = (tab === 'hints') ? 'flex' : 'none';
+        }
+        if (dom.submissionsScrollView) {
+            dom.submissionsScrollView.style.display = (tab === 'sub') ? 'flex' : 'none';
+        }
+
+        if (tab === 'sub' && currentProblem) {
+            loadSubmissions(currentProblem.id);
+        }
+    }
+
+    function getHintsStorageKey(problemId) {
+        return 'codearena_hints_unlocked_' + (problemId || 'unknown');
+    }
+
+    function getUnlockedHintsCount(problemId) {
+        try {
+            if (typeof localStorage !== 'undefined') {
+                const val = parseInt(localStorage.getItem(getHintsStorageKey(problemId)), 10);
+                if (!isNaN(val) && val >= 0 && val <= 3) return val;
+            }
+        } catch (e) {}
+        return 0;
+    }
+
+    function setUnlockedHintsCount(problemId, count) {
+        try {
+            if (typeof localStorage !== 'undefined') {
+                localStorage.setItem(getHintsStorageKey(problemId), String(count));
+            }
+        } catch (e) {}
+    }
+
+    function renderHints(problem) {
+        if (!problem) return;
+        const hints = Array.isArray(problem.hints) && problem.hints.length >= 3
+            ? problem.hints
+            : [
+                "Consider the fundamental invariants and constraints of this problem.",
+                "Choose the appropriate data structure to optimize the core operation.",
+                "Implement your solution iteratively or recursively, handling edge inputs."
+            ];
+
+        const unlockedCount = getUnlockedHintsCount(problem.id);
+
+        if (dom.hintsProgressTag) {
+            dom.hintsProgressTag.textContent = `${unlockedCount}/3`;
+        }
+        if (dom.hintsUnlockedCountBadge) {
+            dom.hintsUnlockedCountBadge.textContent = `${unlockedCount} of 3 Unlocked`;
+        }
+
+        renderSingleHint(1, hints[0], unlockedCount >= 1, true);
+        renderSingleHint(2, hints[1], unlockedCount >= 2, unlockedCount >= 1);
+        renderSingleHint(3, hints[2], unlockedCount >= 3, unlockedCount >= 2);
+    }
+
+    function renderSingleHint(idx, text, isUnlocked, isAvailable) {
+        const card = dom['hintCard' + idx];
+        const statusPill = dom['hintStatusPill' + idx];
+        const lockedView = dom['hintLockedView' + idx];
+        const unlockedView = dom['hintUnlockedView' + idx];
+        const content = dom['hintContent' + idx];
+        const btn = dom['btnRevealHint' + idx];
+
+        if (!card || !statusPill || !lockedView || !unlockedView || !content || !btn) return;
+
+        if (isUnlocked) {
+            card.classList.add('unlocked');
+            card.classList.remove('locked', 'available');
+            lockedView.style.display = 'none';
+            unlockedView.style.display = 'block';
+            content.innerHTML = sanitizeInlineHtml(formatHintText(text));
+            statusPill.textContent = 'Revealed';
+            statusPill.className = 'hint-status-pill status-revealed';
+        } else {
+            card.classList.remove('unlocked');
+            card.classList.add('locked');
+            lockedView.style.display = 'flex';
+            unlockedView.style.display = 'none';
+
+            if (isAvailable) {
+                card.classList.add('available');
+                btn.disabled = false;
+                btn.innerHTML = `<span>Reveal Hint ${idx}</span> <span aria-hidden="true">💡</span>`;
+                statusPill.textContent = 'Available';
+                statusPill.className = 'hint-status-pill';
+            } else {
+                card.classList.remove('available');
+                btn.disabled = true;
+                btn.innerHTML = `<span class="lock-icon" aria-hidden="true">🔒</span> <span>Reveal Hint ${idx}</span>`;
+                statusPill.textContent = 'Locked';
+                statusPill.className = 'hint-status-pill status-locked';
+            }
+        }
+    }
+
+    function formatHintText(txt) {
+        if (!txt) return '';
+        return String(txt).replace(/`([^`]+)`/g, '<code class="spec-inline-code">$1</code>');
+    }
+
+    function unlockHint(step) {
+        if (!currentProblem) return;
+        const currentCount = getUnlockedHintsCount(currentProblem.id);
+        if (step > currentCount) {
+            setUnlockedHintsCount(currentProblem.id, step);
+            renderHints(currentProblem);
+            if (typeof showToast === 'function') {
+                showToast(`Hint ${step} unlocked!`);
+            }
+        }
+    }
+
+    function resetProblemHints() {
+        if (!currentProblem) return;
+        try {
+            if (typeof localStorage !== 'undefined') {
+                localStorage.removeItem(getHintsStorageKey(currentProblem.id));
+            }
+        } catch (e) {}
+        renderHints(currentProblem);
+        if (typeof showToast === 'function') {
+            showToast('All hints reset to locked state.');
+        }
+    }
+
+    function bindGlobalEvents() {
+        // Left Pane Tabs (Description vs Hints vs Submissions)
+        if (dom.tabBtnDescription) {
+            dom.tabBtnDescription.addEventListener('click', () => switchLeftPaneTab('desc'));
+        }
+        if (dom.tabBtnHints) {
+            dom.tabBtnHints.addEventListener('click', () => switchLeftPaneTab('hints'));
+        }
+        if (dom.tabBtnSubmissions) {
+            dom.tabBtnSubmissions.addEventListener('click', () => switchLeftPaneTab('sub'));
+        }
+
+        // Hints Action Controls
+        if (dom.btnRevealHint1) dom.btnRevealHint1.addEventListener('click', () => unlockHint(1));
+        if (dom.btnRevealHint2) dom.btnRevealHint2.addEventListener('click', () => unlockHint(2));
+        if (dom.btnRevealHint3) dom.btnRevealHint3.addEventListener('click', () => unlockHint(3));
+        if (dom.btnResetHints) dom.btnResetHints.addEventListener('click', resetProblemHints);
 
         // Test Console Tabs (Test Cases vs Test Results vs Diagnostics)
         if (dom.tabBtnTestCases) dom.tabBtnTestCases.addEventListener('click', () => switchConsoleTab('cases'));

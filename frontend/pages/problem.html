@@ -64,12 +64,69 @@
                 </svg>
                 <span>Dashboard</span>
             </a>
-            <button class="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle dark/light theme">☀</button>
+            <button class="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme"><svg class="theme-icon theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg></button>
         </div>
     </header>
 
     <!-- Main Dual-Pane Workspace Canvas -->
     <main class="workspace-main">
+
+        <!-- Problem Premium Lock State (Activated when problem requires Pro and user is not Pro) -->
+        <div id="problemPremiumLockView" class="problem-not-found-container" style="display: none;">
+            <div class="problem-not-found-card" style="max-width: 720px; padding: 36px 28px;">
+                <div class="auth-gate-icon" style="background: rgba(234, 179, 8, 0.15); color: #facc15; border-color: rgba(234, 179, 8, 0.4);" aria-hidden="true">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <span class="badge-pro" style="font-size: 0.75rem;">⭐ CodeArena Pro Challenge</span>
+                </div>
+                <h2 class="not-found-title" id="lockProblemTitle" style="font-size: 1.6rem; margin-bottom: 8px;">Challenge Title</h2>
+                <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap;">
+                    <span class="diff-badge" id="lockProblemDiff">Hard</span>
+                    <span class="topic-tag-pill" id="lockProblemTopic">Topic</span>
+                </div>
+                <p class="not-found-desc" style="max-width: 560px; margin: 0 auto 24px; line-height: 1.6;">
+                    This challenge is part of the 50 curated CodeArena Pro problems. To access the complete problem statement, Java starter code, sample test cases, and progressive hints, activate a CodeArena Pro Preview membership.
+                </p>
+
+                <!-- Pricing Plans Grid -->
+                <div class="pricing-plans-grid" style="text-align: left; margin-bottom: 24px;">
+                    <div class="pricing-card-preview" style="padding: 20px;">
+                        <h4 class="pricing-plan-name" style="font-size: 1.05rem;">Monthly Plan</h4>
+                        <div class="pricing-price-row">
+                            <span class="pricing-currency-amount" style="font-size: 1.8rem;">$5</span>
+                            <span class="pricing-period">/ month</span>
+                        </div>
+                        <div class="pricing-billing-terms" style="font-size: 0.75rem; min-height: auto;">Billed monthly ($5/mo). Cancel anytime.</div>
+                        <div class="pricing-note" style="margin-bottom: 12px;">Annualized equivalent: $60/yr</div>
+                        <button type="button" class="pricing-action-btn btn-plan-select" id="btnLockUpgradeMonthly" style="height: 38px;">
+                            Activate Monthly ($5/mo)
+                        </button>
+                    </div>
+                    <div class="pricing-card-preview" style="padding: 20px;">
+                        <h4 class="pricing-plan-name" style="font-size: 1.05rem;">Annual Plan</h4>
+                        <div class="pricing-price-row">
+                            <span class="pricing-currency-amount" style="font-size: 1.8rem;">$199</span>
+                            <span class="pricing-period">/ year</span>
+                        </div>
+                        <div class="pricing-billing-terms" style="font-size: 0.75rem; min-height: auto;">Billed annually ($199/yr). Standard rate.</div>
+                        <div class="pricing-note" style="margin-bottom: 12px;">Note: Standard annual rate ($199/yr) vs monthly ($5/mo).</div>
+                        <button type="button" class="pricing-action-btn btn-plan-select" id="btnLockUpgradeAnnual" style="height: 38px;">
+                            Activate Annual ($199/yr)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="not-found-actions">
+                    <a href="problems.html" class="btn-workspace-action" style="display: inline-flex; text-decoration: none; align-items: center; gap: 8px;">
+                        <span>← Return to Problem Catalogue</span>
+                    </a>
+                </div>
+            </div>
+        </div>
 
         <!-- Problem Not Found State (Activated when ID is missing or invalid) -->
         <div id="problemNotFoundView" class="problem-not-found-container" style="display: none;">
@@ -112,6 +169,13 @@
                         <line x1="16" y1="17" x2="8" y2="17"></line>
                     </svg>
                     <span>Description</span>
+                </button>
+                <button class="pane-tab-btn" id="tabBtnHints" role="tab" aria-selected="false" data-tab="hints">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                    <span>Hints</span>
+                    <span class="pane-tab-tag" id="hintsProgressTag" style="display: inline-block;">0/3</span>
                 </button>
                 <button class="pane-tab-btn" id="tabBtnSubmissions" role="tab" aria-selected="false" data-tab="sub">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -181,6 +245,102 @@
                     </ul>
                 </div>
 
+            </div>
+
+            <!-- Hints Panel View (Progressive Hints) -->
+            <div class="problem-scroll-container hints-panel-view" id="hintsScrollView" style="display: none;" role="tabpanel" aria-labelledby="tabBtnHints">
+                <div class="hints-header-card">
+                    <div class="hints-header-top">
+                        <div class="hints-header-title-wrap">
+                            <span class="hints-header-icon" aria-hidden="true">💡</span>
+                            <div>
+                                <h2 class="hints-header-title">Progressive Hints</h2>
+                                <p class="hints-header-subtitle">Step-by-step algorithmic guidance. Reveal one hint at a time when you need direction.</p>
+                            </div>
+                        </div>
+                        <div class="hints-header-actions">
+                            <span class="hints-count-badge" id="hintsUnlockedCountBadge">0 of 3 Unlocked</span>
+                            <button type="button" class="btn-hints-reset" id="btnResetHints" title="Lock all hints for this challenge" aria-label="Reset all hints">
+                                ↺ Reset Hints
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hints-disclaimer-pill">
+                        <span class="disclaimer-dot"></span>
+                        <span>Curated algorithmic problem hints — client-side progressive disclosure preview.</span>
+                    </div>
+                </div>
+
+                <div class="hints-list-container" id="hintsCardsContainer">
+                    <!-- Hint 1 Card -->
+                    <div class="hint-card locked" id="hintCard1" data-hint-idx="1">
+                        <div class="hint-card-header">
+                            <div class="hint-card-meta">
+                                <span class="hint-step-badge">Hint 1</span>
+                                <span class="hint-step-title">Conceptual Direction</span>
+                            </div>
+                            <span class="hint-status-pill" id="hintStatusPill1">Available</span>
+                        </div>
+                        <div class="hint-card-body">
+                            <div class="hint-locked-view" id="hintLockedView1">
+                                <p class="hint-locked-prompt">Need help understanding the core idea or problem pattern?</p>
+                                <button type="button" class="btn-reveal-hint" id="btnRevealHint1" aria-controls="hintContent1">
+                                    <span>Reveal Hint 1</span>
+                                    <span aria-hidden="true">💡</span>
+                                </button>
+                            </div>
+                            <div class="hint-unlocked-view" id="hintUnlockedView1" style="display: none;">
+                                <div class="hint-text" id="hintContent1"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hint 2 Card -->
+                    <div class="hint-card locked" id="hintCard2" data-hint-idx="2">
+                        <div class="hint-card-header">
+                            <div class="hint-card-meta">
+                                <span class="hint-step-badge">Hint 2</span>
+                                <span class="hint-step-title">Algorithmic Approach &amp; Data Structure</span>
+                            </div>
+                            <span class="hint-status-pill status-locked" id="hintStatusPill2">Locked</span>
+                        </div>
+                        <div class="hint-card-body">
+                            <div class="hint-locked-view" id="hintLockedView2">
+                                <p class="hint-locked-prompt">Unlock Hint 1 first to reveal the algorithmic technique.</p>
+                                <button type="button" class="btn-reveal-hint" id="btnRevealHint2" disabled aria-controls="hintContent2">
+                                    <span class="lock-icon" aria-hidden="true">🔒</span>
+                                    <span>Reveal Hint 2</span>
+                                </button>
+                            </div>
+                            <div class="hint-unlocked-view" id="hintUnlockedView2" style="display: none;">
+                                <div class="hint-text" id="hintContent2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hint 3 Card -->
+                    <div class="hint-card locked" id="hintCard3" data-hint-idx="3">
+                        <div class="hint-card-header">
+                            <div class="hint-card-meta">
+                                <span class="hint-step-badge">Hint 3</span>
+                                <span class="hint-step-title">Implementation Details &amp; Complexity</span>
+                            </div>
+                            <span class="hint-status-pill status-locked" id="hintStatusPill3">Locked</span>
+                        </div>
+                        <div class="hint-card-body">
+                            <div class="hint-locked-view" id="hintLockedView3">
+                                <p class="hint-locked-prompt">Unlock Hint 2 first to reveal implementation guidance.</p>
+                                <button type="button" class="btn-reveal-hint" id="btnRevealHint3" disabled aria-controls="hintContent3">
+                                    <span class="lock-icon" aria-hidden="true">🔒</span>
+                                    <span>Reveal Hint 3</span>
+                                </button>
+                            </div>
+                            <div class="hint-unlocked-view" id="hintUnlockedView3" style="display: none;">
+                                <div class="hint-text" id="hintContent3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Submissions Panel View (Secondary Tab) -->

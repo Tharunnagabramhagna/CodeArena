@@ -39,6 +39,30 @@ a.btn {
   justify-content: center;
   text-decoration: none;
   gap: var(--spacing-xs);
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.hero-actions .btn,
+.hero-actions .btn *,
+.cta-actions .btn,
+.cta-actions .btn * {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.hero-actions .btn::selection,
+.hero-actions .btn *::selection,
+.cta-actions .btn::selection,
+.cta-actions .btn *::selection {
+  background: transparent;
+  color: inherit;
 }
 
 .btn-lg {
@@ -48,15 +72,49 @@ a.btn {
   border-radius: var(--radius-md);
 }
 
-.btn-primary:hover {
-  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.35);
-  transform: translateY(-2px);
+.hero-actions .btn-primary,
+.hero-actions a.btn-primary,
+.cta-actions .btn-primary,
+.cta-actions a.btn-primary {
+  color: #FFFFFF;
+  text-decoration: none;
 }
 
-.btn-secondary:hover {
+.btn-primary:hover,
+a.btn-primary:hover,
+.hero-actions a.btn-primary:hover,
+.cta-actions a.btn-primary:hover {
+  color: #FFFFFF;
+  background-color: var(--color-primary-hover);
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.35);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.btn-primary:active,
+a.btn-primary:active,
+.hero-actions a.btn-primary:active,
+.cta-actions a.btn-primary:active {
+  color: #FFFFFF;
+  transform: translateY(0);
+}
+
+.btn-primary:focus-visible,
+a.btn-primary:focus-visible,
+.hero-actions a.btn-primary:focus-visible,
+.cta-actions a.btn-primary:focus-visible {
+  outline: 2px solid var(--color-focus-ring, #818CF8);
+  outline-offset: 2px;
+  color: #FFFFFF;
+}
+
+.btn-secondary:hover,
+a.btn-secondary:hover {
+  color: var(--color-text-primary);
   border-color: var(--color-border-hover);
   box-shadow: 0 4px 14px var(--color-shadow);
   transform: translateY(-2px);
+  text-decoration: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -726,7 +784,9 @@ a.btn {
   border-color: rgba(79, 70, 229, 0.2);
 }
 
-[data-theme="light"] .btn-primary:hover {
+[data-theme="light"] .btn-primary:hover,
+[data-theme="light"] a.btn-primary:hover {
+  color: #FFFFFF;
   box-shadow: 0 4px 16px rgba(79, 70, 229, 0.25);
 }
 

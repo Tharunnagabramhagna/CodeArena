@@ -25,6 +25,7 @@
         syncThemeWithEditor();
         observeThemeChanges();
         initResizeHandler();
+        initCompilerSplitter();
     }
 
     /**
@@ -41,10 +42,14 @@
             compilerStatusText: document.getElementById('compilerStatusText'),
             cursorPositionDisplay: document.getElementById('cursorPositionDisplay'),
 
-            // Editor
+            // Editor & Splitter
             codeMirrorTarget: document.getElementById('codeMirrorTarget'),
             fallbackEditor: document.getElementById('fallbackEditor'),
             btnShortcutsHelp: document.getElementById('btnShortcutsHelp'),
+            btnResetSplit: document.getElementById('btnResetSplit'),
+            compilerSplitter: document.getElementById('compilerSplitter'),
+            compilerWorkspace: document.querySelector('.compiler-workspace'),
+            editorPane: document.querySelector('.editor-pane'),
 
             // Console Tabs & Actions
             tabBtnStdout: document.getElementById('tabBtnStdout'),
@@ -240,6 +245,145 @@
             resizeTimer = setTimeout(function () {
                 if (codeEditor) codeEditor.refresh();
             }, 100);
+        });
+    }
+
+
+    /* ==========================================================================
+       Feature 3: Adjustable Editor & Output Screen Ratio (Draggable Splitter)
+       ========================================================================== */
+
+    function applySplitRatio(percentage, persist = true) {
+        const clamped = Math.max(30, Math.min(75, percentage));
+        if (dom.compilerWorkspace) {
+            dom.compilerWorkspace.style.setProperty('--compiler-editor-width', clamped.toFixed(1) + '%');
+        }
+        if (dom.btnResetSplit) {
+            dom.btnResetSplit.textContent = `⇋ ${Math.round(clamped)}:${Math.round(100 - clamped)}`;
+        }
+        if (persist) {
+            try {
+                if (typeof localStorage !== 'undefined') {
+                    localStorage.setItem('codearena_compiler_split_ratio', clamped.toFixed(1));
+                }
+            } catch (e) {}
+        }
+        if (codeEditor) {
+            codeEditor.refresh();
+        }
+    }
+
+    function initCompilerSplitter() {
+        if (!dom.compilerSplitter || !dom.compilerWorkspace) return;
+
+        // Restore saved ratio or URL param on load
+        let initialRatio = 55;
+        try {
+            if (typeof localStorage !== 'undefined') {
+                const saved = parseFloat(localStorage.getItem('codearena_compiler_split_ratio'));
+                if (!isNaN(saved) && saved >= 30 && saved <= 75) {
+                    initialRatio = saved;
+                }
+            }
+        } catch (e) {}
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('ratio')) {
+            const r = parseFloat(urlParams.get('ratio'));
+            if (!isNaN(r) && r >= 30 && r <= 75) {
+                initialRatio = r;
+            }
+        }
+        applySplitRatio(initialRatio, false);
+
+        let isDragging = false;
+        let startX = 0;
+        let startWidthPct = 55;
+
+        // Pointer down
+        dom.compilerSplitter.addEventListener('pointerdown', function (e) {
+            if (e.button !== 0) return;
+            isDragging = true;
+            try {
+                dom.compilerSplitter.setPointerCapture(e.pointerId);
+            } catch (err) {}
+            dom.compilerSplitter.classList.add('is-dragging');
+            document.body.classList.add('is-resizing');
+            dom.compilerWorkspace.classList.add('is-resizing');
+
+            const rect = dom.compilerWorkspace.getBoundingClientRect();
+            const currentPx = dom.editorPane ? dom.editorPane.getBoundingClientRect().width : (rect.width * 0.55);
+            startWidthPct = rect.width > 0 ? (currentPx / rect.width) * 100 : 55;
+            startX = e.clientX;
+            e.preventDefault();
+        });
+
+        // Pointer move
+        dom.compilerSplitter.addEventListener('pointermove', function (e) {
+            if (!isDragging) return;
+            const rect = dom.compilerWorkspace.getBoundingClientRect();
+            if (rect.width <= 0) return;
+
+            const deltaX = e.clientX - startX;
+            const deltaPct = (deltaX / rect.width) * 100;
+            const newPct = Math.max(30, Math.min(75, startWidthPct + deltaPct));
+
+            applySplitRatio(newPct, false);
+        });
+
+        // Pointer up / cancel
+        function onPointerEnd(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            try {
+                dom.compilerSplitter.releasePointerCapture(e.pointerId);
+            } catch (err) {}
+            dom.compilerSplitter.classList.remove('is-dragging');
+            document.body.classList.remove('is-resizing');
+            dom.compilerWorkspace.classList.remove('is-resizing');
+
+            const rect = dom.compilerWorkspace.getBoundingClientRect();
+            if (rect.width > 0 && dom.editorPane) {
+                const finalPx = dom.editorPane.getBoundingClientRect().width;
+                const finalPct = Math.max(30, Math.min(75, (finalPx / rect.width) * 100));
+                applySplitRatio(finalPct, true);
+            }
+        }
+
+        dom.compilerSplitter.addEventListener('pointerup', onPointerEnd);
+        dom.compilerSplitter.addEventListener('pointercancel', onPointerEnd);
+
+        // Double click resets to 55%
+        dom.compilerSplitter.addEventListener('dblclick', function () {
+            applySplitRatio(55, true);
+            if (typeof showCompilerToast === 'function') {
+                showCompilerToast('Workspace layout reset to 55:45 ratio');
+            }
+        });
+
+        // Reset button
+        if (dom.btnResetSplit) {
+            dom.btnResetSplit.addEventListener('click', function () {
+                applySplitRatio(55, true);
+                if (typeof showCompilerToast === 'function') {
+                    showCompilerToast('Workspace layout reset to 55:45 ratio');
+                }
+            });
+        }
+
+        // Keyboard arrow navigation
+        dom.compilerSplitter.addEventListener('keydown', function (e) {
+            const currentPct = parseFloat(getComputedStyle(dom.compilerWorkspace).getPropertyValue('--compiler-editor-width')) || 55;
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                applySplitRatio(currentPct - 2, true);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                applySplitRatio(currentPct + 2, true);
+            } else if (e.key === 'Home' || e.key === 'Enter') {
+                e.preventDefault();
+                applySplitRatio(55, true);
+            }
         });
     }
 

@@ -48,19 +48,13 @@
   display: inline-flex;
   align-items: center;
   text-decoration: none;
-}
-
-.problems-brand-wrap {
-  display: inline-flex;
-  align-items: center;
-  text-decoration: none;
   flex-shrink: 0;
 }
 
 .problems-brand-wrap .brand-full-logo {
-  height: 36px;
+  height: 52px;
   width: auto;
-  max-width: 130px;
+  max-width: 200px;
   aspect-ratio: 2122 / 741;
   object-fit: contain;
   flex-shrink: 0;

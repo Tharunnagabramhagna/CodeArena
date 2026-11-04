@@ -150,30 +150,157 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Populate dynamic stats from canonical API service if available
-    try {
-        if (window.CodeArenaAPI && window.CodeArenaAPI.problemService) {
-            window.CodeArenaAPI.problemService.getProblems({ limit: 100 }).then(res => {
-                if (res && res.success && res.data && res.data.problems) {
-                    const el = document.getElementById('dashStatProblems');
-                    if (el) el.textContent = res.data.problems.length;
+    // Populate dynamic stats & upcoming activities from canonical API service
+    async function loadPlatformIntelligence() {
+        try {
+            if (window.CodeArenaAPI && window.CodeArenaAPI.problemService) {
+                // 1. Load canonical statistics without limit truncation
+                if (typeof window.CodeArenaAPI.problemService.getStats === 'function') {
+                    const sRes = await window.CodeArenaAPI.problemService.getStats();
+                    if (sRes.success && sRes.data) {
+                        const st = sRes.data;
+                        const elProb = document.getElementById('dashStatProblems');
+                        const elFree = document.getElementById('dashStatFree');
+                        const elPrem = document.getElementById('dashStatPremium');
+                        const elTopics = document.getElementById('dashStatTopics');
+                        const elPatterns = document.getElementById('dashStatPatterns');
+                        const elContests = document.getElementById('dashStatContests');
+                        if (elProb) elProb.textContent = String(st.totalProblems);
+                        if (elFree) elFree.textContent = String(st.freeProblems);
+                        if (elPrem) elPrem.textContent = String(st.premiumProblems);
+                        if (elTopics) elTopics.textContent = String(st.topicsCount);
+                        if (elPatterns) elPatterns.textContent = String(st.patternsCount);
+                        if (elContests) elContests.textContent = String(st.contestsCount);
+                    }
                 }
-            }).catch(() => {});
 
-            window.CodeArenaAPI.problemService.getTopics().then(res => {
-                if (res && res.success && res.data && res.data.topics) {
-                    const el = document.getElementById('dashStatTopics');
-                    if (el) el.textContent = res.data.topics.length;
+                // 2. Load and render upcoming activities
+                if (typeof window.CodeArenaAPI.problemService.getUpcomingActivities === 'function') {
+                    const actRes = await window.CodeArenaAPI.problemService.getUpcomingActivities();
+                    if (actRes.success && Array.isArray(actRes.data)) {
+                        renderUpcomingActivities(actRes.data);
+                    }
                 }
-            }).catch(() => {});
+            }
+        } catch (e) {
+            console.warn('[Dashboard] Error loading platform intelligence:', e);
         }
-    } catch (e) {}
+    }
+
+    function renderUpcomingActivities(activities) {
+        const grid = document.getElementById('upcomingActivitiesGrid');
+        if (!grid) return;
+
+        grid.innerHTML = activities.map(act => {
+            const catBadgeClass = act.categoryBadge ? `cat-${act.categoryBadge}` : 'cat-contest';
+            return `
+                <div class="activity-card">
+                    <div>
+                        <div class="activity-card-top">
+                            <span class="activity-category-badge ${catBadgeClass}">${escapeHtml(act.category || 'Event')}</span>
+                            <span class="activity-date-tag">${escapeHtml(act.date || '')}</span>
+                        </div>
+                        <h3 class="activity-title">${escapeHtml(act.title)}</h3>
+                        <p class="activity-desc">${escapeHtml(act.description)}</p>
+                    </div>
+                    <div class="activity-card-footer">
+                        <span class="activity-demo-tag">Sample Preview Event</span>
+                        <a href="${escapeHtml(act.actionUrl || '#')}" class="activity-action-link">
+                            ${escapeHtml(act.actionLabel || 'View Details')} &rarr;
+                        </a>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function updateAuthStateUI() {
+        const isAuth = Boolean(
+            window.CodeArenaAPI &&
+            window.CodeArenaAPI.authService &&
+            window.CodeArenaAPI.authService.isAuthenticated()
+        );
+        const userRes = (isAuth && window.CodeArenaAPI.authService.getCurrentUser)
+            ? window.CodeArenaAPI.authService.getCurrentUser()
+            : null;
+        const user = (userRes && userRes.data) || null;
+        const isPro = Boolean(
+            window.CodeArenaAPI &&
+            window.CodeArenaAPI.subscriptionService &&
+            window.CodeArenaAPI.subscriptionService.isPremium()
+        );
+
+        const guestAuthActions = document.getElementById('guestAuthActions');
+        const userProfileArea = document.getElementById('userProfileArea');
+        const userNameEl = document.getElementById('userName');
+        const userRoleEl = document.getElementById('userRole');
+        const userAvatarEl = document.getElementById('userAvatar');
+        const promoCard = document.querySelector('.sidebar-promo-card');
+
+        if (!isAuth) {
+            // Guest preview mode
+            if (guestAuthActions) guestAuthActions.style.display = 'flex';
+            if (userProfileArea) userProfileArea.style.display = 'none';
+            if (promoCard) {
+                promoCard.innerHTML = `
+                    <div class="promo-icon" aria-hidden="true">✦</div>
+                    <h4 class="promo-title">Unlock your coding potential</h4>
+                    <p class="promo-subtitle">Practice. Learn. Grow.</p>
+                    <a href="practice.html" class="btn btn-primary promo-btn">Get Started →</a>
+                `;
+            }
+        } else {
+            // Authenticated preview mode
+            if (guestAuthActions) guestAuthActions.style.display = 'none';
+            if (userProfileArea) {
+                userProfileArea.style.display = 'flex';
+                userProfileArea.classList.remove('auth-hidden');
+            }
+            if (userNameEl && user) userNameEl.textContent = user.name || 'Student';
+            if (userRoleEl) userRoleEl.textContent = isPro ? 'Pro Member' : 'Free Tier';
+            if (userAvatarEl && user) userAvatarEl.textContent = (user.name || 'U').charAt(0).toUpperCase();
+
+            if (promoCard) {
+                if (isPro) {
+                    promoCard.innerHTML = `
+                        <div class="promo-icon" style="color: #facc15;" aria-hidden="true">⭐</div>
+                        <h4 class="promo-title">CodeArena Pro Active</h4>
+                        <p class="promo-subtitle">All 200 Challenges Unlocked</p>
+                        <a href="problems.html?access=Premium" class="btn btn-primary promo-btn" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none;">Explore Pro →</a>
+                    `;
+                } else {
+                    promoCard.innerHTML = `
+                        <div class="promo-icon" style="color: #facc15;" aria-hidden="true">💎</div>
+                        <h4 class="promo-title">Upgrade to Pro</h4>
+                        <p class="promo-subtitle">50 Advanced DSA Challenges</p>
+                        <a href="problems.html" class="btn btn-primary promo-btn" id="btnSidebarUpgrade">Upgrade for $5/mo →</a>
+                    `;
+                }
+            }
+        }
+    }
+
+    loadPlatformIntelligence();
+    updateAuthStateUI();
 
     // --------------------------------------------------------------------------
     // 4. Future Authenticated User Profile Menu Toggle (Ready for Backend)
     // --------------------------------------------------------------------------
     const userProfileTrigger = document.getElementById('userProfileTrigger');
     const userProfileMenu = document.getElementById('userProfileMenu');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function () {
+            if (window.CodeArenaAPI && window.CodeArenaAPI.authService) {
+                window.CodeArenaAPI.authService.logout();
+                if (window.CodeArenaToast) {
+                    window.CodeArenaToast.info('Logged out of preview session. Guest mode restored.');
+                }
+                updateAuthStateUI();
+            }
+        });
+    }
 
     if (userProfileTrigger && userProfileMenu) {
         userProfileTrigger.addEventListener('click', function (e) {

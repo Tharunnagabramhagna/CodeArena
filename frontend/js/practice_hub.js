@@ -45,7 +45,14 @@
             difficultyTabs: document.querySelectorAll('.practice-diff-tab'),
             emptyState: document.getElementById('practiceEmptyState'),
             resultsCount: document.getElementById('practiceResultsCount'),
-            resetFiltersBtn: document.getElementById('resetPracticeFilters')
+            resetFiltersBtn: document.getElementById('resetPracticeFilters'),
+            subModal: document.getElementById('subscriptionModalOverlay'),
+            closeSubModalBtn: document.getElementById('btnCloseSubModal'),
+            subModalPreviewTitle: document.getElementById('subModalPreviewTitle'),
+            subModalPreviewDiff: document.getElementById('subModalPreviewDiff'),
+            subModalPreviewTopic: document.getElementById('subModalPreviewTopic'),
+            btnSelectMonthly: document.getElementById('btnSelectMonthly'),
+            btnSelectAnnual: document.getElementById('btnSelectAnnual')
         };
     }
 
@@ -100,18 +107,38 @@
                 filterAndRenderProblems();
             });
         }
+
+        if (dom.closeSubModalBtn) {
+            dom.closeSubModalBtn.addEventListener('click', closeSubscriptionModal);
+        }
+        if (dom.subModal) {
+            dom.subModal.addEventListener('click', function (e) {
+                if (e.target === dom.subModal) closeSubscriptionModal();
+            });
+        }
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && dom.subModal && dom.subModal.style.display === 'flex') {
+                closeSubscriptionModal();
+            }
+        });
+        if (dom.btnSelectMonthly) {
+            dom.btnSelectMonthly.addEventListener('click', () => activatePlanAndRefresh('monthly'));
+        }
+        if (dom.btnSelectAnnual) {
+            dom.btnSelectAnnual.addEventListener('click', () => activatePlanAndRefresh('annual'));
+        }
     }
 
     async function loadPracticeData() {
         try {
             if (window.CodeArenaAPI && window.CodeArenaAPI.problemService) {
-                const res = await window.CodeArenaAPI.problemService.getProblems({ limit: 100 });
+                const res = await window.CodeArenaAPI.problemService.getProblems({ limit: 250 });
                 if (res && res.success && res.data && res.data.problems) {
                     state.problems = res.data.problems;
                 }
                 const topRes = await window.CodeArenaAPI.problemService.getTopics();
-                if (topRes && topRes.success && topRes.data && topRes.data.topics) {
-                    state.topics = topRes.data.topics;
+                if (topRes && topRes.success && topRes.data) {
+                    state.topics = Array.isArray(topRes.data) ? topRes.data : ((topRes.data && topRes.data.topics) || []);
                 }
             }
         } catch (err) {
@@ -236,21 +263,95 @@
         dom.problemsContainer.style.display = 'grid';
         if (dom.emptyState) dom.emptyState.style.display = 'none';
 
-        dom.problemsContainer.innerHTML = filtered.map(p => `
-            <div class="practice-problem-card">
-                <div class="prob-card-header">
-                    <a href="problem.html?id=${encodeURIComponent(p.id || p.slug)}" class="prob-card-title">${escapeHtml(p.title)}</a>
-                    <span class="diff-badge ${getDiffClass(p.difficulty)}">${escapeHtml(p.difficulty)}</span>
+        const userIsPro = Boolean(
+            window.CodeArenaAPI &&
+            window.CodeArenaAPI.subscriptionService &&
+            window.CodeArenaAPI.subscriptionService.isPremium()
+        );
+
+        dom.problemsContainer.innerHTML = filtered.map(p => {
+            const isPro = Boolean(p.isPremium);
+            const isLocked = isPro && !userIsPro;
+            const proBadge = isPro ? '<span class="badge-pro" style="margin-left: 6px;">PRO</span>' : '<span class="badge-free" style="margin-left: 6px;">FREE</span>';
+            const lockIcon = isLocked ? '<span class="pro-lock-icon">🔒</span>' : '';
+            const actionLabel = isLocked ? '🔒 Unlock Pro' : 'Practice →';
+            const cardHref = isLocked ? '#' : `problem.html?id=${encodeURIComponent(p.id || p.slug)}`;
+
+            return `
+                <div class="practice-problem-card ${isLocked ? 'card-locked' : ''}">
+                    <div class="prob-card-header">
+                        <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                            ${lockIcon}
+                            <a href="${cardHref}" class="prob-card-title ${isLocked ? 'link-locked' : ''}" data-id="${escapeHtml(p.id || p.slug)}">${escapeHtml(p.title)}</a>
+                            ${proBadge}
+                        </div>
+                        <span class="diff-badge ${getDiffClass(p.difficulty)}">${escapeHtml(p.difficulty)}</span>
+                    </div>
+                    <div class="prob-card-desc">${renderSafeDescription(p.description || '')}</div>
+                    <div class="prob-card-footer">
+                        <span class="topic-tag">${escapeHtml(p.topic || 'General')}</span>
+                        <a href="${cardHref}" class="prob-btn-solve ${isLocked ? 'btn-solve-locked' : ''}" data-id="${escapeHtml(p.id || p.slug)}">
+                            ${actionLabel}
+                        </a>
+                    </div>
                 </div>
-                <div class="prob-card-desc">${renderSafeDescription(p.description || '')}</div>
-                <div class="prob-card-footer">
-                    <span class="topic-tag">${escapeHtml(p.topic || 'General')}</span>
-                    <a href="problem.html?id=${encodeURIComponent(p.id || p.slug)}" class="prob-btn-solve">
-                        Practice <span aria-hidden="true">→</span>
-                    </a>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
+
+        // Intercept locked card clicks
+        dom.problemsContainer.querySelectorAll('.btn-solve-locked, .link-locked').forEach(el => {
+            el.addEventListener('click', function (e) {
+                e.preventDefault();
+                const pid = this.getAttribute('data-id');
+                const prob = state.problems.find(x => (x.id === pid || x.slug === pid));
+                if (prob) openSubscriptionModal(prob);
+            });
+        });
+    }
+
+
+    let pendingModalProblem = null;
+
+    function openSubscriptionModal(problem) {
+        pendingModalProblem = problem;
+        if (dom.subModalPreviewTitle) dom.subModalPreviewTitle.textContent = problem.title || 'Advanced Challenge';
+        if (dom.subModalPreviewDiff) {
+            dom.subModalPreviewDiff.textContent = problem.difficulty || 'Hard';
+            dom.subModalPreviewDiff.className = 'diff-badge ' + getDiffClass(problem.difficulty);
+        }
+        if (dom.subModalPreviewTopic) dom.subModalPreviewTopic.textContent = `${problem.topic || 'DSA'} • ${problem.pattern || 'Pattern'}`;
+        if (dom.subModal) {
+            dom.subModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeSubscriptionModal() {
+        if (dom.subModal) {
+            dom.subModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        pendingModalProblem = null;
+    }
+
+    function activatePlanAndRefresh(planId) {
+        if (window.CodeArenaAPI && window.CodeArenaAPI.subscriptionService) {
+            window.CodeArenaAPI.subscriptionService.upgradePlan(planId);
+            if (window.CodeArenaAPI.authService && !window.CodeArenaAPI.authService.isAuthenticated()) {
+                window.CodeArenaAPI.authService.demoLogin(planId);
+            }
+            if (window.CodeArenaToast) {
+                window.CodeArenaToast.success(`Activated ${planId === 'annual' ? 'Pro Annual ($199/yr)' : 'Pro Monthly ($5/mo)'} preview membership!`);
+            }
+            const targetProb = pendingModalProblem;
+            closeSubscriptionModal();
+            filterAndRenderProblems();
+            if (targetProb) {
+                setTimeout(function () {
+                    window.location.href = `problem.html?id=${encodeURIComponent(targetProb.id || targetProb.slug)}`;
+                }, 350);
+            }
+        }
     }
 
     function getDiffClass(diff) {
