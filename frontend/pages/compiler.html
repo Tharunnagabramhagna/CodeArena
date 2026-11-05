@@ -12,6 +12,7 @@
 
     <!-- CodeArena Design System & Workspace Styles -->
     <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/auth_modal.css">
     <link rel="stylesheet" href="../css/compiler.css">
 
     <!-- Immediate Theme Application Script (Zero Flash) -->
@@ -121,24 +122,112 @@
     <!-- Dual-Pane Workspace Canvas -->
     <main class="compiler-workspace">
 
+        <!-- Mobile View Switcher (Visible on viewports <= 960px) -->
+        <div class="compiler-mobile-view-nav" id="compilerMobileViewNav" role="tablist" aria-label="Mobile workspace view selection">
+            <button type="button" class="mobile-nav-btn active" id="btnMobileNavEditor" role="tab" aria-selected="true" data-target="editor">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+                <span>Java Editor</span>
+            </button>
+            <button type="button" class="mobile-nav-btn" id="btnMobileNavConsole" role="tab" aria-selected="false" data-target="console">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="4 17 10 11 4 5"></polyline>
+                    <line x1="12" y1="19" x2="20" y2="19"></line>
+                </svg>
+                <span>Execution Terminal</span>
+            </button>
+        </div>
+
         <!-- Left: Code Editor Pane -->
-        <section class="editor-pane" aria-label="Code Editor">
+        <section class="editor-pane" id="compilerEditorPane" aria-label="Code Editor">
             <div class="editor-pane-header">
-                <div class="editor-header-controls">
+                <div class="editor-header-controls editor-header-left">
                     <span class="pane-title">Source Code</span>
                     <span class="pane-subtitle">Main.java · Java Mode</span>
                 </div>
-                <div class="editor-header-controls">
-                    <button id="btnEditorFontDec" class="compiler-header-btn" type="button" title="Decrease editor font size" aria-label="Decrease font size">A-</button>
-                    <span id="compilerFontSizeDisplay" style="font-size: 0.76rem; color: var(--color-text-muted); min-width: 28px; text-align: center;">14px</span>
-                    <button id="btnEditorFontInc" class="compiler-header-btn" type="button" title="Increase editor font size" aria-label="Increase font size">A+</button>
-                    <button id="btnCompilerCopyCode" class="compiler-header-btn" type="button" title="Copy code to clipboard">Copy</button>
-                    <button id="btnShortcutsHelp" class="compiler-header-btn" type="button" title="View Keyboard Shortcuts">
-                        ⌨ Shortcuts
+                <div class="editor-header-controls editor-header-right">
+                    <div class="editor-font-group" role="group" aria-label="Editor Font Size">
+                        <button id="btnEditorFontDec" class="compiler-header-btn btn-font-step" type="button" title="Decrease font size (A-)" aria-label="Decrease font size">A-</button>
+                        <span id="compilerFontSizeDisplay" class="font-size-display" aria-live="polite">14px</span>
+                        <button id="btnEditorFontInc" class="compiler-header-btn btn-font-step" type="button" title="Increase font size (A+)" aria-label="Increase font size">A+</button>
+                    </div>
+
+                    <button id="btnCompilerCopyCode" class="compiler-header-btn" type="button" title="Copy code to clipboard">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span>Copy</span>
                     </button>
-                    <button id="btnResetSplit" class="compiler-header-btn" type="button" title="Reset split ratio to default (55% editor / 45% output)">
-                        ⇋ 55:45
+
+                    <button id="btnShortcutsHelp" class="compiler-header-btn" type="button" title="View Keyboard Shortcuts" aria-label="Keyboard Shortcuts">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                            <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"></path>
+                        </svg>
+                        <span>Shortcuts</span>
                     </button>
+
+                    <!-- Professional Layout Preset Controls -->
+                    <div class="compiler-layout-controls" id="compilerLayoutControls" role="toolbar" aria-label="Screen split ratio presets and controls">
+                        <div class="layout-presets-group" role="group" aria-label="Layout ratio presets">
+                            <button type="button" class="btn-layout-preset active" id="btnPreset5050" data-ratio="50" title="50:50 — Equal split between editor and terminal" aria-label="50:50 equal split">
+                                <svg class="preset-svg" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                                    <rect x="1.5" y="2" width="13" height="12" rx="2"></rect>
+                                    <line x1="8" y1="2" x2="8" y2="14"></line>
+                                </svg>
+                                <span>50:50</span>
+                            </button>
+                            <button type="button" class="btn-layout-preset" id="btnPreset6040" data-ratio="60" title="60:40 — More space for editor" aria-label="60:40 ratio (Editor favored)">
+                                <svg class="preset-svg" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                                    <rect x="1.5" y="2" width="13" height="12" rx="2"></rect>
+                                    <line x1="9.8" y1="2" x2="9.8" y2="14"></line>
+                                </svg>
+                                <span>60:40</span>
+                            </button>
+                            <button type="button" class="btn-layout-preset" id="btnPreset7030" data-ratio="70" title="70:30 — Editor-focused layout" aria-label="70:30 ratio (Editor focused)">
+                                <svg class="preset-svg" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                                    <rect x="1.5" y="2" width="13" height="12" rx="2"></rect>
+                                    <line x1="11.5" y1="2" x2="11.5" y2="14"></line>
+                                </svg>
+                                <span>70:30</span>
+                            </button>
+                            <button type="button" class="btn-layout-preset" id="btnPreset4060" data-ratio="40" title="40:60 — Output-focused layout" aria-label="40:60 ratio (Output focused)">
+                                <svg class="preset-svg" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                                    <rect x="1.5" y="2" width="13" height="12" rx="2"></rect>
+                                    <line x1="6.2" y1="2" x2="6.2" y2="14"></line>
+                                </svg>
+                                <span>40:60</span>
+                            </button>
+                        </div>
+
+                        <div class="layout-controls-divider" aria-hidden="true"></div>
+
+                        <div class="layout-actions-group" role="group" aria-label="Layout expansion actions">
+                            <button type="button" class="btn-layout-action" id="btnExpandEditor" data-action="expand-editor" title="Expand Editor (85:15)" aria-label="Expand editor">
+                                <svg class="preset-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                                    <line x1="17" y1="3" x2="17" y2="21"></line>
+                                    <polyline points="9 8 13 12 9 16"></polyline>
+                                </svg>
+                            </button>
+                            <button type="button" class="btn-layout-action" id="btnExpandOutput" data-action="expand-output" title="Expand Output (15:85)" aria-label="Expand output terminal">
+                                <svg class="preset-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                                    <line x1="7" y1="3" x2="7" y2="21"></line>
+                                    <polyline points="15 8 11 12 15 16"></polyline>
+                                </svg>
+                            </button>
+                            <button type="button" class="btn-layout-action" id="btnResetSplit" data-action="restore-default" title="Restore Default Layout (50:50)" aria-label="Restore default 50:50 layout">
+                                <svg class="preset-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                                    <polyline points="3 3 3 8 8 8"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -172,12 +261,13 @@
         </section>
 
         <!-- Resizable Vertical Splitter (Editor vs Console) -->
-        <div class="compiler-splitter" id="compilerSplitter" role="separator" aria-orientation="vertical" aria-label="Resize editor and output panels" tabindex="0" title="Drag to adjust split ratio between editor and output (Double-click to reset, or use Left/Right arrow keys)">
+        <div class="compiler-splitter" id="compilerSplitter" role="separator" aria-orientation="vertical" aria-label="Resize editor and output panels" aria-valuenow="50" aria-valuemin="15" aria-valuemax="85" aria-valuetext="50% editor, 50% console" tabindex="0" title="Drag to adjust split ratio between editor and output (Double-click to reset, or use Left/Right arrow keys)">
             <div class="compiler-splitter-handle" aria-hidden="true"></div>
+            <div class="compiler-splitter-badge" id="compilerSplitterBadge" aria-hidden="true">50:50</div>
         </div>
 
         <!-- Right: Console Pane -->
-        <section class="console-pane" aria-label="Execution Console">
+        <section class="console-pane" id="compilerConsolePane" aria-label="Execution Console">
             <div class="console-pane-header">
                 <!-- Tabs -->
                 <div class="console-tabs" role="tablist">
@@ -336,5 +426,6 @@
     <!-- CodeArena Services & Compiler Controller -->
     <script src="../js/api.js"></script>
     <script src="../js/compiler.js"></script>
+    <script src="../js/auth_modal.js" defer></script>
 </body>
 </html>

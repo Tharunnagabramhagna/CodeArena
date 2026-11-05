@@ -12,6 +12,7 @@
 
     <!-- CodeArena Design System & Workspace Styles -->
     <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/auth_modal.css">
     <link rel="stylesheet" href="../css/compiler.css">
     <link rel="stylesheet" href="../css/workspace.css">
 
@@ -193,56 +194,120 @@
                 <!-- Problem Title & Meta Header -->
                 <div class="problem-header-block">
                     <div class="problem-headline-row" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                        <h1 class="problem-title-text" id="problemTitleText">Loading problem...</h1>
-                        <button id="btnBookmarkProblem" class="workspace-header-btn" type="button" title="Bookmark this challenge" aria-label="Bookmark this challenge" style="height: 28px; font-size: 0.78rem; flex-shrink: 0;">
-                            <span class="bookmark-icon" aria-hidden="true">🔖</span>
-                            <span id="bookmarkBtnText">Bookmark</span>
-                        </button>
+                        <div class="problem-title-wrapper" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <span class="problem-id-badge" id="problemIdBadge">#--</span>
+                            <h1 class="problem-title-text" id="problemTitleText">Loading problem...</h1>
+                        </div>
+                        <div class="problem-header-right-actions" style="display: flex; align-items: center; gap: 8px;">
+                            <button id="btnBookmarkProblem" class="workspace-header-btn" type="button" title="Bookmark this challenge" aria-label="Bookmark this challenge" style="height: 28px; font-size: 0.78rem; flex-shrink: 0;">
+                                <span class="bookmark-icon" aria-hidden="true">🔖</span>
+                                <span id="bookmarkBtnText">Bookmark</span>
+                            </button>
+                            <button id="btnToggleCollapseLeft" class="workspace-header-btn btn-collapse-left" type="button" title="Collapse Problem Description Panel (Full Width Editor)" aria-label="Collapse Description Panel" style="height: 28px; width: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <polyline points="11 17 6 12 11 7"></polyline>
+                                    <polyline points="18 17 13 12 18 7"></polyline>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                     <div class="problem-badges-row">
                         <span id="problemDiffBadge" class="diff-badge diff-easy">Easy</span>
                         <span id="problemTopicTag" class="topic-tag-pill">Topic</span>
+                        <span id="problemPatternTag" class="pattern-tag-pill" style="display: none;">Pattern</span>
+                        <span id="problemAccessBadge" class="access-badge access-free">Free</span>
                         <span id="problemAccLabel" class="acc-meta-label">Acceptance: <strong>—</strong> (Provisional)</span>
                     </div>
                 </div>
 
-                <!-- Problem Statement Description -->
-                <div class="problem-body-section">
-                    <h2 class="section-label-heading">Problem Description</h2>
-                    <div class="problem-rich-text" id="problemDescriptionHtml">
-                        Loading problem description...
+                <!-- Section 1: Problem Description (Collapsible) -->
+                <div class="problem-body-section collapsible-section open" id="secDescription">
+                    <button type="button" class="section-collapse-header" aria-expanded="true" aria-controls="secDescriptionContent">
+                        <h2 class="section-label-heading">Problem Description</h2>
+                        <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div class="section-collapse-content" id="secDescriptionContent">
+                        <div class="problem-rich-text" id="problemDescriptionHtml">
+                            Loading problem description...
+                        </div>
+                        <div class="problem-spec-group" style="margin-top: 14px;">
+                            <div class="spec-subblock" id="specSection">
+                                <h3 class="spec-subtitle">Input Format</h3>
+                                <div class="spec-callout-box" id="inputFormatText">Loading input specification...</div>
+                            </div>
+                            <div class="spec-subblock" id="outputSpecSection" style="margin-top: 10px;">
+                                <h3 class="spec-subtitle">Output Format</h3>
+                                <div class="spec-callout-box" id="outputFormatText">Loading output specification...</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Input & Output Specifications -->
-                <div class="problem-body-section" id="specSection">
-                    <h2 class="section-label-heading">Input Format</h2>
-                    <div class="spec-callout-box" id="inputFormatText">
-                        Loading input specification...
+                <!-- Section 2: Examples (Collapsible) -->
+                <div class="problem-body-section collapsible-section open" id="secExamples">
+                    <button type="button" class="section-collapse-header" aria-expanded="true" aria-controls="secExamplesContent">
+                        <h2 class="section-label-heading">Examples</h2>
+                        <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div class="section-collapse-content" id="secExamplesContent">
+                        <div class="example-cards-list" id="exampleCardsList">
+                            <!-- Populated dynamically from sampleTestCases -->
+                        </div>
                     </div>
                 </div>
 
-                <div class="problem-body-section" id="outputSpecSection">
-                    <h2 class="section-label-heading">Output Format</h2>
-                    <div class="spec-callout-box" id="outputFormatText">
-                        Loading output specification...
+                <!-- Section 3: Constraints (Collapsible) -->
+                <div class="problem-body-section collapsible-section open" id="secConstraints">
+                    <button type="button" class="section-collapse-header" aria-expanded="true" aria-controls="secConstraintsContent">
+                        <h2 class="section-label-heading">Constraints</h2>
+                        <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div class="section-collapse-content" id="secConstraintsContent">
+                        <ul class="constraints-list" id="constraintsList">
+                            <!-- Populated dynamically -->
+                        </ul>
                     </div>
                 </div>
 
-                <!-- Public Sample Test Cases Examples -->
-                <div class="problem-body-section">
-                    <h2 class="section-label-heading">Examples</h2>
-                    <div class="example-cards-list" id="exampleCardsList">
-                        <!-- Populated dynamically from sampleTestCases -->
+                <!-- Section 4: Progressive Hints Quick Glance (Collapsible) -->
+                <div class="problem-body-section collapsible-section open" id="secHintsPreview">
+                    <button type="button" class="section-collapse-header" aria-expanded="true" aria-controls="secHintsContent">
+                        <h2 class="section-label-heading">Progressive Hints</h2>
+                        <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div class="section-collapse-content" id="secHintsContent">
+                        <div class="hints-summary-box">
+                            <p class="hints-summary-desc">Need algorithmic guidance? 3-tier progressive hints (Direction, Approach, Strategy) are available for this challenge.</p>
+                            <button type="button" class="btn-open-hints-view" id="btnOpenHintsView">
+                                <span aria-hidden="true">💡</span>
+                                <span id="hintsSummaryBtnText">Open Full Hints Panel (0/3 Unlocked)</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Constraints Section -->
-                <div class="problem-body-section">
-                    <h2 class="section-label-heading">Constraints</h2>
-                    <ul class="constraints-list" id="constraintsList">
-                        <!-- Populated dynamically -->
-                    </ul>
+                <!-- Section 5: Related Concepts & Practice (Collapsible) -->
+                <div class="problem-body-section collapsible-section open" id="secRelatedConcepts">
+                    <button type="button" class="section-collapse-header" aria-expanded="true" aria-controls="secConceptsContent">
+                        <h2 class="section-label-heading">Related Concepts & Learning</h2>
+                        <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div class="section-collapse-content" id="secConceptsContent">
+                        <div class="related-concepts-grid" id="relatedConceptsGrid">
+                            <!-- Populated dynamically with concepts and links to learn.html -->
+                        </div>
+                        <!-- Dedicated Entry Point: Animate the Solution -->
+                        <div class="workspace-animate-entry" id="workspaceAnimateEntry" style="margin-top: 14px;">
+                            <a href="#" id="linkAnimateSolutionConcepts" class="btn-animate-entry-link">
+                                <div class="animate-entry-icon" aria-hidden="true">⚡</div>
+                                <div class="animate-entry-details">
+                                    <span class="animate-entry-tag">Visual Algorithm Walkthrough</span>
+                                    <span class="animate-entry-headline">Animate the Solution →</span>
+                                    <span class="animate-entry-desc">Explore step-by-step interactive algorithm execution, pointer states &amp; complexity analysis on a dedicated stage.</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -354,6 +419,22 @@
                     <span>Guest Session Preview: Submissions are stored temporarily in this browser session. Persistent database history connects in Phase 4.</span>
                 </div>
 
+                <!-- Post-Submission Animation Action Banner (Prominent but compact) -->
+                <div class="submission-animate-banner" id="submissionAnimateBanner" style="display: none;">
+                    <div class="animate-banner-icon" aria-hidden="true">✨</div>
+                    <div class="animate-banner-body">
+                        <div class="animate-banner-header">
+                            <span class="animate-banner-pill">Algorithm Deep Dive</span>
+                            <span class="animate-banner-title">Explore: Animate the Solution →</span>
+                        </div>
+                        <p class="animate-banner-desc">Interactive visual execution of this algorithm's logic, step-by-step state changes, and time/space complexity.</p>
+                    </div>
+                    <a href="#" id="btnLaunchAnimateFromSubmissions" class="btn-launch-animate-action">
+                        <span>Animate Solution</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+
                 <div id="submissionsListContainer">
                     <p style="font-size: 0.86rem; color: var(--color-text-muted); font-style: italic;">
                         No submissions yet for this problem. Click &quot;Submit Solution&quot; to demonstrate simulated evaluation.
@@ -373,12 +454,20 @@
 
                         <!-- Editor Toolbar Bar (Stage 3.4.8 Reorganized 4-Group Architecture) -->
             <div class="editor-toolbar-bar" role="toolbar" aria-label="Editor Controls">
-                <!-- Group A: Editor Information -->
+                <!-- Group A: Editor Information & Language Selector -->
                 <div class="toolbar-group toolbar-group-info" role="group" aria-label="Editor Information">
                     <div class="target-lang-badge" title="Target Language: Java (OpenJDK 17)">
                         <span class="lang-dot" aria-hidden="true"></span>
                         <span class="lang-text">Target: Java (OpenJDK 17)</span>
                         <span class="lang-text-compact">Java 17</span>
+                    </div>
+                    <div class="workspace-lang-picker" title="Programming Language">
+                        <select id="selectEditorLang" class="workspace-lang-select" aria-label="Programming Language">
+                            <option value="java" selected>Java (OpenJDK 17)</option>
+                            <option value="python" disabled>Python 3 (Preview)</option>
+                            <option value="cpp" disabled>C++ 17 (Preview)</option>
+                            <option value="javascript" disabled>JavaScript (Preview)</option>
+                        </select>
                     </div>
                     <span class="active-file-indicator" title="Current Active File">
                         <span aria-hidden="true">☕</span>
@@ -503,12 +592,20 @@
                             </svg>
                             <span>Test Cases</span>
                         </button>
+                        <button class="console-tab-btn" id="tabBtnCustomInput" role="tab" aria-selected="false" data-tab="custom" draggable="true" title="Drag to reorder tabs">
+                            <span class="tab-drag-grip" aria-hidden="true">⋮⋮</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            <span>Custom Input</span>
+                        </button>
                         <button class="console-tab-btn" id="tabBtnTestResults" role="tab" aria-selected="false" data-tab="results" draggable="true" title="Drag to reorder tabs">
                             <span class="tab-drag-grip" aria-hidden="true">⋮⋮</span>
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <polyline points="20 6 9 17 4 12"></polyline>
                             </svg>
-                            <span>Test Results</span>
+                            <span>Output</span>
                             <span class="console-badge-count">Preview</span>
                         </button>
                         <button class="console-tab-btn" id="tabBtnDiagnostics" role="tab" aria-selected="false" data-tab="diagnostics" draggable="true" title="Drag to reorder tabs">
@@ -519,6 +616,14 @@
                                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
                             </svg>
                             <span>Diagnostics</span>
+                        </button>
+                        <button class="console-tab-btn" id="tabBtnSubmissionsConsole" role="tab" aria-selected="false" data-tab="submissions" draggable="true" title="Drag to reorder tabs">
+                            <span class="tab-drag-grip" aria-hidden="true">⋮⋮</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span>Submissions</span>
                         </button>
                     </div>
                 </div>
@@ -543,7 +648,21 @@
                         </div>
                     </div>
 
-                    <!-- Panel 2: Test Results (Preview) -->
+                    <!-- Panel 2: Custom Input Panel -->
+                    <div class="custominput-panel" id="panelCustomInput" style="display: none;">
+                        <div class="custominput-header-row">
+                            <span class="custominput-title">Custom Test Input (stdin):</span>
+                            <button type="button" class="btn-load-sample" id="btnLoadSampleInput" title="Load active sample test case into custom input">
+                                Load Sample Case
+                            </button>
+                        </div>
+                        <textarea id="customInputText" class="custominput-textarea" placeholder="Enter custom arguments or input lines for execution preview..." spellcheck="false"></textarea>
+                        <p class="custominput-guidance">
+                            Tip: Provide arguments formatted like the problem's sample inputs. Click &quot;Run Code&quot; (Ctrl+Enter) to preview.
+                        </p>
+                    </div>
+
+                    <!-- Panel 3: Test Results / Output (Preview) -->
                     <div class="testresults-panel" id="panelTestResults">
                         <div class="results-verdict-banner banner-info" id="resultsVerdictBanner">
                             <div class="verdict-title-group">
@@ -595,12 +714,35 @@
                         </div>
                     </div>
 
-                    <!-- Panel 3: Diagnostics -->
+                    <!-- Panel 4: Diagnostics -->
                     <div class="diagnostics-panel" id="panelDiagnostics">
                         <pre class="diagnostics-terminal-box" id="diagnosticsTerminalBox">No syntax or structural issues detected.</pre>
                         <p style="font-size: 0.78rem; color: var(--color-text-muted); margin: 4px 0 0 0;">
                             Client-side structural checks assist with brace matching and class declarations before submission.
                         </p>
+                    </div>
+
+                    <!-- Panel 5: Submissions History Console Panel -->
+                    <div class="submissions-console-panel" id="panelSubmissionsConsole" style="display: none;">
+                        <div class="submissions-console-header">
+                            <span class="submissions-console-title">Submission History Preview</span>
+                            <span class="submissions-console-count" id="consoleSubmissionsCountBadge">0 Submissions</span>
+                        </div>
+                        <div class="submission-animate-banner console-sub-animate" id="consoleSubmissionAnimateBanner" style="display: none; margin-bottom: 10px;">
+                            <div class="animate-banner-icon" aria-hidden="true">✨</div>
+                            <div class="animate-banner-body">
+                                <span class="animate-banner-title" style="font-size: 0.84rem;">Explore: Animate the Solution →</span>
+                                <span class="animate-banner-desc" style="font-size: 0.76rem;">Walk through this algorithm step-by-step with state transitions on a dedicated stage.</span>
+                            </div>
+                            <a href="#" id="btnLaunchAnimateFromConsole" class="btn-launch-animate-action" style="padding: 4px 10px; font-size: 0.76rem;">
+                                <span>Animate Solution →</span>
+                            </a>
+                        </div>
+                        <div id="consoleSubmissionsListContainer" class="console-submissions-list">
+                            <p style="font-size: 0.84rem; color: var(--color-text-muted); font-style: italic; padding: 12px 0;">
+                                No submissions recorded yet in this session. Click &quot;Submit Solution&quot; to test simulated evaluation.
+                            </p>
+                        </div>
                     </div>
 
                 </div>
@@ -726,5 +868,6 @@
     <!-- Canonical problem details retrieved via problemService.getProblemById inside workspace.js -->
     <script src="../js/api.js"></script>
     <script src="../js/workspace.js"></script>
+    <script src="../js/auth_modal.js" defer></script>
 </body>
 </html>

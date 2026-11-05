@@ -31,6 +31,10 @@
         }
 
         checkAuthAndRender();
+
+        document.addEventListener('codearena:auth-changed', function () {
+            checkAuthAndRender();
+        });
     }
 
     function checkAuthAndRender() {

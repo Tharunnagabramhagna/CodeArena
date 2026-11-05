@@ -29,6 +29,7 @@
     let isEvaluating = false;
     let lastEvaluationResult = null;
     let toastTimer = null;
+    let cachedProblemsList = [];
 
     // Stage 3.4.6 Flexible Layout State & Constants
     const LAYOUT_STORAGE_KEY = 'codearena_workspace_layout';
@@ -70,6 +71,7 @@
     function cacheElements() {
         dom = {
             // Layout Containers & Panes
+            workspaceMain: document.querySelector('.workspace-main'),
             problemNotFoundView: document.getElementById('problemNotFoundView'),
             notFoundMessage: document.getElementById('notFoundMessage'),
             premiumLockView: document.getElementById('problemPremiumLockView'),
@@ -83,15 +85,28 @@
             breadcrumbProblemTitle: document.getElementById('breadcrumbProblemTitle'),
 
             // Left Pane Problem Metadata
+            problemIdBadge: document.getElementById('problemIdBadge'),
             problemTitleText: document.getElementById('problemTitleText'),
             problemDiffBadge: document.getElementById('problemDiffBadge'),
             problemTopicTag: document.getElementById('problemTopicTag'),
+            problemPatternTag: document.getElementById('problemPatternTag'),
+            problemAccessBadge: document.getElementById('problemAccessBadge'),
             problemAccLabel: document.getElementById('problemAccLabel'),
             problemDescriptionHtml: document.getElementById('problemDescriptionHtml'),
             inputFormatText: document.getElementById('inputFormatText'),
             outputFormatText: document.getElementById('outputFormatText'),
             constraintsList: document.getElementById('constraintsList'),
             exampleCardsList: document.getElementById('exampleCardsList'),
+            btnToggleCollapseLeft: document.getElementById('btnToggleCollapseLeft'),
+            btnOpenHintsView: document.getElementById('btnOpenHintsView'),
+            hintsSummaryBtnText: document.getElementById('hintsSummaryBtnText'),
+            relatedConceptsGrid: document.getElementById('relatedConceptsGrid'),
+            linkAnimateSolutionConcepts: document.getElementById('linkAnimateSolutionConcepts'),
+            submissionAnimateBanner: document.getElementById('submissionAnimateBanner'),
+            btnLaunchAnimateFromSubmissions: document.getElementById('btnLaunchAnimateFromSubmissions'),
+            consoleSubmissionAnimateBanner: document.getElementById('consoleSubmissionAnimateBanner'),
+            btnLaunchAnimateFromConsole: document.getElementById('btnLaunchAnimateFromConsole'),
+            selectEditorLang: document.getElementById('selectEditorLang'),
 
             // Left Pane Tabs
             tabBtnDescription: document.getElementById('tabBtnDescription'),
@@ -152,11 +167,19 @@
 
             // Test Console Tabs & Panels
             tabBtnTestCases: document.getElementById('tabBtnTestCases'),
+            tabBtnCustomInput: document.getElementById('tabBtnCustomInput'),
             tabBtnTestResults: document.getElementById('tabBtnTestResults'),
             tabBtnDiagnostics: document.getElementById('tabBtnDiagnostics'),
+            tabBtnSubmissionsConsole: document.getElementById('tabBtnSubmissionsConsole'),
             panelTestCases: document.getElementById('panelTestCases'),
+            panelCustomInput: document.getElementById('panelCustomInput'),
             panelTestResults: document.getElementById('panelTestResults'),
             panelDiagnostics: document.getElementById('panelDiagnostics'),
+            panelSubmissionsConsole: document.getElementById('panelSubmissionsConsole'),
+            customInputText: document.getElementById('customInputText'),
+            btnLoadSampleInput: document.getElementById('btnLoadSampleInput'),
+            consoleSubmissionsListContainer: document.getElementById('consoleSubmissionsListContainer'),
+            consoleSubmissionsCountBadge: document.getElementById('consoleSubmissionsCountBadge'),
 
             // Test Cases Panel Elements
             testCasePillsRow: document.getElementById('testCasePillsRow'),
@@ -243,6 +266,20 @@
                 if (dom.premiumLockView) dom.premiumLockView.style.display = 'none';
                 if (dom.problemReferencePane) dom.problemReferencePane.style.display = 'flex';
                 if (dom.codingWorkspacePane) dom.codingWorkspacePane.style.display = 'flex';
+
+                // Asynchronously fetch catalogue index list for exact canonical problem numbering
+                if (window.CodeArenaAPI && window.CodeArenaAPI.problemService && typeof window.CodeArenaAPI.problemService.getProblems === 'function') {
+                    window.CodeArenaAPI.problemService.getProblems({ limit: 300 }).then(listRes => {
+                        if (listRes && listRes.success && listRes.data && Array.isArray(listRes.data.problems)) {
+                            cachedProblemsList = listRes.data.problems;
+                            if (currentProblem && dom.problemIdBadge) {
+                                const idx = cachedProblemsList.findIndex(item => item.id === currentProblem.id);
+                                if (idx !== -1) dom.problemIdBadge.textContent = `#${idx + 1}`;
+                            }
+                        }
+                    }).catch(() => { });
+                }
+
                 renderProblemData(currentProblem);
                 updateReturnToggleUI();
 
@@ -261,16 +298,20 @@
                     }
                 }
 
-                // Draft preservation (Phase 6)
+                // Draft preservation (localStorage & sessionStorage)
                 let initialCode = getStarterCode(currentProblem, includeDefaultReturn);
                 try {
-                    if (typeof window !== 'undefined' && window.sessionStorage) {
-                        const draft = window.sessionStorage.getItem('codearena_draft_problem_' + cleanId);
-                        if (draft && draft.trim()) {
-                            initialCode = draft;
-                        }
+                    let draft = null;
+                    if (typeof localStorage !== 'undefined') {
+                        draft = localStorage.getItem('codearena_draft_' + cleanId) || localStorage.getItem('codearena_draft_problem_' + cleanId);
                     }
-                } catch (e) {}
+                    if (!draft && typeof sessionStorage !== 'undefined') {
+                        draft = sessionStorage.getItem('codearena_draft_problem_' + cleanId);
+                    }
+                    if (draft && draft.trim()) {
+                        initialCode = draft;
+                    }
+                } catch (e) { }
 
                 initEditor(initialCode);
                 saveRecentlyViewedProblem(currentProblem);
@@ -370,12 +411,47 @@
         // Headline & Badges
         if (dom.problemTitleText) dom.problemTitleText.textContent = p.title;
 
+        // Problem ID Badge
+        if (dom.problemIdBadge) {
+            let num = '';
+            if (cachedProblemsList && cachedProblemsList.length > 0) {
+                const idx = cachedProblemsList.findIndex(item => item.id === p.id);
+                if (idx !== -1) num = idx + 1;
+            }
+            if (!num) {
+                const match = String(p.id).match(/\d+/);
+                if (match) num = match[0];
+            }
+            dom.problemIdBadge.textContent = num ? `#${num}` : `#${p.id}`;
+        }
+
         if (dom.problemDiffBadge) {
             dom.problemDiffBadge.textContent = p.difficulty;
             dom.problemDiffBadge.className = 'diff-badge diff-' + String(p.difficulty).toLowerCase();
         }
 
         if (dom.problemTopicTag) dom.problemTopicTag.textContent = p.topic;
+
+        // Pattern Tag
+        if (dom.problemPatternTag) {
+            if (p.pattern && p.pattern.trim()) {
+                dom.problemPatternTag.textContent = p.pattern;
+                dom.problemPatternTag.style.display = 'inline-flex';
+            } else {
+                dom.problemPatternTag.style.display = 'none';
+            }
+        }
+
+        // Access Badge (Free vs Pro)
+        if (dom.problemAccessBadge) {
+            if (p.isPremium) {
+                dom.problemAccessBadge.textContent = '⭐ Pro';
+                dom.problemAccessBadge.className = 'access-badge access-pro';
+            } else {
+                dom.problemAccessBadge.textContent = 'Free';
+                dom.problemAccessBadge.className = 'access-badge access-free';
+            }
+        }
 
         if (dom.problemAccLabel) {
             const accRate = (p.provisionalStats && p.provisionalStats.acceptanceRate)
@@ -441,11 +517,153 @@
         renderTestCasePills(p.sampleTestCases);
         renderResultsCasePills(p.sampleTestCases);
 
+        // Render Related Concepts grid
+        renderRelatedConcepts(p);
+
+        // Update Animate the Solution links with canonical problem ID
+        const animUrl = `solution-animation.html?id=${encodeURIComponent(p.id)}`;
+        if (dom.linkAnimateSolutionConcepts) {
+            dom.linkAnimateSolutionConcepts.href = animUrl;
+        }
+        if (dom.btnLaunchAnimateFromSubmissions) {
+            dom.btnLaunchAnimateFromSubmissions.href = animUrl;
+        }
+        if (dom.btnLaunchAnimateFromConsole) {
+            dom.btnLaunchAnimateFromConsole.href = animUrl;
+        }
+
+        // Update hints summary button text
+        if (dom.hintsSummaryBtnText) {
+            const unl = getUnlockedHintsCount(p.id);
+            dom.hintsSummaryBtnText.textContent = `View 3-Tier Progressive Hints (${unl}/3 Unlocked)`;
+        }
+
         // Load existing session submissions for this problem
         loadSubmissions(p.id);
+        renderConsoleSubmissions(p.id);
 
         // Reset any prior results
         clearResults();
+    }
+
+    /**
+     * Renders clickable related concept chips linking to learning modules.
+     */
+    function renderRelatedConcepts(p) {
+        if (!dom.relatedConceptsGrid) return;
+        dom.relatedConceptsGrid.innerHTML = '';
+
+        const conceptMap = {
+            'Arrays': [
+                { name: '1D & 2D Arrays', link: 'learn.html#arrays-and-strings', desc: 'Contiguous memory & indexing' },
+                { name: 'Linear Search & Pointers', link: 'learn.html#arrays-and-strings', desc: 'Traversal algorithms' },
+                { name: 'Loop Iterations', link: 'learn.html#control-flow', desc: 'Condition & increment cycles' }
+            ],
+            'Strings': [
+                { name: 'String Immutability', link: 'learn.html#arrays-and-strings', desc: 'String pool & heap' },
+                { name: 'StringBuilder & Buffer', link: 'learn.html#arrays-and-strings', desc: 'Mutable sequences' },
+                { name: 'Character Traversals', link: 'learn.html#arrays-and-strings', desc: 'Direct char manipulation' }
+            ],
+            'Dynamic Programming': [
+                { name: 'Recursion Call Stack', link: 'learn.html#methods', desc: 'Call frames & unwind' },
+                { name: 'Tabulation Arrays', link: 'learn.html#arrays-and-strings', desc: 'State transition matrices' },
+                { name: 'Methods & Return Values', link: 'learn.html#methods', desc: 'Optimal subproblems' }
+            ],
+            'Trees': [
+                { name: 'Classes & References', link: 'learn.html#oop', desc: 'Node reference structures' },
+                { name: 'Stack & Heap Allocation', link: 'learn.html#oop', desc: 'Object memory layout' },
+                { name: 'Recursive Tree Traversal', link: 'learn.html#methods', desc: 'DFS tree algorithms' }
+            ],
+            'Graphs': [
+                { name: 'Adjacency Lists', link: 'learn.html#advanced-java', desc: 'Collections framework' },
+                { name: 'Queue & Stack Traversal', link: 'learn.html#advanced-java', desc: 'Breadth/Depth first search' },
+                { name: 'Object References', link: 'learn.html#oop', desc: 'Graph topology' }
+            ],
+            'Math': [
+                { name: 'Operators & Expressions', link: 'learn.html#java-fundamentals', desc: 'Arithmetic & bitwise' },
+                { name: 'Control Flow Conditionals', link: 'learn.html#control-flow', desc: 'Branches & invariants' },
+                { name: 'Primitive Variables', link: 'learn.html#java-fundamentals', desc: 'Integral value types' }
+            ]
+        };
+
+        const concepts = conceptMap[p.topic] || [
+            { name: p.topic || 'DSA Fundamentals', link: 'learn.html#java-fundamentals', desc: 'Core principles' },
+            { name: p.pattern || 'Algorithmic Optimization', link: 'learn.html#control-flow', desc: 'Structured approach' },
+            { name: 'Java Execution Model', link: 'learn.html#java-fundamentals', desc: 'JVM & memory' }
+        ];
+
+        concepts.forEach(c => {
+            const a = document.createElement('a');
+            a.href = c.link;
+            a.className = 'concept-chip';
+            a.title = c.desc;
+            a.innerHTML = `
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                </svg>
+                <span>${escapeHtml(c.name)}</span>
+            `;
+            dom.relatedConceptsGrid.appendChild(a);
+        });
+    }
+
+    /**
+     * Renders submission history inside the bottom test console panel.
+     */
+    async function renderConsoleSubmissions(problemId) {
+        if (!dom.consoleSubmissionsListContainer) return;
+        if (!window.CodeArenaAPI || !window.CodeArenaAPI.submissionService || typeof window.CodeArenaAPI.submissionService.getSubmissions !== 'function') {
+            return;
+        }
+        try {
+            const res = await window.CodeArenaAPI.submissionService.getSubmissions(problemId);
+            const subs = (res && res.success && res.data && Array.isArray(res.data.submissions)) ? res.data.submissions : [];
+            if (dom.consoleSubmissionsCountBadge) {
+                dom.consoleSubmissionsCountBadge.textContent = `${subs.length} recorded`;
+            }
+            if (dom.consoleSubmissionAnimateBanner) {
+                dom.consoleSubmissionAnimateBanner.style.display = (subs.length > 0) ? 'flex' : 'none';
+            }
+            if (subs.length === 0) {
+                dom.consoleSubmissionsListContainer.innerHTML = `
+                    <div class="submissions-empty-state" style="padding: 1.5rem 1rem; text-align: center;">
+                        <p class="submissions-empty-title" style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.35rem;">No Submissions Yet</p>
+                        <p class="submissions-empty-desc" style="font-size: 0.78rem; color: var(--color-text-muted);">Click &quot;Submit Solution&quot; to test your code and record simulated submissions.</p>
+                    </div>
+                `;
+                return;
+            }
+            let html = `
+                <table class="console-submissions-table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Runtime</th>
+                            <th>Memory</th>
+                            <th>Language</th>
+                            <th>Submitted</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            subs.forEach(sub => {
+                const timeStr = formatSubmissionTime(sub.submittedAt);
+                html += `
+                    <tr>
+                        <td><span class="diff-badge diff-easy">Passed (Preview)</span></td>
+                        <td>${sub.runtimeMs || 14} ms</td>
+                        <td>${sub.memoryMb || 38.4} MB</td>
+                        <td>Java (OpenJDK 17)</td>
+                        <td>${escapeHtml(timeStr)}</td>
+                    </tr>
+                `;
+            });
+            html += `</tbody></table>`;
+            dom.consoleSubmissionsListContainer.innerHTML = html;
+        } catch (e) {
+            console.warn('[CodeArena Workspace] Failed to render console submissions:', e);
+        }
     }
 
     /**
@@ -547,7 +765,7 @@
         try {
             const raw = localStorage.getItem('codearena_user_settings');
             if (raw) userSettings = JSON.parse(raw);
-        } catch (e) {}
+        } catch (e) { }
 
         const editorTabSize = (userSettings && userSettings.editorTabSize) ? parseInt(userSettings.editorTabSize, 10) : 4;
         const editorLineNumbers = (userSettings && typeof userSettings.showLineNumbers === 'boolean') ? userSettings.showLineNumbers : true;
@@ -618,16 +836,23 @@
                     }
                 });
 
-                // Auto-save per-problem draft to sessionStorage (Phase 6 Code Draft Isolation)
+                // Auto-save per-problem draft to localStorage and sessionStorage (Phase 6 & Feature 3)
                 codeEditor.on('change', function () {
                     try {
-                        if (typeof window !== 'undefined' && window.sessionStorage && currentProblem) {
+                        if (currentProblem) {
                             const pId = currentProblem.id || currentProblem.slug;
                             if (pId) {
-                                window.sessionStorage.setItem('codearena_draft_problem_' + pId, codeEditor.getValue());
+                                const val = codeEditor.getValue();
+                                if (typeof localStorage !== 'undefined') {
+                                    localStorage.setItem('codearena_draft_' + pId, val);
+                                    localStorage.setItem('codearena_draft_problem_' + pId, val);
+                                }
+                                if (typeof sessionStorage !== 'undefined') {
+                                    sessionStorage.setItem('codearena_draft_problem_' + pId, val);
+                                }
                             }
                         }
-                    } catch (e) {}
+                    } catch (e) { }
                 });
 
                 isFallback = false;
@@ -655,6 +880,21 @@
             dom.fallbackEditor.addEventListener('input', function () {
                 updateFallbackCursor();
                 if (lastEvaluationResult) markResultsStale();
+                try {
+                    if (currentProblem) {
+                        const pId = currentProblem.id || currentProblem.slug;
+                        if (pId) {
+                            const val = dom.fallbackEditor.value;
+                            if (typeof localStorage !== 'undefined') {
+                                localStorage.setItem('codearena_draft_' + pId, val);
+                                localStorage.setItem('codearena_draft_problem_' + pId, val);
+                            }
+                            if (typeof sessionStorage !== 'undefined') {
+                                sessionStorage.setItem('codearena_draft_problem_' + pId, val);
+                            }
+                        }
+                    }
+                } catch (e) { }
             });
             dom.fallbackEditor.addEventListener('click', updateFallbackCursor);
             dom.fallbackEditor.addEventListener('keyup', updateFallbackCursor);
@@ -873,8 +1113,10 @@
         if (!dom.consoleTabGroup || !Array.isArray(tabOrder)) return;
         const tabsMap = {
             cases: dom.tabBtnTestCases,
+            custom: dom.tabBtnCustomInput,
             results: dom.tabBtnTestResults,
-            diagnostics: dom.tabBtnDiagnostics
+            diagnostics: dom.tabBtnDiagnostics,
+            submissions: dom.tabBtnSubmissionsConsole
         };
 
         tabOrder.forEach(key => {
@@ -1145,7 +1387,7 @@
             if (typeof localStorage !== 'undefined') {
                 localStorage.removeItem(LAYOUT_STORAGE_KEY);
             }
-        } catch (e) {}
+        } catch (e) { }
         applyLayoutSettings(currentLayout, true);
         showToast('Workspace layout reset to default', 'info');
     }
@@ -1387,7 +1629,7 @@
                 const val = parseInt(localStorage.getItem(getHintsStorageKey(problemId)), 10);
                 if (!isNaN(val) && val >= 0 && val <= 3) return val;
             }
-        } catch (e) {}
+        } catch (e) { }
         return 0;
     }
 
@@ -1396,7 +1638,7 @@
             if (typeof localStorage !== 'undefined') {
                 localStorage.setItem(getHintsStorageKey(problemId), String(count));
             }
-        } catch (e) {}
+        } catch (e) { }
     }
 
     function renderHints(problem) {
@@ -1416,6 +1658,9 @@
         }
         if (dom.hintsUnlockedCountBadge) {
             dom.hintsUnlockedCountBadge.textContent = `${unlockedCount} of 3 Unlocked`;
+        }
+        if (dom.hintsSummaryBtnText) {
+            dom.hintsSummaryBtnText.textContent = `View 3-Tier Progressive Hints (${unlockedCount}/3 Unlocked)`;
         }
 
         renderSingleHint(1, hints[0], unlockedCount >= 1, true);
@@ -1486,7 +1731,7 @@
             if (typeof localStorage !== 'undefined') {
                 localStorage.removeItem(getHintsStorageKey(currentProblem.id));
             }
-        } catch (e) {}
+        } catch (e) { }
         renderHints(currentProblem);
         if (typeof showToast === 'function') {
             showToast('All hints reset to locked state.');
@@ -1511,10 +1756,75 @@
         if (dom.btnRevealHint3) dom.btnRevealHint3.addEventListener('click', () => unlockHint(3));
         if (dom.btnResetHints) dom.btnResetHints.addEventListener('click', resetProblemHints);
 
-        // Test Console Tabs (Test Cases vs Test Results vs Diagnostics)
+        // Test Console Tabs (Test Cases vs Custom Input vs Test Results vs Diagnostics vs Submissions)
         if (dom.tabBtnTestCases) dom.tabBtnTestCases.addEventListener('click', () => switchConsoleTab('cases'));
+        if (dom.tabBtnCustomInput) dom.tabBtnCustomInput.addEventListener('click', () => switchConsoleTab('custom'));
         if (dom.tabBtnTestResults) dom.tabBtnTestResults.addEventListener('click', () => switchConsoleTab('results'));
         if (dom.tabBtnDiagnostics) dom.tabBtnDiagnostics.addEventListener('click', () => switchConsoleTab('diagnostics'));
+        if (dom.tabBtnSubmissionsConsole) dom.tabBtnSubmissionsConsole.addEventListener('click', () => switchConsoleTab('submissions'));
+
+        // Load Sample Input into Custom Input textarea
+        if (dom.btnLoadSampleInput) {
+            dom.btnLoadSampleInput.addEventListener('click', function () {
+                if (currentProblem && Array.isArray(currentProblem.sampleTestCases) && currentProblem.sampleTestCases.length > 0) {
+                    const idx = (typeof activeCaseIndex === 'number' && currentProblem.sampleTestCases[activeCaseIndex]) ? activeCaseIndex : 0;
+                    if (dom.customInputText) {
+                        dom.customInputText.value = currentProblem.sampleTestCases[idx].input || '';
+                    }
+                    showToast(`Loaded Sample Case ${idx + 1} input`, 'info');
+                } else {
+                    showToast('No sample test cases available to load', 'warning');
+                }
+            });
+        }
+
+        // Accordion Collapsible Sections
+        document.querySelectorAll('.section-collapse-header').forEach(header => {
+            header.addEventListener('click', function () {
+                const sec = this.closest('.collapsible-section');
+                if (sec) {
+                    sec.classList.toggle('open');
+                    const isOpen = sec.classList.contains('open');
+                    this.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                }
+            });
+        });
+
+        // Left Pane Collapse/Expand Toggle
+        if (dom.btnToggleCollapseLeft) {
+            dom.btnToggleCollapseLeft.addEventListener('click', function () {
+                if (dom.problemReferencePane) {
+                    dom.problemReferencePane.classList.toggle('collapsed');
+                    const isCollapsed = dom.problemReferencePane.classList.contains('collapsed');
+                    if (dom.workspaceMain) {
+                        dom.workspaceMain.classList.toggle('left-collapsed', isCollapsed);
+                    }
+                    this.setAttribute('title', isCollapsed ? 'Expand Description Panel' : 'Collapse Description Panel');
+                    this.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+                    if (codeEditor && typeof codeEditor.refresh === 'function') {
+                        setTimeout(() => codeEditor.refresh(), 200);
+                    }
+                }
+            });
+        }
+
+        // Open Hints View from Description Accordion
+        if (dom.btnOpenHintsView) {
+            dom.btnOpenHintsView.addEventListener('click', function () {
+                switchLeftPaneTab('hints');
+            });
+        }
+
+        // Language Selector
+        if (dom.selectEditorLang) {
+            dom.selectEditorLang.addEventListener('change', function () {
+                const lang = this.value;
+                if (lang !== 'java') {
+                    showToast(`${lang.toUpperCase()} compiler environment connects in an upcoming release. Java (OpenJDK 17) active.`, 'info');
+                    this.value = 'java';
+                }
+            });
+        }
 
         // Starter Return Toggle Controls (Stage 3.4.7)
         if (dom.chkIncludeDefaultReturn) {
@@ -1571,7 +1881,7 @@
                     const parsed = JSON.parse(raw);
                     if (parsed.editorFontSize) currentSize = parseInt(parsed.editorFontSize, 10) || 14;
                 }
-            } catch (e) {}
+            } catch (e) { }
             updateWorkFontDisplay(currentSize);
 
             function setWorkspaceFontSize(newSize) {
@@ -1587,7 +1897,7 @@
                     const settings = raw ? JSON.parse(raw) : {};
                     settings.editorFontSize = newSize + 'px';
                     localStorage.setItem('codearena_user_settings', JSON.stringify(settings));
-                } catch (e) {}
+                } catch (e) { }
                 showToast(`Editor font: ${newSize}px`, 'info');
             }
 
@@ -1603,19 +1913,22 @@
             }
         }
 
-        // Clear session draft on reset confirmation
+        // Clear session & local drafts on reset confirmation
         if (dom.btnConfirmReset) {
             dom.btnConfirmReset.addEventListener('click', function () {
                 try {
-                    if (typeof window !== 'undefined' && window.sessionStorage && currentProblem) {
-                        window.sessionStorage.removeItem('codearena_draft_problem_' + currentProblem.id);
+                    if (currentProblem) {
+                        const pId = currentProblem.id || currentProblem.slug;
+                        if (typeof localStorage !== 'undefined') {
+                            localStorage.removeItem('codearena_draft_' + pId);
+                            localStorage.removeItem('codearena_draft_problem_' + pId);
+                        }
+                        if (typeof sessionStorage !== 'undefined') {
+                            sessionStorage.removeItem('codearena_draft_problem_' + pId);
+                        }
                     }
-                } catch (e) {}
-            });
-        }
+                } catch (e) { }
 
-        if (dom.btnConfirmReset) {
-            dom.btnConfirmReset.addEventListener('click', function () {
                 if (currentProblem) {
                     if (dom.chkModalIncludeReturn && !isVoidProblem(currentProblem)) {
                         saveReturnPreference(dom.chkModalIncludeReturn.checked);
@@ -1707,18 +2020,27 @@
     }
 
     /**
-     * Switches between console tabs: 'cases' | 'results' | 'diagnostics'.
+     * Switches between console tabs: 'cases' | 'custom' | 'results' | 'diagnostics' | 'submissions'.
      */
     function switchConsoleTab(tabName) {
         activeConsoleTab = tabName;
 
         if (dom.tabBtnTestCases) dom.tabBtnTestCases.classList.toggle('active', tabName === 'cases');
+        if (dom.tabBtnCustomInput) dom.tabBtnCustomInput.classList.toggle('active', tabName === 'custom');
         if (dom.tabBtnTestResults) dom.tabBtnTestResults.classList.toggle('active', tabName === 'results');
         if (dom.tabBtnDiagnostics) dom.tabBtnDiagnostics.classList.toggle('active', tabName === 'diagnostics');
+        if (dom.tabBtnSubmissionsConsole) dom.tabBtnSubmissionsConsole.classList.toggle('active', tabName === 'submissions');
 
         if (dom.panelTestCases) dom.panelTestCases.style.display = (tabName === 'cases') ? 'flex' : 'none';
+        if (dom.panelCustomInput) dom.panelCustomInput.style.display = (tabName === 'custom') ? 'flex' : 'none';
         if (dom.panelTestResults) dom.panelTestResults.style.display = (tabName === 'results') ? 'flex' : 'none';
         if (dom.panelDiagnostics) dom.panelDiagnostics.style.display = (tabName === 'diagnostics') ? 'flex' : 'none';
+        if (dom.panelSubmissionsConsole) {
+            dom.panelSubmissionsConsole.style.display = (tabName === 'submissions') ? 'flex' : 'none';
+            if (tabName === 'submissions' && currentProblem) {
+                renderConsoleSubmissions(currentProblem.id);
+            }
+        }
     }
 
     /**
@@ -1799,7 +2121,7 @@
                 const parsed = JSON.parse(user);
                 if (parsed && (parsed.token || parsed.isLoggedIn)) return false;
             }
-        } catch (e) {}
+        } catch (e) { }
         return true;
     }
 
@@ -1941,7 +2263,10 @@
 
             } else {
                 // Structural checks passed!
-                setVerdictBanner('success', 'Structural Check Passed', 'Code structure is valid · Java execution engine connects in Phase 4', 'Preview Only');
+                const hasCustomInput = Boolean(dom.customInputText && dom.customInputText.value.trim());
+                const customInputStr = hasCustomInput ? dom.customInputText.value.trim() : null;
+
+                setVerdictBanner('success', 'Structural Check Passed', hasCustomInput ? 'Custom input registered · Execution engine connects in Phase 4' : 'Code structure is valid · Java execution engine connects in Phase 4', 'Preview Only');
 
                 if (dom.resultsStatusBadge) {
                     dom.resultsStatusBadge.textContent = 'Not Executed — Preview Only';
@@ -1952,8 +2277,13 @@
                     dom.resultsActualDisplay.textContent = 'Execution unavailable — frontend preview only.';
                 }
 
+                if (hasCustomInput && dom.resultsInputDisplay) {
+                    dom.resultsInputDisplay.textContent = customInputStr;
+                }
+
                 if (dom.diagnosticsTerminalBox) {
-                    dom.diagnosticsTerminalBox.textContent = `[Client-Side Structural Check: Passed]\nNo syntax or structural issues detected in editor source.\n• Class declaration verified (class Solution)\n• Curly braces balanced ({ ... })\n• Syntax mode: Java (OpenJDK 17)\n\nPreview Notice: Client-side structural checks assist with brace matching and class declarations before submission. Arbitrary Java compilation, System.in streaming, and test-case execution connect in Phase 4.`;
+                    const customNote = hasCustomInput ? `\n• Custom Stdin Stream: Provided (${customInputStr.length} chars)` : '';
+                    dom.diagnosticsTerminalBox.textContent = `[Client-Side Structural Check: Passed]\nNo syntax or structural issues detected in editor source.\n• Class declaration verified (class Solution)\n• Curly braces balanced ({ ... })\n• Syntax mode: Java (OpenJDK 17)${customNote}\n\nPreview Notice: Client-side structural checks assist with brace matching and class declarations before submission. Arbitrary Java compilation, System.in streaming, and test-case execution connect in Phase 4.`;
                 }
 
                 if (dom.workspaceStatusText) {
@@ -2030,6 +2360,10 @@
         }
 
         if (!dom.submissionsListContainer) return;
+
+        if (dom.submissionAnimateBanner) {
+            dom.submissionAnimateBanner.style.display = (submissions && submissions.length > 0) ? 'flex' : 'none';
+        }
 
         if (!submissions || submissions.length === 0) {
             dom.submissionsListContainer.innerHTML = `
@@ -2156,6 +2490,15 @@
             }
 
             await loadSubmissions(currentProblem.id);
+            await renderConsoleSubmissions(currentProblem.id);
+
+            // Show prominent Animate the Solution action after submission
+            if (dom.submissionAnimateBanner) {
+                dom.submissionAnimateBanner.style.display = 'flex';
+            }
+            if (dom.consoleSubmissionAnimateBanner) {
+                dom.consoleSubmissionAnimateBanner.style.display = 'flex';
+            }
 
             if (dom.workspaceStatusText) {
                 dom.workspaceStatusText.textContent = 'Preview Submission Recorded · Session Scope';
@@ -2350,7 +2693,9 @@
         isVoidProblem: (prob) => isVoidProblem(prob),
         isCodeModified: () => isCodeModified(currentProblem),
         getReturnPreference: () => includeDefaultReturn,
-        setReturnPreference: (val) => handleReturnToggleChange(val)
+        setReturnPreference: (val) => handleReturnToggleChange(val),
+        renderConsoleSubmissions: renderConsoleSubmissions,
+        renderRelatedConcepts: renderRelatedConcepts
     };
 
 
@@ -2366,7 +2711,7 @@
             try {
                 const raw = localStorage.getItem('codearena_guest_bookmarks');
                 if (raw) return JSON.parse(raw);
-            } catch (e) {}
+            } catch (e) { }
             return [];
         }
 
@@ -2403,7 +2748,7 @@
             }
             try {
                 localStorage.setItem('codearena_guest_bookmarks', JSON.stringify(bms));
-            } catch (e) {}
+            } catch (e) { }
             updateBookmarkBtn();
         };
     }
@@ -2435,7 +2780,7 @@
                 list = list.slice(0, 5);
                 window.localStorage.setItem('codearena_recently_viewed', JSON.stringify(list));
             }
-        } catch (e) {}
+        } catch (e) { }
     }
 
 })();

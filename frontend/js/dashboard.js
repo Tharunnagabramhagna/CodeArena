@@ -283,6 +283,10 @@ document.addEventListener('DOMContentLoaded', function () {
     loadPlatformIntelligence();
     updateAuthStateUI();
 
+    document.addEventListener('codearena:auth-changed', function () {
+        updateAuthStateUI();
+    });
+
     // --------------------------------------------------------------------------
     // 4. Future Authenticated User Profile Menu Toggle (Ready for Backend)
     // --------------------------------------------------------------------------

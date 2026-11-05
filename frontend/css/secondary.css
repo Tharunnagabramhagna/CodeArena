@@ -1703,3 +1703,825 @@ button,
   -webkit-user-select: none;
   user-select: none;
 }
+
+/* ==========================================================================
+   Interactive Java Concept Learning & Animation Studio (Feature 3)
+   ========================================================================== */
+
+/* 1. Mode Switcher (Curriculum vs Interactive Animation Studio) */
+.learn-mode-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  background-color: var(--color-bg-secondary, #1e293b);
+  padding: 6px;
+  border-radius: var(--radius-lg, 12px);
+  border: 1px solid var(--color-border, #334155);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.learn-mode-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--radius-md, 8px);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-text-secondary, #94a3b8);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.2s ease);
+}
+
+.learn-mode-btn:hover {
+  color: var(--color-text-primary, #f8fafc);
+  background-color: rgba(99, 102, 241, 0.08);
+}
+
+.learn-mode-btn.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(129, 140, 248, 0.15));
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #a5b4fc;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+}
+
+/* Concept Practice Card inside Curriculum Lessons */
+.concept-practice-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  margin: 24px 0;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(16, 185, 129, 0.05));
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: var(--radius-lg, 12px);
+}
+
+.concept-practice-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.concept-practice-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #818cf8;
+  letter-spacing: 0.05em;
+}
+
+.concept-practice-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.concept-practice-desc {
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #94a3b8);
+}
+
+.concept-practice-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.btn-concept-practice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md, 8px);
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.15s ease);
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.35);
+}
+
+.btn-concept-practice:hover {
+  background: linear-gradient(135deg, #4338ca, #4f46e5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.45);
+}
+
+.btn-concept-anim {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md, 8px);
+  background: rgba(99, 102, 241, 0.12);
+  color: #a5b4fc;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.15s ease);
+}
+
+.btn-concept-anim:hover {
+  background: rgba(99, 102, 241, 0.22);
+  border-color: rgba(99, 102, 241, 0.5);
+  color: #ffffff;
+}
+
+/* 2. Animation Studio Selector Bar */
+.anim-selector-container {
+  background-color: var(--color-bg-secondary, #1e293b);
+  border: 1px solid var(--color-border, #334155);
+  border-radius: var(--radius-lg, 12px);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.anim-selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.anim-selector-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-text-secondary, #94a3b8);
+  letter-spacing: 0.05em;
+}
+
+.anim-selector-badge {
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background-color: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.anim-pills-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+
+.anim-pills-bar::-webkit-scrollbar {
+  height: 6px;
+}
+
+.anim-pills-bar::-webkit-scrollbar-thumb {
+  background: var(--color-border, #334155);
+  border-radius: 4px;
+}
+
+.anim-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md, 8px);
+  background-color: var(--color-bg-surface, #0f172a);
+  border: 1px solid var(--color-border, #334155);
+  color: var(--color-text-secondary, #94a3b8);
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.15s ease);
+}
+
+.anim-pill-btn:hover {
+  background-color: rgba(99, 102, 241, 0.1);
+  color: var(--color-text-primary, #f8fafc);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.anim-pill-btn.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(79, 70, 229, 0.18));
+  border-color: #6366f1;
+  color: #c7d2fe;
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+/* 3. Animation Player Card */
+.anim-player-card {
+  background-color: var(--color-bg-secondary, #1e293b);
+  border: 1px solid var(--color-border, #334155);
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+.anim-player-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background-color: rgba(15, 23, 42, 0.6);
+  border-bottom: 1px solid var(--color-border, #334155);
+  gap: 16px;
+}
+
+.anim-player-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.anim-player-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.btn-anim-practice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-md, 8px);
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--transition-fast, 0.15s ease);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+}
+
+.btn-anim-practice:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
+}
+
+/* Visual Stage Area */
+.anim-stage-wrapper {
+  padding: 24px;
+  background-color: #0b1120;
+  border-bottom: 1px solid var(--color-border, #334155);
+  position: relative;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.anim-stage {
+  width: 100%;
+  max-width: 900px;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Animation Stage Component Elements */
+.anim-pipeline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 12px;
+  position: relative;
+}
+
+.anim-node {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 16px 12px;
+  background-color: #1e293b;
+  border: 2px solid #334155;
+  border-radius: var(--radius-lg, 10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 2;
+}
+
+.anim-node-icon {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+.anim-node-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin-bottom: 4px;
+}
+
+.anim-node-sub {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-family: var(--font-family-mono, monospace);
+}
+
+.anim-node.active {
+  border-color: #6366f1;
+  background: linear-gradient(135deg, #1e1b4b, #312e81);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.5), inset 0 0 12px rgba(99, 102, 241, 0.3);
+  transform: scale(1.06);
+}
+
+.anim-node.completed {
+  border-color: #10b981;
+  background: linear-gradient(135deg, #064e3b, #065f46);
+}
+
+.anim-arrow {
+  color: #64748b;
+  font-size: 1.25rem;
+  font-weight: bold;
+  user-select: none;
+  transition: color 0.3s ease;
+  flex-shrink: 0;
+}
+
+.anim-arrow.active {
+  color: #818cf8;
+  text-shadow: 0 0 8px rgba(129, 140, 248, 0.6);
+  animation: pulseArrow 1.2s infinite ease-in-out;
+}
+
+@keyframes pulseArrow {
+  0%, 100% { transform: translateX(0); opacity: 0.7; }
+  50% { transform: translateX(4px); opacity: 1; }
+}
+
+/* Memory & Stack Layout Components */
+.anim-mem-grid {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.anim-mem-box {
+  flex: 1;
+  max-width: 320px;
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: var(--radius-lg, 10px);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.anim-mem-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #818cf8;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.anim-mem-cells-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.anim-mem-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  font-family: var(--font-family-mono, monospace);
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.anim-mem-cell.active {
+  border-color: #6366f1;
+  background-color: #1e1b4b;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+}
+
+.anim-mem-cell.highlight {
+  border-color: #10b981;
+  background-color: #064e3b;
+  color: #6ee7b7;
+}
+
+/* Array Traversal Visualizer */
+.anim-array-track {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 20px 0;
+  width: 100%;
+}
+
+.anim-array-slot-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.anim-array-slot {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1e293b;
+  border: 2px solid #334155;
+  border-radius: 8px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f8fafc;
+  font-family: var(--font-family-mono, monospace);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.anim-array-slot.active {
+  border-color: #6366f1;
+  background-color: #312e81;
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.5);
+  transform: translateY(-6px);
+}
+
+.anim-array-slot.found {
+  border-color: #10b981;
+  background-color: #065f46;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.6);
+  transform: translateY(-8px);
+}
+
+.anim-array-idx {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-family: var(--font-family-mono, monospace);
+}
+
+.anim-array-ptr-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #818cf8;
+  margin-top: 2px;
+  height: 16px;
+}
+
+/* Call Stack Frames */
+.anim-stack-col {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  width: 100%;
+  max-width: 380px;
+}
+
+.anim-stack-frame {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background-color: #1e293b;
+  border: 2px solid #334155;
+  border-radius: 8px;
+  font-family: var(--font-family-mono, monospace);
+  font-size: 0.82rem;
+  transition: all 0.3s ease;
+}
+
+.anim-stack-frame.active {
+  border-color: #6366f1;
+  background-color: #2e1065;
+  box-shadow: 0 0 14px rgba(99, 102, 241, 0.4);
+}
+
+.anim-stack-frame.base-case {
+  border-color: #10b981;
+  background-color: #064e3b;
+}
+
+/* Controls Bar */
+.anim-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background-color: var(--color-bg-secondary, #1e293b);
+  border-bottom: 1px solid var(--color-border, #334155);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.anim-controls-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.anim-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-md, 8px);
+  background-color: var(--color-bg-surface, #0f172a);
+  border: 1px solid var(--color-border, #334155);
+  color: var(--color-text-secondary, #94a3b8);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast, 0.15s ease);
+}
+
+.anim-btn:hover:not(:disabled) {
+  background-color: rgba(99, 102, 241, 0.12);
+  color: var(--color-text-primary, #f8fafc);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.anim-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.anim-btn-play {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: #ffffff;
+  border-color: #4f46e5;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
+}
+
+.anim-btn-play:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4338ca, #4f46e5);
+  color: #ffffff;
+}
+
+.anim-btn-reset {
+  color: var(--color-text-muted, #94a3b8);
+}
+
+.anim-status-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.anim-step-badge {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #818cf8;
+  background-color: rgba(99, 102, 241, 0.1);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}
+
+.anim-speed-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #94a3b8);
+}
+
+.anim-speed-select {
+  background-color: var(--color-bg-surface, #0f172a);
+  border: 1px solid var(--color-border, #334155);
+  color: var(--color-text-primary, #f8fafc);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Live Step Explanation Card */
+.anim-explanation-card {
+  padding: 20px 24px;
+  background-color: rgba(15, 23, 42, 0.4);
+}
+
+.anim-explanation-header {
+  margin-bottom: 8px;
+}
+
+.anim-step-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.anim-step-num-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  background-color: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.anim-step-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-primary, #f8fafc);
+}
+
+.anim-step-narration {
+  font-size: 0.88rem;
+  color: var(--color-text-secondary, #cbd5e1);
+  line-height: 1.55;
+  margin: 0 0 12px 0;
+}
+
+.anim-step-note-box {
+  padding: 10px 14px;
+  background-color: rgba(99, 102, 241, 0.06);
+  border-left: 3px solid #6366f1;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #94a3b8);
+  line-height: 1.45;
+}
+
+.anim-note-label {
+  font-weight: 700;
+  color: #818cf8;
+  margin-right: 4px;
+}
+
+/* Light Theme Overrides */
+[data-theme="light"] .learn-mode-nav {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .learn-mode-btn.active {
+  background: #ffffff;
+  color: #4338ca;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .anim-selector-container,
+[data-theme="light"] .anim-player-card {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .anim-player-header {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .anim-stage-wrapper {
+  background-color: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .anim-node {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .anim-node-title {
+  color: #0f172a;
+}
+
+[data-theme="light"] .anim-node.active {
+  background: linear-gradient(135deg, #e0e7ff, #ede9fe);
+  border-color: #4f46e5;
+  box-shadow: 0 0 16px rgba(79, 70, 229, 0.2);
+}
+
+[data-theme="light"] .anim-mem-box {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .anim-mem-cell {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme="light"] .anim-mem-cell.active {
+  background-color: #e0e7ff;
+  border-color: #4f46e5;
+}
+
+[data-theme="light"] .anim-array-slot {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme="light"] .anim-array-slot.active {
+  background-color: #e0e7ff;
+  border-color: #4f46e5;
+}
+
+[data-theme="light"] .anim-stack-frame {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+[data-theme="light"] .anim-controls-bar {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+}
+
+[data-theme="light"] .anim-explanation-card {
+  background-color: #f8fafc;
+}
+
+[data-theme="light"] .anim-step-narration {
+  color: #334155;
+}
+
+[data-theme="light"] .concept-practice-card {
+  background: linear-gradient(135deg, #eef2ff, #f0fdf4);
+  border-color: #c7d2fe;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .anim-node,
+  .anim-array-slot,
+  .anim-mem-cell,
+  .anim-stack-frame,
+  .anim-arrow {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .learn-mode-nav {
+    flex-direction: column;
+  }
+
+  .concept-practice-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .anim-player-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .anim-controls-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .anim-pipeline {
+    flex-direction: column;
+  }
+
+  .anim-node {
+    width: 100%;
+  }
+
+  .anim-arrow {
+    transform: rotate(90deg);
+  }
+}

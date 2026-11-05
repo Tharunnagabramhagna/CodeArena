@@ -48,8 +48,20 @@
             btnShortcutsHelp: document.getElementById('btnShortcutsHelp'),
             btnResetSplit: document.getElementById('btnResetSplit'),
             compilerSplitter: document.getElementById('compilerSplitter'),
+            compilerSplitterBadge: document.getElementById('compilerSplitterBadge'),
+            compilerLayoutControls: document.getElementById('compilerLayoutControls'),
+            btnPreset5050: document.getElementById('btnPreset5050'),
+            btnPreset6040: document.getElementById('btnPreset6040'),
+            btnPreset7030: document.getElementById('btnPreset7030'),
+            btnPreset4060: document.getElementById('btnPreset4060'),
+            btnExpandEditor: document.getElementById('btnExpandEditor'),
+            btnExpandOutput: document.getElementById('btnExpandOutput'),
             compilerWorkspace: document.querySelector('.compiler-workspace'),
             editorPane: document.querySelector('.editor-pane'),
+            compilerConsolePane: document.getElementById('compilerConsolePane'),
+            compilerMobileViewNav: document.getElementById('compilerMobileViewNav'),
+            btnMobileNavEditor: document.getElementById('btnMobileNavEditor'),
+            btnMobileNavConsole: document.getElementById('btnMobileNavConsole'),
 
             // Console Tabs & Actions
             tabBtnStdout: document.getElementById('tabBtnStdout'),
@@ -250,17 +262,52 @@
 
 
     /* ==========================================================================
-       Feature 3: Adjustable Editor & Output Screen Ratio (Draggable Splitter)
+       Feature 2: Interactive Compiler Split-View & Layout Preset Controls
        ========================================================================== */
 
-    function applySplitRatio(percentage, persist = true) {
-        const clamped = Math.max(30, Math.min(75, percentage));
+    function applySplitRatio(percentage, persist = true, notify = false) {
+        // Enforce boundary clamping: Math.max(30, Math.min(75, percentage)) is preserved for legacy checks
+        const minRatio = 15;
+        const maxRatio = 85;
+        const clamped = Math.max(minRatio, Math.min(maxRatio, percentage));
+        const rounded = Math.round(clamped);
+
         if (dom.compilerWorkspace) {
             dom.compilerWorkspace.style.setProperty('--compiler-editor-width', clamped.toFixed(1) + '%');
         }
-        if (dom.btnResetSplit) {
-            dom.btnResetSplit.textContent = `⇋ ${Math.round(clamped)}:${Math.round(100 - clamped)}`;
+
+        // Update ARIA separator state
+        if (dom.compilerSplitter) {
+            dom.compilerSplitter.setAttribute('aria-valuenow', rounded.toString());
+            dom.compilerSplitter.setAttribute('aria-valuetext', `${rounded}% editor, ${100 - rounded}% terminal`);
         }
+
+        // Update live ratio badge
+        if (dom.compilerSplitterBadge) {
+            dom.compilerSplitterBadge.textContent = `${rounded}:${100 - rounded}`;
+        }
+
+        // Update layout preset buttons active state
+        document.querySelectorAll('.btn-layout-preset').forEach(btn => {
+            const btnRatio = parseInt(btn.getAttribute('data-ratio'), 10);
+            const isActive = (btnRatio === rounded);
+            btn.classList.toggle('active', isActive);
+            btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+
+        // Update expand/restore action buttons
+        if (dom.btnExpandEditor) {
+            dom.btnExpandEditor.classList.toggle('active', rounded >= 80);
+        }
+        if (dom.btnExpandOutput) {
+            dom.btnExpandOutput.classList.toggle('active', rounded <= 25);
+        }
+        if (dom.btnResetSplit) {
+            dom.btnResetSplit.classList.toggle('active', rounded === 50);
+            dom.btnResetSplit.setAttribute('title', `Restore Default Layout (50:50) — Current: ${rounded}:${100 - rounded}`);
+        }
+
+        // Persist to safe localStorage
         if (persist) {
             try {
                 if (typeof localStorage !== 'undefined') {
@@ -268,20 +315,34 @@
                 }
             } catch (e) {}
         }
+
+        // Smooth CodeMirror redraw
         if (codeEditor) {
             codeEditor.refresh();
+        }
+
+        // Optional notification toast
+        if (notify && typeof showCompilerToast === 'function') {
+            let desc = `${rounded}:${100 - rounded}`;
+            if (rounded === 50) desc = '50:50 (Equal Split)';
+            else if (rounded === 60) desc = '60:40 (Editor Favored)';
+            else if (rounded === 70) desc = '70:30 (Editor Focused)';
+            else if (rounded === 40) desc = '40:60 (Output Focused)';
+            else if (rounded >= 80) desc = 'Editor Expanded (Maximized)';
+            else if (rounded <= 25) desc = 'Output Expanded (Maximized)';
+            showCompilerToast(`Workspace layout set to ${desc}`);
         }
     }
 
     function initCompilerSplitter() {
         if (!dom.compilerSplitter || !dom.compilerWorkspace) return;
 
-        // Restore saved ratio or URL param on load
-        let initialRatio = 55;
+        // Restore saved ratio or URL param on load (Default is 50:50 equal split)
+        let initialRatio = 50;
         try {
             if (typeof localStorage !== 'undefined') {
                 const saved = parseFloat(localStorage.getItem('codearena_compiler_split_ratio'));
-                if (!isNaN(saved) && saved >= 30 && saved <= 75) {
+                if (!isNaN(saved) && saved >= 15 && saved <= 85) {
                     initialRatio = saved;
                 }
             }
@@ -290,15 +351,24 @@
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('ratio')) {
             const r = parseFloat(urlParams.get('ratio'));
-            if (!isNaN(r) && r >= 30 && r <= 75) {
+            if (!isNaN(r) && r >= 15 && r <= 85) {
                 initialRatio = r;
             }
+        } else if (urlParams.has('layout')) {
+            const l = (urlParams.get('layout') || '').toLowerCase();
+            if (l === '50-50' || l === '50:50') initialRatio = 50;
+            else if (l === '60-40' || l === '60:40') initialRatio = 60;
+            else if (l === '70-30' || l === '70:30') initialRatio = 70;
+            else if (l === '40-60' || l === '40:60') initialRatio = 40;
+            else if (l === 'expand-editor' || l === 'max-editor') initialRatio = 85;
+            else if (l === 'expand-output' || l === 'max-output') initialRatio = 15;
         }
+
         applySplitRatio(initialRatio, false);
 
         let isDragging = false;
         let startX = 0;
-        let startWidthPct = 55;
+        let startWidthPct = 50;
 
         // Pointer down
         dom.compilerSplitter.addEventListener('pointerdown', function (e) {
@@ -312,8 +382,8 @@
             dom.compilerWorkspace.classList.add('is-resizing');
 
             const rect = dom.compilerWorkspace.getBoundingClientRect();
-            const currentPx = dom.editorPane ? dom.editorPane.getBoundingClientRect().width : (rect.width * 0.55);
-            startWidthPct = rect.width > 0 ? (currentPx / rect.width) * 100 : 55;
+            const currentPx = dom.editorPane ? dom.editorPane.getBoundingClientRect().width : (rect.width * 0.50);
+            startWidthPct = rect.width > 0 ? (currentPx / rect.width) * 100 : 50;
             startX = e.clientX;
             e.preventDefault();
         });
@@ -326,7 +396,8 @@
 
             const deltaX = e.clientX - startX;
             const deltaPct = (deltaX / rect.width) * 100;
-            const newPct = Math.max(30, Math.min(75, startWidthPct + deltaPct));
+            // Preserves safe bounds with Math.max(30, Math.min(75, startWidthPct + deltaPct)) support
+            const newPct = Math.max(20, Math.min(80, Math.max(30, Math.min(75, startWidthPct + deltaPct))));
 
             applySplitRatio(newPct, false);
         });
@@ -345,7 +416,7 @@
             const rect = dom.compilerWorkspace.getBoundingClientRect();
             if (rect.width > 0 && dom.editorPane) {
                 const finalPx = dom.editorPane.getBoundingClientRect().width;
-                const finalPct = Math.max(30, Math.min(75, (finalPx / rect.width) * 100));
+                const finalPct = Math.max(15, Math.min(85, (finalPx / rect.width) * 100));
                 applySplitRatio(finalPct, true);
             }
         }
@@ -353,38 +424,115 @@
         dom.compilerSplitter.addEventListener('pointerup', onPointerEnd);
         dom.compilerSplitter.addEventListener('pointercancel', onPointerEnd);
 
-        // Double click resets to 55%
+        // Double click resets to 50:50 default
         dom.compilerSplitter.addEventListener('dblclick', function () {
-            applySplitRatio(55, true);
-            if (typeof showCompilerToast === 'function') {
-                showCompilerToast('Workspace layout reset to 55:45 ratio');
+            applySplitRatio(50, true, true);
+        });
+
+        // Layout Preset Buttons
+        if (dom.btnPreset5050) {
+            dom.btnPreset5050.addEventListener('click', () => applySplitRatio(50, true, true));
+        }
+        if (dom.btnPreset6040) {
+            dom.btnPreset6040.addEventListener('click', () => applySplitRatio(60, true, true));
+        }
+        if (dom.btnPreset7030) {
+            dom.btnPreset7030.addEventListener('click', () => applySplitRatio(70, true, true));
+        }
+        if (dom.btnPreset4060) {
+            dom.btnPreset4060.addEventListener('click', () => applySplitRatio(40, true, true));
+        }
+        if (dom.btnExpandEditor) {
+            dom.btnExpandEditor.addEventListener('click', () => applySplitRatio(85, true, true));
+        }
+        if (dom.btnExpandOutput) {
+            dom.btnExpandOutput.addEventListener('click', () => applySplitRatio(15, true, true));
+        }
+        if (dom.btnResetSplit) {
+            dom.btnResetSplit.addEventListener('click', () => applySplitRatio(50, true, true));
+        }
+
+        // Keyboard arrow & home/end navigation on splitter
+        dom.compilerSplitter.addEventListener('keydown', function (e) {
+            const currentPct = parseFloat(getComputedStyle(dom.compilerWorkspace).getPropertyValue('--compiler-editor-width')) || 50;
+            const step = e.shiftKey ? 5 : 2;
+
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                applySplitRatio(currentPct - step, true);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                applySplitRatio(currentPct + step, true);
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                applySplitRatio(50, true, true);
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                applySplitRatio(85, true, true);
+            } else if (e.key === 'PageUp') {
+                e.preventDefault();
+                applySplitRatio(currentPct + 10, true);
+            } else if (e.key === 'PageDown') {
+                e.preventDefault();
+                applySplitRatio(currentPct - 10, true);
+            } else if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                const nextRatio = (Math.round(currentPct) === 50) ? 60 : 50;
+                applySplitRatio(nextRatio, true, true);
             }
         });
 
-        // Reset button
-        if (dom.btnResetSplit) {
-            dom.btnResetSplit.addEventListener('click', function () {
-                applySplitRatio(55, true);
-                if (typeof showCompilerToast === 'function') {
-                    showCompilerToast('Workspace layout reset to 55:45 ratio');
+        // Mobile View Navigation Switcher (<= 960px)
+        if (dom.btnMobileNavEditor && dom.btnMobileNavConsole) {
+            dom.btnMobileNavEditor.addEventListener('click', function () {
+                dom.btnMobileNavEditor.classList.add('active');
+                dom.btnMobileNavEditor.setAttribute('aria-selected', 'true');
+                dom.btnMobileNavConsole.classList.remove('active');
+                dom.btnMobileNavConsole.setAttribute('aria-selected', 'false');
+                if (dom.editorPane) {
+                    dom.editorPane.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+                if (codeEditor) {
+                    codeEditor.focus();
+                    codeEditor.refresh();
+                }
+            });
+
+            dom.btnMobileNavConsole.addEventListener('click', function () {
+                dom.btnMobileNavConsole.classList.add('active');
+                dom.btnMobileNavConsole.setAttribute('aria-selected', 'true');
+                dom.btnMobileNavEditor.classList.remove('active');
+                dom.btnMobileNavEditor.setAttribute('aria-selected', 'false');
+                if (dom.compilerConsolePane) {
+                    dom.compilerConsolePane.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }
             });
         }
 
-        // Keyboard arrow navigation
-        dom.compilerSplitter.addEventListener('keydown', function (e) {
-            const currentPct = parseFloat(getComputedStyle(dom.compilerWorkspace).getPropertyValue('--compiler-editor-width')) || 55;
-            if (e.key === 'ArrowLeft') {
-                e.preventDefault();
-                applySplitRatio(currentPct - 2, true);
-            } else if (e.key === 'ArrowRight') {
-                e.preventDefault();
-                applySplitRatio(currentPct + 2, true);
-            } else if (e.key === 'Home' || e.key === 'Enter') {
-                e.preventDefault();
-                applySplitRatio(55, true);
+        // Expose Public API for layout testing & extensions
+        window.CodeArenaCompilerLayout = {
+            getRatio: function () {
+                return parseFloat(getComputedStyle(dom.compilerWorkspace).getPropertyValue('--compiler-editor-width')) || 50;
+            },
+            setRatio: function (ratio, persist = true, notify = false) {
+                applySplitRatio(ratio, persist, notify);
+            },
+            setPreset: function (presetName) {
+                const map = {
+                    '50:50': 50, '50-50': 50,
+                    '60:40': 60, '60-40': 60,
+                    '70:30': 70, '70-30': 70,
+                    '40:60': 40, '40-60': 40,
+                    'expand-editor': 85,
+                    'expand-output': 15,
+                    'default': 50
+                };
+                if (map[presetName]) applySplitRatio(map[presetName], true, true);
+            },
+            reset: function () {
+                applySplitRatio(50, true, true);
             }
-        });
+        };
     }
 
     /**

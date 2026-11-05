@@ -5,7 +5,8 @@
     try {
         if (typeof window !== 'undefined' && window.localStorage) {
             const saved = window.localStorage.getItem('codearena-theme');
-            if (saved === 'light') {
+            const urlParams = (typeof window !== 'undefined' && window.location) ? new URLSearchParams(window.location.search) : null;
+            if ((urlParams && urlParams.get('theme') === 'light') || saved === 'light') {
                 document.documentElement.setAttribute('data-theme', 'light');
             }
             const settingsRaw = window.localStorage.getItem('codearena_user_settings');

@@ -8,6 +8,7 @@
     <link rel="icon" type="image/png" href="../assets/logo/codearena-favicon.png">
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/auth_modal.css">
     <link rel="stylesheet" href="../css/secondary.css">
     <!-- Immediate Theme Application Script (Prevents Flash) -->
     <script src="../js/theme.js"></script>
@@ -74,32 +75,155 @@
                 </div>
             </section>
 
-            <!-- Learning Layout: Sidebar + Lesson Viewer -->
-            <div class="learn-layout-container">
-
-                <!-- Left Topics Sidebar -->
-                <aside class="learn-topics-sidebar" id="learnTopicsSidebar" aria-label="Curriculum Modules List">
-                    <!-- Populated dynamically by learn.js -->
-                </aside>
-
-                <!-- Right Lesson Viewer -->
-                <article class="learn-lesson-card" id="lessonCardArea" aria-label="Current Lesson">
-                    <!-- Populated dynamically by learn.js -->
-                </article>
-
+            <!-- Learning Mode Switcher (Curriculum vs Interactive Animation Studio) -->
+            <div class="learn-mode-nav" role="tablist" aria-label="Learning Modes">
+                <button type="button" class="learn-mode-btn active" id="btnModeCurriculum" role="tab" aria-selected="true" aria-controls="viewCurriculum">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+                        <path d="M6 6h10"></path>
+                        <path d="M6 10h10"></path>
+                    </svg>
+                    <span>📚 Concept Curriculum (14 Modules)</span>
+                </button>
+                <button type="button" class="learn-mode-btn" id="btnModeAnimations" role="tab" aria-selected="false" aria-controls="viewAnimationStudio">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    <span>⚡ Interactive Animation Studio (8 Demonstrations)</span>
+                </button>
             </div>
 
-            <!-- Lesson Navigation Footer -->
-            <div class="lesson-nav-footer">
-                <button type="button" class="secondary-header-btn" id="btnPrevLesson" style="height: 36px; padding: 0 16px;">
-                    ← Previous Module
-                </button>
-                <span id="lessonProgressText" style="font-size: 0.84rem; font-weight: 600; color: var(--color-text-muted);">
-                    Module 1 of 14
-                </span>
-                <button type="button" class="prob-btn-solve" id="btnNextLesson" style="height: 36px; padding: 0 16px;">
-                    Next Module →
-                </button>
+            <!-- View 1: Concept Curriculum View -->
+            <div class="learn-view-panel" id="viewCurriculum" role="tabpanel" aria-labelledby="btnModeCurriculum">
+                <!-- Learning Layout: Sidebar + Lesson Viewer -->
+                <div class="learn-layout-container">
+
+                    <!-- Left Topics Sidebar -->
+                    <aside class="learn-topics-sidebar" id="learnTopicsSidebar" aria-label="Curriculum Modules List">
+                        <!-- Populated dynamically by learn.js -->
+                    </aside>
+
+                    <!-- Right Lesson Viewer -->
+                    <article class="learn-lesson-card" id="lessonCardArea" aria-label="Current Lesson">
+                        <!-- Populated dynamically by learn.js -->
+                    </article>
+
+                </div>
+
+                <!-- Lesson Navigation Footer -->
+                <div class="lesson-nav-footer">
+                    <button type="button" class="secondary-header-btn" id="btnPrevLesson" style="height: 36px; padding: 0 16px;">
+                        ← Previous Module
+                    </button>
+                    <span id="lessonProgressText" style="font-size: 0.84rem; font-weight: 600; color: var(--color-text-muted);">
+                        Module 1 of 14
+                    </span>
+                    <button type="button" class="prob-btn-solve" id="btnNextLesson" style="height: 36px; padding: 0 16px;">
+                        Next Module →
+                    </button>
+                </div>
+            </div>
+
+            <!-- View 2: Interactive Animation Studio View -->
+            <div class="learn-view-panel" id="viewAnimationStudio" role="tabpanel" aria-labelledby="btnModeAnimations" style="display: none;">
+                <!-- Animation Studio Selector Bar -->
+                <div class="anim-selector-container">
+                    <div class="anim-selector-header">
+                        <span class="anim-selector-title">Select Concept Demonstration:</span>
+                        <span class="anim-selector-badge">8 Interactive Simulations</span>
+                    </div>
+                    <div class="anim-pills-bar" id="animPillsBar" role="tablist" aria-label="Interactive Animations List">
+                        <!-- Populated dynamically by learn.js -->
+                    </div>
+                </div>
+
+                <!-- Interactive Animation Player -->
+                <div class="anim-player-card" id="animPlayerCard">
+                    <!-- Player Header -->
+                    <div class="anim-player-header">
+                        <div class="anim-player-info">
+                            <span class="preview-badge-pill" id="animCategoryBadge">Core JVM</span>
+                            <h2 class="anim-player-title" id="animTitle">Java Program Execution Lifecycle</h2>
+                        </div>
+                        <div class="anim-player-actions">
+                            <a href="problem.html?id=two-sum" class="btn-anim-practice" id="btnAnimPracticeProblem">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                                <span>Practice This Concept</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Visual Stage Area -->
+                    <div class="anim-stage-wrapper">
+                        <div class="anim-stage" id="animStage" role="region" aria-label="Visual animation diagram">
+                            <!-- SVG and visual elements rendered dynamically by learn.js -->
+                        </div>
+                    </div>
+
+                    <!-- Player Controls Bar -->
+                    <div class="anim-controls-bar">
+                        <div class="anim-controls-group">
+                            <button type="button" class="anim-btn" id="btnAnimPrev" title="Step Backward (Left Arrow)" aria-label="Step Backward">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg>
+                                <span>Prev</span>
+                            </button>
+
+                            <button type="button" class="anim-btn anim-btn-play" id="btnAnimPlayPause" title="Play or Pause Animation (Spacebar)" aria-label="Play animation">
+                                <svg class="anim-icon-play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                                <span id="animPlayBtnLabel">Play</span>
+                            </button>
+
+                            <button type="button" class="anim-btn" id="btnAnimNext" title="Step Forward (Right Arrow)" aria-label="Step Forward">
+                                <span>Next</span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+
+                            <button type="button" class="anim-btn anim-btn-reset" id="btnAnimReset" title="Restart to Step 1" aria-label="Restart Animation">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                                    <path d="M3 3v5h5"></path>
+                                </svg>
+                                <span>Reset</span>
+                            </button>
+                        </div>
+
+                        <div class="anim-status-group">
+                            <span class="anim-step-badge" id="animStepIndicator" aria-live="polite">Step 1 of 5</span>
+
+                            <div class="anim-speed-selector">
+                                <label for="selectAnimSpeed" class="anim-speed-label">Speed:</label>
+                                <select id="selectAnimSpeed" class="anim-speed-select" aria-label="Animation playback speed">
+                                    <option value="0.5">0.5x</option>
+                                    <option value="1" selected>1.0x</option>
+                                    <option value="2">2.0x</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Step Explanation Card -->
+                    <div class="anim-explanation-card" id="animExplanationCard">
+                        <div class="anim-explanation-header">
+                            <div class="anim-step-title-row">
+                                <span class="anim-step-num-pill" id="animStepNumberPill">Step 1</span>
+                                <h3 class="anim-step-title" id="animStepTitle">Step Title</h3>
+                            </div>
+                        </div>
+                        <p class="anim-step-narration" id="animStepNarration">Step narration...</p>
+                        <div class="anim-step-note-box" id="animStepNoteBox">
+                            <span class="anim-note-label">⚡ Under the Hood:</span>
+                            <span id="animStepTechnicalNote">Technical explanation...</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -131,5 +255,6 @@
     <!-- Scripts -->
     <script src="../js/toast.js"></script>
     <script src="../js/learn.js"></script>
+    <script src="../js/auth_modal.js" defer></script>
 </body>
 </html>
