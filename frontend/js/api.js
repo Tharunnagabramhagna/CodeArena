@@ -1,16 +1,21 @@
 // api.js — CodeArena Centralized API Client & Service Layer
-// Prepares frontend for upcoming Java Servlet + JDBC backend endpoints.
+// Connects frontend to Java Servlet + JDBC backend endpoints.
 // Encapsulates network communication, JSON serialization, headers, and error handling.
 
 const API_CONFIG = {
-    // Default base URL; customizable via window.CODEARENA_API_BASE
-    baseURL: (typeof window !== 'undefined' && window.CODEARENA_API_BASE) || '/api',
+    // Base URL; defaults to relative '/api' or can be set via window.CODEARENA_API_BASE
+    baseURL: (typeof window !== 'undefined' && window.CODEARENA_API_BASE) || '/codearena/api',
     timeoutMs: 6000,
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     }
 };
+
+// Fallback detection: if running standalone without context path, try '/api'
+if (typeof window !== 'undefined' && !window.CODEARENA_API_BASE && window.location.pathname.indexOf('/codearena') === -1) {
+    API_CONFIG.baseURL = '/api';
+}
 
 /**
  * Low-level HTTP client with timeout, JSON parsing, and unified error handling.
@@ -23,7 +28,7 @@ async function apiClient(endpoint, options = {}) {
     const config = Object.assign({
         method: options.method || 'GET',
         headers: Object.assign({}, API_CONFIG.headers, options.headers || {}),
-        credentials: 'same-origin', // Preserves HTTP-only session cookies from Java Servlets
+        credentials: 'include', // Preserves HTTP-only session cookies from Java Servlets
         signal: controller.signal
     }, options);
 
@@ -53,7 +58,8 @@ async function apiClient(endpoint, options = {}) {
         return {
             success: true,
             status: response.status,
-            data: data
+            data: data && data.data !== undefined ? data.data : data,
+            raw: data
         };
     } catch (err) {
         clearTimeout(timeoutId);
@@ -63,15 +69,14 @@ async function apiClient(endpoint, options = {}) {
             status: err.status || 0,
             isNetworkFailure: isNetworkFailure,
             message: isNetworkFailure
-                ? 'Backend service is currently in preview mode. Java Servlet authentication endpoints will be active in the upcoming backend phase.'
+                ? 'Backend service is connecting. Ensure Tomcat and MySQL are running.'
                 : (err.message || 'An unexpected error occurred.')
         };
     }
 }
 
 /**
- * Authentication Service Layer
- * Prepared for real Java Servlet endpoints.
+ * Authentication Service Layer (Person 4 - Kavya)
  */
 const authService = {
     /**
@@ -115,7 +120,6 @@ const authService = {
 
     /**
      * GET /api/users/me
-     * Retrieves the authenticated user's session profile from the server.
      */
     async getCurrentUser() {
         return apiClient('/users/me', {
@@ -124,16 +128,68 @@ const authService = {
     }
 };
 
-// Expose to window for vanilla JS application consumption
+/**
+ * Student Services Layer (Person 4 - Kavya)
+ */
+const studentService = {
+    /**
+     * GET /api/student/profile
+     */
+    async getProfile() {
+        return apiClient('/student/profile', {
+            method: 'GET'
+        });
+    },
+
+    /**
+     * PUT /api/student/profile
+     */
+    async updateProfile(profileData) {
+        return apiClient('/student/profile', {
+            method: 'PUT',
+            body: profileData
+        });
+    },
+
+    /**
+     * GET /api/student/progress
+     */
+    async getProgress() {
+        return apiClient('/student/progress', {
+            method: 'GET'
+        });
+    },
+
+    /**
+     * GET /api/student/submissions
+     */
+    async getSubmissions(page = 1, limit = 20) {
+        return apiClient(`/student/submissions?page=${page}&limit=${limit}`, {
+            method: 'GET'
+        });
+    },
+
+    /**
+     * POST /api/student/submissions
+     */
+    async recordSubmission(submissionData) {
+        return apiClient('/student/submissions', {
+            method: 'POST',
+            body: submissionData
+        });
+    }
+};
+
+// Expose to window for frontend consumption
 if (typeof window !== 'undefined') {
     window.CodeArenaAPI = {
         config: API_CONFIG,
         client: apiClient,
-        authService: authService
+        authService: authService,
+        studentService: studentService
     };
 }
 
-// Module export for test environments if applicable
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { API_CONFIG, apiClient, authService };
+    module.exports = { API_CONFIG, apiClient, authService, studentService };
 }

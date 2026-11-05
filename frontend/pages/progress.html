@@ -9,12 +9,71 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/auth.css">
-    <!-- Immediate Theme Application Script (Prevents Flash) -->
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <!-- Immediate Theme Application Script -->
     <script src="../js/theme.js"></script>
+    <style>
+        .progress-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 24px;
+            background: var(--bg-card, #1e293b);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--text-primary, #f8fafc);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+            padding: 18px;
+            text-align: center;
+        }
+        .stat-val {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3b82f6;
+            margin-top: 4px;
+        }
+        .topic-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .topic-bar-bg {
+            flex-grow: 1;
+            margin: 0 16px;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .topic-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            border-radius: 4px;
+        }
+        .badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .badge-ADVANCED { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .badge-INTERMEDIATE { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .badge-BEGINNER { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    </style>
 </head>
 <body class="auth-page">
 
-    <!-- Top Minimal Brand Bar -->
     <header class="auth-header">
         <a href="../index.html" class="brand" title="Return to CodeArena Home">
             <img src="../assets/logo/codearena-logo.png" alt="CodeArena logo" class="brand-logo">
@@ -22,44 +81,99 @@
         </a>
 
         <div class="auth-header-actions">
-            <button class="theme-toggle" type="button" aria-label="Toggle theme">☀</button>
+            <button class="theme-toggle" type="button" aria-label="Toggle theme">🌓</button>
             <a href="dashboard.html" class="auth-return-link">← Return to Dashboard</a>
         </div>
     </header>
 
-    <!-- Main Placeholder Canvas -->
-    <main class="auth-main">
-        <div class="auth-card" style="max-width: 520px; text-align: center;">
-            <div class="auth-card-header">
-                <div class="empty-state-icon" style="margin: 0 auto 10px; width: 56px; height: 56px; border-radius: 50%; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center; color: #60A5FA;" aria-hidden="true">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1='18' y1='20' x2='18' y2='10'/><line x1='12' y1='20' x2='12' y2='4'/><line x1='6' y1='20' x2='6' y2='14'/>
-                    </svg>
+    <main>
+        <div class="progress-container">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 style="font-size: 1.6rem; font-weight: 700;">Student Learning Progress</h1>
+                    <p style="color: #94a3b8; font-size: 0.9rem;">Real-time topic mastery & problem solving analytics</p>
                 </div>
-                <h1 class="auth-title">Student Progress Tracking</h1>
-                <span class="auth-notice" style="margin: 6px auto; display: inline-flex; justify-content: center;">
-                    <span class="notice-icon">ℹ</span>
-                    <span>Planned for Phase 4 · Backend Integration In Progress</span>
-                </span>
-                <p class="auth-subtitle" style="margin-top: 10px; font-size: 0.9rem; line-height: 1.5;">
-                    Visualize topic proficiency, daily problem-solving streaks, and cumulative difficulty distribution over time.
-                </p>
+                <button id="refreshBtn" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Refresh</button>
             </div>
 
-            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 12px;">
-                <a href="dashboard.html" class="btn btn-primary btn-auth" style="margin-top: 0; text-decoration: none;">
-                    Go to Student Dashboard <span aria-hidden="true">→</span>
-                </a>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div style="color: #94a3b8; font-size: 0.85rem;">Problems Solved</div>
+                    <div class="stat-val" id="totalSolved">--</div>
+                </div>
+                <div class="stat-card">
+                    <div style="color: #94a3b8; font-size: 0.85rem;">Overall Accuracy</div>
+                    <div class="stat-val" id="accuracyRate">--%</div>
+                </div>
+                <div class="stat-card">
+                    <div style="color: #94a3b8; font-size: 0.85rem;">Day Streak</div>
+                    <div class="stat-val" id="streakDays" style="color: #f59e0b;">-- 🔥</div>
+                </div>
+                <div class="stat-card">
+                    <div style="color: #94a3b8; font-size: 0.85rem;">Ranking Score</div>
+                    <div class="stat-val" id="rankingScore" style="color: #10b981;">--</div>
+                </div>
             </div>
-            
-            <p class="auth-switch" style="margin-top: 8px;">
-                <a href="../index.html">← Back to Public Homepage</a>
-            </p>
+
+            <h2 style="font-size: 1.15rem; font-weight: 600; margin-top: 30px; margin-bottom: 12px;">Topic Proficiency Breakdown</h2>
+            <div id="topicsList">
+                <p style="color: #94a3b8;">Loading student progress data...</p>
+            </div>
         </div>
     </main>
 
-    <footer class="auth-footer">
-        &copy; 2026 CodeArena. All rights reserved. Built for learners, by learners.
-    </footer>
+    <script src="../js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const totalSolved = document.getElementById('totalSolved');
+            const accuracyRate = document.getElementById('accuracyRate');
+            const streakDays = document.getElementById('streakDays');
+            const rankingScore = document.getElementById('rankingScore');
+            const topicsList = document.getElementById('topicsList');
+            const refreshBtn = document.getElementById('refreshBtn');
+
+            async function loadProgress() {
+                try {
+                    const res = await window.CodeArenaAPI.studentService.getProgress();
+                    if (res.success && res.data) {
+                        const d = res.data;
+                        totalSolved.textContent = d.totalSolved || 0;
+                        accuracyRate.textContent = (d.accuracyRate || 0) + '%';
+                        streakDays.textContent = (d.streakDays || 0) + ' 🔥';
+                        rankingScore.textContent = d.rankingScore || 0;
+
+                        if (d.topics && d.topics.length > 0) {
+                            topicsList.innerHTML = d.topics.map(t => {
+                                const rate = t.problemsAttempted > 0 ? Math.round((t.problemsSolved / t.problemsAttempted) * 100) : 0;
+                                return `
+                                    <div class="topic-row">
+                                        <div style="min-width: 220px; font-weight: 500;">${t.topic}</div>
+                                        <div class="topic-bar-bg">
+                                            <div class="topic-bar-fill" style="width: ${Math.min(rate, 100)}%;"></div>
+                                        </div>
+                                        <div style="min-width: 100px; text-align: right; color: #94a3b8; font-size: 0.85rem;">
+                                            ${t.problemsSolved}/${t.problemsAttempted} (${rate}%)
+                                        </div>
+                                        <div style="margin-left: 12px; min-width: 90px; text-align: right;">
+                                            <span class="badge badge-${t.proficiencyLevel}">${t.proficiencyLevel}</span>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('');
+                        } else {
+                            topicsList.innerHTML = '<p style="color: #94a3b8;">No topic progress recorded yet. Start practicing problems to view analytics!</p>';
+                        }
+                    } else {
+                        topicsList.innerHTML = `<p style="color: #f87171;">${res.message || 'Please log in to view your learning progress.'}</p>`;
+                    }
+                } catch (e) {
+                    topicsList.innerHTML = '<p style="color: #f87171;">Failed to connect to backend service.</p>';
+                }
+            }
+
+            refreshBtn.addEventListener('click', loadProgress);
+            loadProgress();
+        });
+    </script>
 </body>
 </html>

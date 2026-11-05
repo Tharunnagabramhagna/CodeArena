@@ -9,12 +9,52 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/auth.css">
-    <!-- Immediate Theme Application Script (Prevents Flash) -->
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <!-- Immediate Theme Application Script -->
     <script src="../js/theme.js"></script>
+    <style>
+        .history-container {
+            max-width: 960px;
+            margin: 40px auto;
+            padding: 24px;
+            background: var(--bg-card, #1e293b);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--text-primary, #f8fafc);
+        }
+        .subs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 18px;
+            font-size: 0.9rem;
+        }
+        .subs-table th, .subs-table td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .subs-table th {
+            color: #94a3b8;
+            font-weight: 600;
+            background: rgba(255,255,255,0.02);
+        }
+        .verdict-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .verdict-ACCEPTED { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .verdict-WRONG_ANSWER { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .verdict-TIME_LIMIT_EXCEEDED { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .verdict-COMPILATION_ERROR { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+        .verdict-RUNTIME_ERROR { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
+        .verdict-PENDING { background: rgba(148, 163, 184, 0.2); color: #94a3b8; }
+    </style>
 </head>
 <body class="auth-page">
 
-    <!-- Top Minimal Brand Bar -->
     <header class="auth-header">
         <a href="../index.html" class="brand" title="Return to CodeArena Home">
             <img src="../assets/logo/codearena-logo.png" alt="CodeArena logo" class="brand-logo">
@@ -22,44 +62,79 @@
         </a>
 
         <div class="auth-header-actions">
-            <button class="theme-toggle" type="button" aria-label="Toggle theme">☀</button>
+            <button class="theme-toggle" type="button" aria-label="Toggle theme">🌓</button>
             <a href="dashboard.html" class="auth-return-link">← Return to Dashboard</a>
         </div>
     </header>
 
-    <!-- Main Placeholder Canvas -->
-    <main class="auth-main">
-        <div class="auth-card" style="max-width: 520px; text-align: center;">
-            <div class="auth-card-header">
-                <div class="empty-state-icon" style="margin: 0 auto 10px; width: 56px; height: 56px; border-radius: 50%; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center; color: #60A5FA;" aria-hidden="true">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/><line x1='16' y1='13' x2='8' y2='13'/><line x1='16' y1='17' x2='8' y2='17'/>
-                    </svg>
+    <main>
+        <div class="history-container">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 style="font-size: 1.6rem; font-weight: 700;">Submission History</h1>
+                    <p style="color: #94a3b8; font-size: 0.9rem;">Audit of evaluated code submissions, execution times, and verdicts</p>
                 </div>
-                <h1 class="auth-title">Submission History</h1>
-                <span class="auth-notice" style="margin: 6px auto; display: inline-flex; justify-content: center;">
-                    <span class="notice-icon">ℹ</span>
-                    <span>Planned for Phase 4 · Backend Integration In Progress</span>
-                </span>
-                <p class="auth-subtitle" style="margin-top: 10px; font-size: 0.9rem; line-height: 1.5;">
-                    Review all past code submissions, execution times, memory usage graphs, and test-case verdicts recorded in your MySQL profile.
-                </p>
+                <button id="refreshBtn" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Refresh</button>
             </div>
 
-            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 12px;">
-                <a href="dashboard.html" class="btn btn-primary btn-auth" style="margin-top: 0; text-decoration: none;">
-                    Go to Student Dashboard <span aria-hidden="true">→</span>
-                </a>
-            </div>
-            
-            <p class="auth-switch" style="margin-top: 8px;">
-                <a href="../index.html">← Back to Public Homepage</a>
-            </p>
+            <table class="subs-table">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Problem</th>
+                        <th>Language</th>
+                        <th>Runtime</th>
+                        <th>Memory</th>
+                        <th>Submitted At</th>
+                    </tr>
+                </thead>
+                <tbody id="submissionsTableBody">
+                    <tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 24px;">Loading submissions...</td></tr>
+                </tbody>
+            </table>
         </div>
     </main>
 
-    <footer class="auth-footer">
-        &copy; 2026 CodeArena. All rights reserved. Built for learners, by learners.
-    </footer>
+    <script src="../js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const tbody = document.getElementById('submissionsTableBody');
+            const refreshBtn = document.getElementById('refreshBtn');
+
+            async function loadSubmissions() {
+                try {
+                    const res = await window.CodeArenaAPI.studentService.getSubmissions();
+                    if (res.success && res.data) {
+                        const subs = res.data.submissions || [];
+                        if (subs.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 24px;">No submissions yet. Solve problems to build your history!</td></tr>';
+                            return;
+                        }
+
+                        tbody.innerHTML = subs.map(s => {
+                            const dateStr = s.submittedAt ? new Date(s.submittedAt).toLocaleString() : 'Recent';
+                            return `
+                                <tr>
+                                    <td><span class="verdict-tag verdict-${s.verdict}">${s.verdict.replace(/_/g, ' ')}</span></td>
+                                    <td><strong>${s.problemTitle || ('Problem #' + s.problemId)}</strong></td>
+                                    <td>${s.language}</td>
+                                    <td>${s.executionTimeMs} ms</td>
+                                    <td>${Math.round(s.memoryKb / 1024)} MB</td>
+                                    <td style="color: #94a3b8;">${dateStr}</td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #f87171; padding: 24px;">${res.message || 'Please log in to view submissions.'}</td></tr>`;
+                    }
+                } catch (e) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #f87171; padding: 24px;">Failed to connect to backend server.</td></tr>';
+                }
+            }
+
+            refreshBtn.addEventListener('click', loadSubmissions);
+            loadSubmissions();
+        });
+    </script>
 </body>
 </html>

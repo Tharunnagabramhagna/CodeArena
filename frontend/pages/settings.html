@@ -3,18 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Settings — CodeArena</title>
+    <title>Account & Profile Settings — CodeArena</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="../assets/logo/codearena-favicon.png">
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/auth.css">
-    <!-- Immediate Theme Application Script (Prevents Flash) -->
+    <!-- Immediate Theme Application Script -->
     <script src="../js/theme.js"></script>
+    <style>
+        .settings-card {
+            max-width: 620px;
+            margin: 40px auto;
+            padding: 32px;
+            background: var(--bg-card, #1e293b);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--text-primary, #f8fafc);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+    </style>
 </head>
 <body class="auth-page">
 
-    <!-- Top Minimal Brand Bar -->
     <header class="auth-header">
         <a href="../index.html" class="brand" title="Return to CodeArena Home">
             <img src="../assets/logo/codearena-logo.png" alt="CodeArena logo" class="brand-logo">
@@ -22,44 +57,107 @@
         </a>
 
         <div class="auth-header-actions">
-            <button class="theme-toggle" type="button" aria-label="Toggle theme">☀</button>
+            <button class="theme-toggle" type="button" aria-label="Toggle theme">🌓</button>
             <a href="dashboard.html" class="auth-return-link">← Return to Dashboard</a>
         </div>
     </header>
 
-    <!-- Main Placeholder Canvas -->
-    <main class="auth-main">
-        <div class="auth-card" style="max-width: 520px; text-align: center;">
-            <div class="auth-card-header">
-                <div class="empty-state-icon" style="margin: 0 auto 10px; width: 56px; height: 56px; border-radius: 50%; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); display: flex; align-items: center; justify-content: center; color: #60A5FA;" aria-hidden="true">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx='12' cy='12' r='3'/><path d='M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z'/>
-                    </svg>
-                </div>
-                <h1 class="auth-title">Account & Workspace Settings</h1>
-                <span class="auth-notice" style="margin: 6px auto; display: inline-flex; justify-content: center;">
-                    <span class="notice-icon">ℹ</span>
-                    <span>Planned for Phase 4 · Backend Integration In Progress</span>
-                </span>
-                <p class="auth-subtitle" style="margin-top: 10px; font-size: 0.9rem; line-height: 1.5;">
-                    Configure editor keybindings, font size, default Java compiler flags, notifications, and profile details.
-                </p>
-            </div>
+    <main>
+        <div class="settings-card">
+            <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 4px;">Student Profile & Settings</h1>
+            <p style="color: #94a3b8; font-size: 0.88rem; margin-bottom: 24px;">Configure your public student profile, preferred language, and portfolio links.</p>
 
-            <div style="display: flex; gap: 12px; justify-content: center; margin-top: 12px;">
-                <a href="dashboard.html" class="btn btn-primary btn-auth" style="margin-top: 0; text-decoration: none;">
-                    Go to Student Dashboard <span aria-hidden="true">→</span>
-                </a>
-            </div>
-            
-            <p class="auth-switch" style="margin-top: 8px;">
-                <a href="../index.html">← Back to Public Homepage</a>
-            </p>
+            <div id="settingsFeedback" class="auth-feedback" style="display:none; margin-bottom: 16px;"></div>
+
+            <form id="profileForm">
+                <div class="form-group">
+                    <label class="form-label" for="bioInput">Bio / Headline</label>
+                    <textarea id="bioInput" rows="3" class="form-textarea" placeholder="Tell other learners about yourself and what you're practicing..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="prefLangInput">Preferred Programming Language</label>
+                    <select id="prefLangInput" class="form-select">
+                        <option value="Java">Java</option>
+                        <option value="Python">Python</option>
+                        <option value="C++">C++</option>
+                        <option value="JavaScript">JavaScript</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="githubInput">GitHub Profile URL</label>
+                    <input type="url" id="githubInput" class="form-input" placeholder="https://github.com/username">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="linkedinInput">LinkedIn Profile URL</label>
+                    <input type="url" id="linkedinInput" class="form-input" placeholder="https://linkedin.com/in/username">
+                </div>
+
+                <button type="submit" id="saveProfileBtn" class="btn btn-primary btn-auth" style="margin-top: 10px;">Save Profile Changes</button>
+            </form>
         </div>
     </main>
 
-    <footer class="auth-footer">
-        &copy; 2026 CodeArena. All rights reserved. Built for learners, by learners.
-    </footer>
+    <script src="../js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const bioInput = document.getElementById('bioInput');
+            const prefLangInput = document.getElementById('prefLangInput');
+            const githubInput = document.getElementById('githubInput');
+            const linkedinInput = document.getElementById('linkedinInput');
+            const form = document.getElementById('profileForm');
+            const feedback = document.getElementById('settingsFeedback');
+            const saveBtn = document.getElementById('saveProfileBtn');
+
+            function showMsg(msg, isSuccess) {
+                feedback.textContent = msg;
+                feedback.className = 'auth-feedback ' + (isSuccess ? 'feedback-success' : 'feedback-error');
+                feedback.style.display = 'block';
+            }
+
+            // Load initial profile data
+            try {
+                const res = await window.CodeArenaAPI.studentService.getProfile();
+                if (res.success && res.data) {
+                    const p = res.data;
+                    if (p.bio) bioInput.value = p.bio;
+                    if (p.preferredLanguage) prefLangInput.value = p.preferredLanguage;
+                    if (p.githubUrl) githubInput.value = p.githubUrl;
+                    if (p.linkedinUrl) linkedinInput.value = p.linkedinUrl;
+                }
+            } catch (err) {
+                console.warn('Could not load profile initially:', err);
+            }
+
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'Saving...';
+
+                try {
+                    const updateData = {
+                        bio: bioInput.value,
+                        preferredLanguage: prefLangInput.value,
+                        githubUrl: githubInput.value,
+                        linkedinUrl: linkedinInput.value
+                    };
+
+                    const res = await window.CodeArenaAPI.studentService.updateProfile(updateData);
+                    if (res.success) {
+                        showMsg('Profile settings saved successfully!', true);
+                    } else {
+                        showMsg(res.message || 'Failed to update profile.', false);
+                    }
+                } catch (err) {
+                    showMsg('Network communication error.', false);
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Save Profile Changes';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

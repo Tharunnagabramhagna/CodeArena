@@ -1,8 +1,5 @@
 // auth.js — CodeArena Authentication UI & Validation Helper
-// IMPORTANT: Backend authentication via Java Servlets & JDBC is implemented in a future phase.
-// This script provides client-side form validation, password visibility toggle,
-// and clean API service layer communication via window.CodeArenaAPI.
-// It DOES NOT store passwords, DOES NOT fabricate auth sessions, and DOES NOT mock successful login.
+// Person 4 (Kavya): Integrated with Java Servlets & JDBC backend endpoints.
 
 document.addEventListener('DOMContentLoaded', function () {
     // --------------------------------------------------------------------------
@@ -22,7 +19,6 @@ document.addEventListener('DOMContentLoaded', function () {
             btn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
             btn.setAttribute('title', isPassword ? 'Hide password' : 'Show password');
 
-            // Toggle SVG icon paths (Eye vs Eye-Off)
             btn.innerHTML = isPassword
                 ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
                 : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
@@ -30,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // --------------------------------------------------------------------------
-    // 2. Login Form Client-Side Validation & API Service Dispatch
+    // 2. Login Form Submission & Java Servlet Dispatch
     // --------------------------------------------------------------------------
     const loginForm = document.getElementById('loginForm');
     const loginFeedback = document.getElementById('authFeedback');
@@ -48,7 +44,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const password = passwordInput ? passwordInput.value : '';
             const rememberMe = rememberMeInput ? rememberMeInput.checked : false;
 
-            // Basic client-side format validation
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!email || !emailRegex.test(email)) {
                 showFeedback(loginFeedback, 'Please enter a valid email address.', 'error');
@@ -66,7 +61,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 passwordInput.classList.remove('input-error');
             }
 
-            // Set loading presentation state
             const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Log In';
             if (submitBtn) {
                 submitBtn.disabled = true;
@@ -74,20 +68,16 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             try {
-                // Dispatch through service layer
                 if (window.CodeArenaAPI && window.CodeArenaAPI.authService) {
                     const result = await window.CodeArenaAPI.authService.login({ email, password, rememberMe });
                     if (result.success) {
-                        showFeedback(loginFeedback, 'Authentication successful.', 'info');
+                        showFeedback(loginFeedback, 'Authentication successful! Redirecting...', 'success');
+                        setTimeout(function () {
+                            window.location.href = 'dashboard.html';
+                        }, 800);
                     } else {
-                        showFeedback(loginFeedback, result.message, 'info');
+                        showFeedback(loginFeedback, result.message || 'Login failed.', 'error');
                     }
-                } else {
-                    showFeedback(
-                        loginFeedback,
-                        'Frontend validation passed. Backend authentication will be connected via Java Servlets & JDBC in the upcoming development phase.',
-                        'info'
-                    );
                 }
             } catch (err) {
                 showFeedback(loginFeedback, 'Network communication failed. Please check connection.', 'error');
@@ -101,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // --------------------------------------------------------------------------
-    // 3. Signup Form Client-Side Validation & API Service Dispatch
+    // 3. Signup Form Submission & Java Servlet Dispatch
     // --------------------------------------------------------------------------
     const signupForm = document.getElementById('signupForm');
     const signupFeedback = document.getElementById('authFeedback');
@@ -121,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const password = passwordInput ? passwordInput.value : '';
             const confirmPassword = confirmInput ? confirmInput.value : '';
 
-            // Reset error highlights
             [nameInput, emailInput, passwordInput, confirmInput].forEach(function (inp) {
                 if (inp) inp.classList.remove('input-error');
             });
@@ -139,8 +128,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            if (!password || password.length < 8) {
-                showFeedback(signupFeedback, 'Password must be at least 8 characters.', 'error');
+            if (!password || password.length < 6) {
+                showFeedback(signupFeedback, 'Password must be at least 6 characters.', 'error');
                 if (passwordInput) passwordInput.classList.add('input-error');
                 return;
             }
@@ -151,7 +140,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            // Set loading presentation state
             const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Create Account';
             if (submitBtn) {
                 submitBtn.disabled = true;
@@ -159,20 +147,16 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             try {
-                // Dispatch through service layer
                 if (window.CodeArenaAPI && window.CodeArenaAPI.authService) {
                     const result = await window.CodeArenaAPI.authService.register({ fullName: name, email, password });
                     if (result.success) {
-                        showFeedback(signupFeedback, 'Registration successful.', 'info');
+                        showFeedback(signupFeedback, 'Account registered! Loading dashboard...', 'success');
+                        setTimeout(function () {
+                            window.location.href = 'dashboard.html';
+                        }, 800);
                     } else {
-                        showFeedback(signupFeedback, result.message, 'info');
+                        showFeedback(signupFeedback, result.message || 'Registration failed.', 'error');
                     }
-                } else {
-                    showFeedback(
-                        signupFeedback,
-                        'Frontend registration form validated successfully. User persistence to the MySQL database will be activated in the backend integration phase.',
-                        'info'
-                    );
                 }
             } catch (err) {
                 showFeedback(signupFeedback, 'Network communication failed. Please check connection.', 'error');
@@ -190,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // --------------------------------------------------------------------------
     function showFeedback(element, message, type) {
         element.textContent = message;
-        element.className = 'auth-feedback ' + (type === 'error' ? 'feedback-error' : 'feedback-info');
+        element.className = 'auth-feedback ' + (type === 'error' ? 'feedback-error' : (type === 'success' ? 'feedback-success' : 'feedback-info'));
         element.style.display = 'block';
     }
 });

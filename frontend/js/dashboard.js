@@ -1,4 +1,5 @@
 // dashboard.js — CodeArena Student Dashboard Interactions
+// Person 4 (Kavya): Integrated authenticated session checks, profile binding, and logout.
 
 document.addEventListener('DOMContentLoaded', function () {
     const dashboardLayout = document.getElementById('dashboardLayout');
@@ -30,21 +31,17 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             localStorage.setItem(STORAGE_KEY, isCollapsed ? 'true' : 'false');
         } catch (e) {
-            // Silently handle storage limits or private browsing restrictions
         }
     }
 
-    // Initialize sidebar state from localStorage (defaults to expanded on desktop)
     const savedState = localStorage.getItem(STORAGE_KEY);
     if (savedState === 'true') {
         setSidebarState(true);
     } else {
         setSidebarState(false);
     }
-    // Remove preload class now that dynamic state is active
     document.documentElement.classList.remove('sidebar-preload-collapsed');
 
-    // Toggle sidebar on button click or keyboard trigger
     if (sidebarToggleBtn) {
         sidebarToggleBtn.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -98,14 +95,12 @@ document.addEventListener('DOMContentLoaded', function () {
         sidebarBackdrop.addEventListener('click', closeMobileDrawer);
     }
 
-    // Close mobile drawer when pressing Escape
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             closeMobileDrawer();
         }
     });
 
-    // Close mobile drawer when selecting any navigation link
     if (dashboardSidebar) {
         const sidebarLinks = dashboardSidebar.querySelectorAll('.sidebar-link');
         sidebarLinks.forEach(function (link) {
@@ -136,10 +131,16 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // --------------------------------------------------------------------------
-    // 4. Future Authenticated User Profile Menu Toggle (Ready for Backend)
+    // 4. Authenticated User Profile Menu Toggle & Live Session Sync
     // --------------------------------------------------------------------------
     const userProfileTrigger = document.getElementById('userProfileTrigger');
     const userProfileMenu = document.getElementById('userProfileMenu');
+    const userProfileArea = document.getElementById('userProfileArea');
+    const guestAuthActions = document.getElementById('guestAuthActions');
+    const userName = document.getElementById('userName');
+    const userAvatar = document.getElementById('userAvatar');
+    const userRole = document.getElementById('userRole');
+    const logoutBtn = document.getElementById('logoutBtn');
 
     if (userProfileTrigger && userProfileMenu) {
         userProfileTrigger.addEventListener('click', function (e) {
@@ -157,8 +158,48 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Check backend session for current user
+    async function syncSession() {
+        if (!window.CodeArenaAPI || !window.CodeArenaAPI.authService) return;
+
+        try {
+            const res = await window.CodeArenaAPI.authService.getCurrentUser();
+            if (res.success && res.data) {
+                const user = res.data;
+                if (guestAuthActions) guestAuthActions.style.display = 'none';
+                if (userProfileArea) {
+                    userProfileArea.style.display = 'flex';
+                    userProfileArea.classList.remove('auth-hidden');
+                    userProfileArea.setAttribute('aria-hidden', 'false');
+                }
+                if (userName) userName.textContent = user.fullName || 'Student';
+                if (userRole) userRole.textContent = user.role || 'Student';
+                if (userAvatar) userAvatar.textContent = (user.fullName ? user.fullName.charAt(0) : 'U').toUpperCase();
+
+                // Update welcome heading if present
+                const welcomeName = document.querySelector('.welcome-banner h2');
+                if (welcomeName && user.fullName) {
+                    welcomeName.textContent = `Welcome back, ${user.fullName.split(' ')[0]}!`;
+                }
+            }
+        } catch (err) {
+            // Keep guest actions visible
+        }
+    }
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async function () {
+            if (window.CodeArenaAPI && window.CodeArenaAPI.authService) {
+                await window.CodeArenaAPI.authService.logout();
+                window.location.reload();
+            }
+        });
+    }
+
+    syncSession();
+
     // --------------------------------------------------------------------------
-    // 5. Notification Popover Toggle (Honest Non-Fabricated State)
+    // 5. Notification Popover Toggle
     // --------------------------------------------------------------------------
     const notificationBtn = document.getElementById('notificationBtn');
     const notificationPopover = document.getElementById('notificationPopover');
@@ -187,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // --------------------------------------------------------------------------
-    // 6. Search Input Feedback (Informs user of Phase 3 search indexing)
+    // 6. Search Input Feedback
     // --------------------------------------------------------------------------
     const dashSearchInput = document.getElementById('dashSearchInput');
     const searchFeedbackPopover = document.getElementById('searchFeedbackPopover');
@@ -217,4 +258,3 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
-
