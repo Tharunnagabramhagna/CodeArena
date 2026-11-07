@@ -200,7 +200,11 @@
                         </div>
                         <div class="problem-header-right-actions" style="display: flex; align-items: center; gap: 8px;">
                             <button id="btnBookmarkProblem" class="workspace-header-btn" type="button" title="Bookmark this challenge" aria-label="Bookmark this challenge" style="height: 28px; font-size: 0.78rem; flex-shrink: 0;">
-                                <span class="bookmark-icon" aria-hidden="true">🔖</span>
+                                <span class="bookmark-icon" aria-hidden="true">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                    </svg>
+                                </span>
                                 <span id="bookmarkBtnText">Bookmark</span>
                             </button>
                             <button id="btnToggleCollapseLeft" class="workspace-header-btn btn-collapse-left" type="button" title="Collapse Problem Description Panel (Full Width Editor)" aria-label="Collapse Description Panel" style="height: 28px; width: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">
@@ -279,7 +283,11 @@
                         <div class="hints-summary-box">
                             <p class="hints-summary-desc">Need algorithmic guidance? 3-tier progressive hints (Direction, Approach, Strategy) are available for this challenge.</p>
                             <button type="button" class="btn-open-hints-view" id="btnOpenHintsView">
-                                <span aria-hidden="true">💡</span>
+                                <span class="hints-svg-icon" aria-hidden="true">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9 18h6M10 22h4M15 9a3 3 0 1 0-6 0c0 1.5 1 2.5 1 3.5h4c0-1 1-2 1-3.5z"></path>
+                                    </svg>
+                                </span>
                                 <span id="hintsSummaryBtnText">Open Full Hints Panel (0/3 Unlocked)</span>
                             </button>
                         </div>
@@ -299,7 +307,11 @@
                         <!-- Dedicated Entry Point: Animate the Solution -->
                         <div class="workspace-animate-entry" id="workspaceAnimateEntry" style="margin-top: 14px;">
                             <a href="#" id="linkAnimateSolutionConcepts" class="btn-animate-entry-link">
-                                <div class="animate-entry-icon" aria-hidden="true">⚡</div>
+                                <div class="animate-entry-icon" aria-hidden="true">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                </div>
                                 <div class="animate-entry-details">
                                     <span class="animate-entry-tag">Visual Algorithm Walkthrough</span>
                                     <span class="animate-entry-headline">Animate the Solution →</span>
@@ -317,7 +329,11 @@
                 <div class="hints-header-card">
                     <div class="hints-header-top">
                         <div class="hints-header-title-wrap">
-                            <span class="hints-header-icon" aria-hidden="true">💡</span>
+                            <span class="hints-header-icon" aria-hidden="true">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M9 18h6M10 22h4M15 9a3 3 0 1 0-6 0c0 1.5 1 2.5 1 3.5h4c0-1 1-2 1-3.5z"></path>
+                                </svg>
+                            </span>
                             <div>
                                 <h2 class="hints-header-title">Progressive Hints</h2>
                                 <p class="hints-header-subtitle">Step-by-step algorithmic guidance. Reveal one hint at a time when you need direction.</p>
@@ -351,7 +367,11 @@
                                 <p class="hint-locked-prompt">Need help understanding the core idea or problem pattern?</p>
                                 <button type="button" class="btn-reveal-hint" id="btnRevealHint1" aria-controls="hintContent1">
                                     <span>Reveal Hint 1</span>
-                                    <span aria-hidden="true">💡</span>
+                                    <span aria-hidden="true">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M9 18h6M10 22h4M15 9a3 3 0 1 0-6 0c0 1.5 1 2.5 1 3.5h4c0-1 1-2 1-3.5z"></path>
+                                        </svg>
+                                    </span>
                                 </button>
                             </div>
                             <div class="hint-unlocked-view" id="hintUnlockedView1" style="display: none;">
@@ -373,7 +393,12 @@
                             <div class="hint-locked-view" id="hintLockedView2">
                                 <p class="hint-locked-prompt">Unlock Hint 1 first to reveal the algorithmic technique.</p>
                                 <button type="button" class="btn-reveal-hint" id="btnRevealHint2" disabled aria-controls="hintContent2">
-                                    <span class="lock-icon" aria-hidden="true">🔒</span>
+                                    <span class="lock-icon" aria-hidden="true">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                        </svg>
+                                    </span>
                                     <span>Reveal Hint 2</span>
                                 </button>
                             </div>
@@ -396,7 +421,12 @@
                             <div class="hint-locked-view" id="hintLockedView3">
                                 <p class="hint-locked-prompt">Unlock Hint 2 first to reveal implementation guidance.</p>
                                 <button type="button" class="btn-reveal-hint" id="btnRevealHint3" disabled aria-controls="hintContent3">
-                                    <span class="lock-icon" aria-hidden="true">🔒</span>
+                                    <span class="lock-icon" aria-hidden="true">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                        </svg>
+                                    </span>
                                     <span>Reveal Hint 3</span>
                                 </button>
                             </div>
@@ -421,7 +451,11 @@
 
                 <!-- Post-Submission Animation Action Banner (Prominent but compact) -->
                 <div class="submission-animate-banner" id="submissionAnimateBanner" style="display: none;">
-                    <div class="animate-banner-icon" aria-hidden="true">✨</div>
+                    <div class="animate-banner-icon" aria-hidden="true">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                    </div>
                     <div class="animate-banner-body">
                         <div class="animate-banner-header">
                             <span class="animate-banner-pill">Algorithm Deep Dive</span>
@@ -470,7 +504,14 @@
                         </select>
                     </div>
                     <span class="active-file-indicator" title="Current Active File">
-                        <span aria-hidden="true">☕</span>
+                        <span class="file-icon-svg" aria-hidden="true">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                            </svg>
+                        </span>
                         <span class="file-name">Solution.java</span>
                     </span>
                 </div>

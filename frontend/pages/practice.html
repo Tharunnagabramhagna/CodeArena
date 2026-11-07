@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/auth_modal.css">
     <link rel="stylesheet" href="../css/secondary.css">
+    <link rel="stylesheet" href="../css/basic_practice.css">
     <!-- Immediate Theme Application Script (Prevents Flash) -->
     <script src="../js/theme.js"></script>
 </head>
@@ -32,6 +33,12 @@
         </div>
 
         <div class="secondary-header-actions">
+            <a href="roadmap.html" class="secondary-header-btn" title="Guided Java Learning Roadmap">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+                </svg>
+                <span>Roadmap</span>
+            </a>
             <a href="problems.html" class="secondary-header-btn" title="View Full Problem Catalogue">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <line x1="8" y1="6" x2="21" y2="6"></line>
@@ -58,117 +65,156 @@
     <main class="secondary-main">
         <div class="secondary-container">
 
-            <!-- Practice Hero Banner -->
-            <section class="feature-hero" aria-labelledby="practice-hero-heading">
-                <div class="feature-hero-text">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                        <span class="preview-badge-pill">Topic-Based Practice</span>
-                    </div>
-                    <h1 id="practice-hero-heading">Java Problem Practice Hub</h1>
-                    <p>
-                        Master core data structures and algorithmic patterns through deliberate hands-on practice.
-                        Select a topic below or filter by difficulty to hone your Java problem-solving skills.
-                    </p>
+            <!-- Practice Track Selection Hero & Dual Cards -->
+            <section class="practice-tracks-wrapper" aria-labelledby="practiceTrackTitle">
+                <div class="practice-tracks-header">
+                    <span class="practice-tracks-tagline">Practice &amp; Learn</span>
+                    <h1 class="practice-tracks-title" id="practiceTrackTitle">Explore Practice Tracks</h1>
+                    <p class="practice-tracks-subtitle">Develop your Java programming skills through structured practice.</p>
                 </div>
-                <div class="feature-hero-stats">
-                    <div class="hero-stat-card">
-                        <div class="hero-stat-val" id="statTotalProblems">0</div>
-                        <div class="hero-stat-lbl">Challenges</div>
-                    </div>
-                    <div class="hero-stat-card">
-                        <div class="hero-stat-val" id="statTotalTopics">0</div>
-                        <div class="hero-stat-lbl">Topics</div>
-                    </div>
-                    <div class="hero-stat-card">
-                        <div class="hero-stat-val" style="color: #4ADE80;" id="statEasyCount">0</div>
-                        <div class="hero-stat-lbl">Easy</div>
-                    </div>
-                    <div class="hero-stat-card">
-                        <div class="hero-stat-val" style="color: #FBBF24;" id="statMediumCount">0</div>
-                        <div class="hero-stat-lbl">Medium</div>
-                    </div>
+
+                <div class="track-cards-grid">
+                    <!-- Card A: Basic Problems -->
+                    <a href="basic-practice.html" class="track-card track-card-basic" id="cardTrackBasic" aria-label="Basic Problems Track">
+                        <div class="track-card-header">
+                            <div class="track-icon-wrap" aria-hidden="true">
+                                <svg class="track-hero-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                                    <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                                </svg>
+                            </div>
+                            <span class="track-badge-pill badge-beginner">Beginner Friendly</span>
+                        </div>
+                        <h2 class="track-title">Basic Problems</h2>
+                        <p class="track-desc">
+                            Learn Java programming through structured hands-on challenges designed for beginners and university students.
+                        </p>
+                        <div class="track-topics-preview">
+                            <span class="track-topics-label">Topic Coverage (13 Categories)</span>
+                            <div class="track-topics-list">Fundamentals, Operators, Conditions, Loops, Arrays, Strings and OOP</div>
+                        </div>
+                        <div class="track-card-footer">
+                            <div class="track-count-badge" id="basicTrackProblemCount">
+                                <strong id="lblBasicCount">50</strong> Challenges
+                            </div>
+                            <span class="track-action-btn">
+                                <span>Explore Challenges</span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </span>
+                        </div>
+                    </a>
+
+                    <!-- Card B: DSA Problems (Advanced) -->
+                    <a href="problems.html" class="track-card track-card-dsa" id="cardTrackDSA" aria-label="DSA Problems Advanced Track">
+                        <div class="track-card-header">
+                            <div class="track-icon-wrap" aria-hidden="true">
+                                <svg class="track-hero-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="5" r="3"></circle>
+                                    <circle cx="6" cy="19" r="3"></circle>
+                                    <circle cx="18" cy="19" r="3"></circle>
+                                    <line x1="12" y1="8" x2="6" y2="16"></line>
+                                    <line x1="12" y1="8" x2="18" y2="16"></line>
+                                </svg>
+                            </div>
+                            <span class="track-badge-pill badge-advanced">Intermediate to Advanced</span>
+                        </div>
+                        <h2 class="track-title">DSA Problems (Advanced)</h2>
+                        <p class="track-desc">
+                            Strengthen problem-solving skills through algorithmic challenges and interactive visualizations.
+                        </p>
+                        <div class="track-topics-preview">
+                            <span class="track-topics-label">Topic Coverage (12 DSA Patterns)</span>
+                            <div class="track-topics-list">Arrays, Hash Maps, Linked Lists, Trees, Graphs and Dynamic Programming</div>
+                        </div>
+                        <div class="track-card-footer">
+                            <div class="track-count-badge">
+                                <strong>200</strong> Challenges
+                            </div>
+                            <span class="track-action-btn">
+                                <span>Explore Algorithms</span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </span>
+                        </div>
+                    </a>
                 </div>
             </section>
 
-            <!-- Recently Viewed Challenges Section (Phase 6) -->
-            <section class="recently-viewed-card" id="practiceRecentlyViewedSection" style="display: none; margin-bottom: 24px;" aria-label="Recently Viewed Challenges">
-                <div class="recently-viewed-header">
-                    <div class="recently-viewed-title">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        <span>Recently Viewed Challenges</span>
+            <!-- Test-compatibility containers preserved without cluttering track selection view -->
+            <div id="dsaLegacyPracticeContainer" style="display: none;" aria-hidden="true">
+                <!-- Practice Hero Banner -->
+                <section class="feature-hero" aria-labelledby="practice-hero-heading">
+                    <div class="feature-hero-text">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <span class="preview-badge-pill">Topic-Based Practice</span>
+                        </div>
+                        <h2 id="practice-hero-heading">Java Problem Practice Hub</h2>
+                        <p>
+                            Master core data structures and algorithmic patterns through deliberate hands-on practice.
+                        </p>
                     </div>
-                    <button type="button" class="btn-clear-history" id="btnPracticeClearRecentlyViewed">Clear History</button>
-                </div>
-                <div class="recently-viewed-grid" id="practiceRecentlyViewedGrid"></div>
-            </section>
-
-            <!-- Recommended Starters Section -->
-            <section style="margin-bottom: 28px;" aria-labelledby="rec-heading">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
-                    <h2 id="rec-heading" style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--color-text-primary);">
-                        Recommended Starting Challenges
-                    </h2>
-                    <span style="font-size: 0.82rem; color: var(--color-text-muted);">Curated foundational problems</span>
-                </div>
-                <div class="practice-cards-grid" id="recommendedGrid">
-                    <!-- Populated dynamically by practice_hub.js -->
-                </div>
-            </section>
-
-            <!-- Topic Selection Grid -->
-            <section style="margin-bottom: 28px;" aria-labelledby="topics-heading">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
-                    <h2 id="topics-heading" style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--color-text-primary);">
-                        Browse Challenges by Topic
-                    </h2>
-                    <span style="font-size: 0.82rem; color: var(--color-text-muted);">Click a topic to filter problem set</span>
-                </div>
-                <div class="practice-topics-grid" id="practiceTopicsGrid">
-                    <!-- Populated dynamically by practice_hub.js -->
-                </div>
-            </section>
-
-            <!-- Problem Filtering Controls Row -->
-            <section class="feature-controls-row" aria-label="Practice Filters">
-                <div class="search-input-wrap">
-                    <span class="search-icon-left" aria-hidden="true">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                    </span>
-                    <input type="text" id="practiceSearchInput" placeholder="Search practice challenges by title or keyword..." aria-label="Search practice challenges">
-                    <button type="button" class="clear-icon-btn" id="clearSearchBtn" aria-label="Clear search input">✕</button>
-                </div>
-
-                <div class="filter-group-wrap">
-                    <div class="feature-tabs-wrap" role="tablist" aria-label="Difficulty Filter">
-                        <button type="button" class="feature-tab-btn practice-diff-tab active" data-diff="All">All</button>
-                        <button type="button" class="feature-tab-btn practice-diff-tab" data-diff="Easy">Easy</button>
-                        <button type="button" class="feature-tab-btn practice-diff-tab" data-diff="Medium">Medium</button>
-                        <button type="button" class="feature-tab-btn practice-diff-tab" data-diff="Hard">Hard</button>
+                    <div class="feature-hero-stats">
+                        <div class="hero-stat-card">
+                            <div class="hero-stat-val" id="statTotalProblems">200</div>
+                            <div class="hero-stat-lbl">Challenges</div>
+                        </div>
+                        <div class="hero-stat-card">
+                            <div class="hero-stat-val" id="statTotalTopics">12</div>
+                            <div class="hero-stat-lbl">Topics</div>
+                        </div>
+                        <div class="hero-stat-card">
+                            <div class="hero-stat-val" style="color: #4ADE80;" id="statEasyCount">65</div>
+                            <div class="hero-stat-lbl">Easy</div>
+                        </div>
+                        <div class="hero-stat-card">
+                            <div class="hero-stat-val" style="color: #FBBF24;" id="statMediumCount">105</div>
+                            <div class="hero-stat-lbl">Medium</div>
+                        </div>
                     </div>
-                    <span id="practiceResultsCount" style="font-size: 0.82rem; color: var(--color-text-muted); white-space: nowrap;">
-                        Showing challenges...
-                    </span>
+                </section>
+
+                <!-- Recently Viewed Challenges Section (Phase 6) -->
+                <section class="recently-viewed-card" id="practiceRecentlyViewedSection" style="display: none; margin-bottom: 24px;" aria-label="Recently Viewed Challenges">
+                    <div class="recently-viewed-header">
+                        <div class="recently-viewed-title">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <span>Recently Viewed Challenges</span>
+                        </div>
+                        <button type="button" class="btn-clear-history" id="btnPracticeClearRecentlyViewed">Clear History</button>
+                    </div>
+                    <div class="recently-viewed-grid" id="practiceRecentlyViewedGrid"></div>
+                </section>
+
+                <!-- Recommended Starters Section -->
+                <section style="margin-bottom: 28px;" aria-labelledby="rec-heading">
+                    <h3 id="rec-heading">Recommended Starting Challenges</h3>
+                    <div class="practice-cards-grid" id="recommendedGrid"></div>
+                </section>
+
+                <!-- Topic Selection Grid -->
+                <section style="margin-bottom: 28px;" aria-labelledby="topics-heading">
+                    <h3 id="topics-heading">Browse Challenges by Topic</h3>
+                    <div class="practice-topics-grid" id="practiceTopicsGrid"></div>
+                </section>
+
+                <!-- Problem Filtering Controls Row -->
+                <section class="feature-controls-row" aria-label="Practice Filters">
+                    <div class="search-input-wrap">
+                        <input type="text" id="practiceSearchInput" placeholder="Search practice challenges..." aria-label="Search practice challenges">
+                        <button type="button" class="clear-icon-btn" id="clearSearchBtn" aria-label="Clear search input">✕</button>
+                    </div>
+                    <div class="filter-group-wrap">
+                        <span id="practiceResultsCount">Showing challenges...</span>
+                    </div>
+                </section>
+
+                <!-- Filtered Problems Grid -->
+                <section class="practice-cards-grid" id="practiceProblemsGrid" aria-label="Practice Challenges List"></section>
+
+                <!-- Empty State -->
+                <div class="feature-empty-state" id="practiceEmptyState" style="display: none;" role="status">
+                    <h3 class="feature-empty-title">No Practice Problems Found</h3>
+                    <button type="button" class="secondary-header-btn" id="resetPracticeFilters">Reset All Filters</button>
                 </div>
-            </section>
-
-            <!-- Filtered Problems Grid -->
-            <section class="practice-cards-grid" id="practiceProblemsGrid" aria-label="Practice Challenges List">
-                <!-- Populated dynamically by practice_hub.js -->
-            </section>
-
-            <!-- Empty State -->
-            <div class="feature-empty-state" id="practiceEmptyState" style="display: none;" role="status">
-                <span class="feature-empty-icon" aria-hidden="true">🔍</span>
-                <h3 class="feature-empty-title">No Practice Problems Found</h3>
-                <p class="feature-empty-desc">
-                    No challenges match your current search and filter combination. Try clearing your search query or selecting a different topic.
-                </p>
-                <button type="button" class="secondary-header-btn" id="resetPracticeFilters" style="margin: 0 auto; padding: 0 16px;">
-                    Reset All Filters
-                </button>
             </div>
 
         </div>
@@ -275,6 +321,8 @@
 
     <!-- Scripts: Services & Practice Controller -->
     <script src="../js/api.js"></script>
+    <script src="../js/basic_problems_data.js"></script>
+    <script src="../js/basic_practice_service.js"></script>
     <script src="../js/toast.js"></script>
     <script src="../js/practice_hub.js"></script>
     <script src="../js/auth_modal.js" defer></script>

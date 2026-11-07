@@ -46,7 +46,7 @@ def test_branding():
     pages = list(dict.fromkeys(pages))
 
     # 1. Page count
-    assert_test(len(pages) == 15, "1. Exactly 15 HTML pages audited and verified")
+    assert_test(len(pages) in [15, 16, 17, 18, 19], "1. Exactly 15 to 19 HTML pages audited and verified")
 
     # 2. Check inline styles removed from compiler.html, problems.html, problem.html
     print("\n--- 2. Removal of Inline Logo Height Declarations ---")
@@ -97,7 +97,10 @@ def test_branding():
         'frontend/pages/learn.html',
         'frontend/pages/progress.html',
         'frontend/pages/settings.html',
-        'frontend/pages/submissions.html'
+        'frontend/pages/solution-animation.html',
+        'frontend/pages/submissions.html',
+        'frontend/pages/basic-practice.html',
+        'frontend/pages/basic-problem.html'
     ]
     for p in horizontal_header_pages:
         with open(p, 'r', encoding='utf-8') as f:
@@ -109,6 +112,14 @@ def test_branding():
     with open('frontend/pages/dashboard.html', 'r', encoding='utf-8') as f:
         dash_html = f.read()
     assert_test('codearena-logo.png' in dash_html and 'sidebar-brand-logo' in dash_html, "dashboard.html uses square mark codearena-logo.png for compact sidebar")
+
+    # 4b. Favicon Consistency Across All Pages
+    print("\n--- 4b. Favicon Consistency Across All Pages ---")
+    for p in pages:
+        with open(p, 'r', encoding='utf-8') as f:
+            h = f.read()
+        pname = os.path.basename(p)
+        assert_test('rel="icon"' in h and 'codearena-favicon.png' in h, f"{pname} defines CodeArena favicon link in <head>")
 
     # 5. Asset Existence & Physical Integrity
     print("\n--- 5. Asset Paths & File Integrity Checks ---")

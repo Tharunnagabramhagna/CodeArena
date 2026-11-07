@@ -20,7 +20,11 @@ tests/
     │   ├── test_phase6_refinement.py
     │   ├── test_phase7_dsa_hints_splitter.py
     │   ├── test_phase8_user_access_premium_dashboard.py
-    │   └── test_ui_refinements.py
+    │   ├── test_ui_refinements.py
+    │   ├── test_auth_modal_glassmorphism.py
+    │   ├── test_compiler_split_controls.py
+    │   ├── test_workspace_problem_learning.py
+    │   └── test_solution_animation.py
     │
     ├── regression/             # Cross-cutting invariant & UI standard tests
     │   ├── test_branding_consistency.py
@@ -72,6 +76,8 @@ tests/
 * **`test_phase6_advanced_features.py`** (72 tests): Tests advanced features: search suggestions, recently viewed problems tray, font zoom controls, interface density tokens, and reduced motion overrides.
 * **`test_phase6_refinement.py`** (54 tests): Tests the final refinement invariants: fresh guest zero-bookmark state, workspace draft isolation, strictly deduplicated recently viewed tracking, honest sample announcements, and synchronized settings.
 * **`test_ui_refinements.py`** (24 tests): Tests the UI refinements: horizontal logo scaling across all page categories (38–42px), premium vector SVG theme toggle icons with zero raw emojis, and interactive button text selection prevention (`user-select: none`).
+* **`test_compiler_split_controls.py`** (46 tests): Validates the interactive compiler split-view controls, 4 layout presets (50:50, 60:40, 70:30, 40:60), expand editor/output toggles, reset default ratio, and CodeMirror redraw.
+* **`test_workspace_problem_learning.py`** (98 tests): Validates Feature 3: Professional Problem-Solving Workspace (ID badge, pattern tag, Free/Pro access badge, 5 collapsible accordion sections, left pane collapse toggle, related concept chips, language selector, custom input panel with sample loader, console submissions history, localStorage draft auto-save) and Interactive Java Learning (mode switcher, 14 curriculum lessons with concept practice links, and 8 Interactive Educational Animations with step visualizers, play/pause, step controls, and live technical callouts).
 
 ### Cross-Cutting Regression Suites (`tests/frontend/regression/`)
 * **`test_branding_consistency.py`** (106 tests): Asserts logo proportions, CSS-controlled sizing classes, and canonical asset paths across all 15 HTML pages.

@@ -280,11 +280,11 @@ walkDir(frontendRoot);
 let danglingRefs = 0;
 allFrontendFiles.forEach(f => {
     const content = fs.readFileSync(f, 'utf8');
-    if (content.includes('components.css')) {
+    if (/(^|[^a-zA-Z0-9_-])components\.css\b/.test(content)) {
         danglingRefs++;
         console.log(`Dangling components.css in ${f}`);
     }
-    if (content.includes('practice.js')) {
+    if (/(^|[^a-zA-Z0-9_-])practice\.js\b/.test(content)) {
         danglingRefs++;
         console.log(`Dangling practice.js in ${f}`);
     }

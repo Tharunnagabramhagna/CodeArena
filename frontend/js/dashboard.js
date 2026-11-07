@@ -128,13 +128,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // --------------------------------------------------------------------------
-    // 3. Problem Items Click Navigation
+    // 3. Problem Items Click Navigation (Two Tracks Supported)
     // --------------------------------------------------------------------------
     const problemItems = document.querySelectorAll('.problem-item');
     problemItems.forEach(function (item) {
         const problemId = item.getAttribute('data-id');
+        const track = item.getAttribute('data-track');
         function navigate() {
-            if (problemId) {
+            if (track === 'basic' && problemId) {
+                window.location.href = `basic-problem.html?id=${encodeURIComponent(problemId)}`;
+            } else if (problemId) {
                 window.location.href = `problem.html?id=${encodeURIComponent(problemId)}`;
             } else {
                 window.location.href = 'problems.html';
@@ -165,12 +168,23 @@ document.addEventListener('DOMContentLoaded', function () {
                         const elTopics = document.getElementById('dashStatTopics');
                         const elPatterns = document.getElementById('dashStatPatterns');
                         const elContests = document.getElementById('dashStatContests');
-                        if (elProb) elProb.textContent = String(st.totalProblems);
-                        if (elFree) elFree.textContent = String(st.freeProblems);
-                        if (elPrem) elPrem.textContent = String(st.premiumProblems);
-                        if (elTopics) elTopics.textContent = String(st.topicsCount);
-                        if (elPatterns) elPatterns.textContent = String(st.patternsCount);
-                        if (elContests) elContests.textContent = String(st.contestsCount);
+
+                        const basicCount = (window.CodeArenaBasicData && Array.isArray(window.CodeArenaBasicData.problems))
+                            ? window.CodeArenaBasicData.problems.length
+                            : 50;
+                        const basicCategories = (window.CodeArenaBasicData && Array.isArray(window.CodeArenaBasicData.categories))
+                            ? window.CodeArenaBasicData.categories.length
+                            : 13;
+                        const totalAll = (st.totalProblems || 200) + basicCount;
+                        const totalFree = (st.freeProblems || 150) + basicCount;
+                        const totalDomains = (st.topicsCount || 12) + basicCategories;
+
+                        if (elProb) elProb.textContent = String(totalAll);
+                        if (elFree) elFree.textContent = String(totalFree);
+                        if (elPrem) elPrem.textContent = String(st.premiumProblems || 50);
+                        if (elTopics) elTopics.textContent = String(totalDomains);
+                        if (elPatterns) elPatterns.textContent = String(st.patternsCount || 63);
+                        if (elContests) elContests.textContent = String(st.contestsCount || 4);
                     }
                 }
 
@@ -243,10 +257,14 @@ document.addEventListener('DOMContentLoaded', function () {
             if (userProfileArea) userProfileArea.style.display = 'none';
             if (promoCard) {
                 promoCard.innerHTML = `
-                    <div class="promo-icon" aria-hidden="true">✦</div>
-                    <h4 class="promo-title">Unlock your coding potential</h4>
-                    <p class="promo-subtitle">Practice. Learn. Grow.</p>
-                    <a href="practice.html" class="btn btn-primary promo-btn">Get Started →</a>
+                    <div class="promo-icon" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+                        </svg>
+                    </div>
+                    <h4 class="promo-title">Guided Java Roadmap</h4>
+                    <p class="promo-subtitle">30 Milestones &middot; 250 Challenges</p>
+                    <a href="roadmap.html" class="btn btn-primary promo-btn">Explore Roadmap &rarr;</a>
                 `;
             }
         } else {
@@ -263,17 +281,25 @@ document.addEventListener('DOMContentLoaded', function () {
             if (promoCard) {
                 if (isPro) {
                     promoCard.innerHTML = `
-                        <div class="promo-icon" style="color: #facc15;" aria-hidden="true">⭐</div>
+                        <div class="promo-icon" style="color: var(--color-primary, #60a5fa);" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </div>
                         <h4 class="promo-title">CodeArena Pro Active</h4>
-                        <p class="promo-subtitle">All 200 Challenges Unlocked</p>
-                        <a href="problems.html?access=Premium" class="btn btn-primary promo-btn" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none;">Explore Pro →</a>
+                        <p class="promo-subtitle">All 250 Challenges Unlocked</p>
+                        <a href="problems.html?access=Premium" class="btn btn-primary promo-btn" style="background: linear-gradient(135deg, #2563EB, #1D4ED8); border: none;">Explore Pro &rarr;</a>
                     `;
                 } else {
                     promoCard.innerHTML = `
-                        <div class="promo-icon" style="color: #facc15;" aria-hidden="true">💎</div>
+                        <div class="promo-icon" style="color: var(--color-primary, #60a5fa);" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </div>
                         <h4 class="promo-title">Upgrade to Pro</h4>
                         <p class="promo-subtitle">50 Advanced DSA Challenges</p>
-                        <a href="problems.html" class="btn btn-primary promo-btn" id="btnSidebarUpgrade">Upgrade for $5/mo →</a>
+                        <a href="problems.html" class="btn btn-primary promo-btn" id="btnSidebarUpgrade">Upgrade for $5/mo &rarr;</a>
                     `;
                 }
             }
@@ -399,10 +425,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Built-in Platform Pages Index
     const platformPages = [
-        { title: 'Online Java Compiler', category: 'Tool', url: 'compiler.html', desc: 'In-browser Java editor, syntax runner & diagnostics', badge: 'Tool' },
-        { title: 'Problem Catalogue', category: 'Practice', url: 'problems.html', desc: 'Browse all 12 canonical Java algorithm problems', badge: 'Practice' },
-        { title: 'Practice Problem Hub', category: 'Practice', url: 'practice.html', desc: 'Topic-based challenge tracks and starter problems', badge: 'Practice' },
-        { title: 'Java Learning Centre', category: 'Learn', url: 'learn.html', desc: '14 interactive lessons, JVM architecture & quizzes', badge: 'Learn' },
+        { title: 'Online Java Compiler', category: 'Tool', url: 'compiler.html', desc: 'In-browser OpenJDK 17 editor, runner & diagnostics', badge: 'Tool' },
+        { title: 'Practice Problem Hub', category: 'Practice', url: 'practice.html', desc: 'Two practice tracks: Basic Java & Advanced DSA', badge: 'Practice' },
+        { title: 'Basic Java Problems Track', category: 'Practice', url: 'basic-practice.html', desc: '50 beginner challenges across 13 core Java pillars', badge: 'Basic' },
+        { title: 'Problem Catalogue (DSA)', category: 'Practice', url: 'problems.html', desc: 'Browse 200 canonical Java algorithmic problems', badge: 'DSA' },
+        { title: 'Guided Java Roadmap', category: 'Roadmap', url: 'roadmap.html', desc: '30 milestones with prerequisite DAG & progress tracking', badge: 'Roadmap' },
+        { title: 'Interactive Algorithm Visualizer', category: 'Visualizer', url: 'solution-animation.html?id=two-sum', desc: 'Step-by-step visual animation for 200 DSA problems', badge: 'Visualizer' },
+        { title: 'Java Mastery Studio', category: 'Learn', url: 'learn.html', desc: '14 interactive lessons, JVM architecture & visualizers', badge: 'Learn' },
         { title: 'AI Learning Assistant', category: 'Mentor', url: 'ai_assistant.html', desc: 'Simulated AI guidance, Java concepts & explanations', badge: 'AI' },
         { title: 'Coding Contests', category: 'Competitions', url: 'contests.html', desc: 'Scheduled Java tournaments and leaderboards', badge: 'Contest' },
         { title: 'Learning Progress & Analytics', category: 'Analytics', url: 'progress.html', desc: 'Activity heatmap, solve streaks & distribution', badge: 'Progress' },
@@ -414,16 +443,29 @@ document.addEventListener('DOMContentLoaded', function () {
     if (dashSearchInput && dashSearchSuggestions) {
         let activeIndex = -1;
         let currentSuggestions = [];
+        let cachedDSAProblems = [];
 
-        function getCanonicalProblems() {
+        async function prefetchDSAProblems() {
             try {
                 if (window.CodeArenaAPI && window.CodeArenaAPI.problemService) {
-                    return window.CodeArenaAPI.problemService.getProblems() || [];
+                    const res = await window.CodeArenaAPI.problemService.getProblems({ limit: 200 });
+                    // canonical fallback check: window.CodeArenaAPI.problemService.getProblems()
+                    if (res && res.success && res.data) {
+                        if (Array.isArray(res.data.problems)) {
+                            cachedDSAProblems = res.data.problems;
+                        } else if (Array.isArray(res.data)) {
+                            cachedDSAProblems = res.data;
+                        }
+                    }
                 }
             } catch (err) {
-                console.warn('Unable to query problemService:', err);
+                console.warn('Unable to prefetch problemService problems:', err);
             }
-            return [];
+        }
+        prefetchDSAProblems();
+
+        function getCanonicalProblems() {
+            return cachedDSAProblems;
         }
 
         function queryIndex(keyword) {
@@ -431,9 +473,28 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!term) return [];
 
             const results = [];
-            const problems = getCanonicalProblems();
 
-            // Match problems
+            // 1. Match Basic Java problems if loaded
+            if (window.CodeArenaBasicData && Array.isArray(window.CodeArenaBasicData.problems)) {
+                window.CodeArenaBasicData.problems.forEach(function (bp) {
+                    const titleMatch = (bp.title || '').toLowerCase().includes(term);
+                    const catMatch = (bp.categoryTitle || '').toLowerCase().includes(term);
+                    const descMatch = (bp.description || '').toLowerCase().includes(term);
+                    if (titleMatch || catMatch || descMatch) {
+                        results.push({
+                            type: 'basic',
+                            title: bp.title,
+                            desc: `Basic Java · ${bp.categoryTitle || 'Fundamentals'}`,
+                            url: `basic-problem.html?id=${encodeURIComponent(bp.id)}`,
+                            badge: 'Basic',
+                            badgeClass: 'search-badge-basic'
+                        });
+                    }
+                });
+            }
+
+            // 2. Match DSA problems
+            const problems = getCanonicalProblems();
             problems.forEach(function (p) {
                 const titleMatch = (p.title || '').toLowerCase().includes(term);
                 const topicMatch = (p.topic || '').toLowerCase().includes(term);
@@ -444,7 +505,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     results.push({
                         type: 'problem',
                         title: p.title,
-                        desc: `${p.topic} • ${p.difficulty}`,
+                        desc: `DSA · ${p.topic} · ${p.difficulty}`,
                         url: `problem.html?id=${encodeURIComponent(p.id)}`,
                         badge: p.difficulty,
                         badgeClass: `search-badge-${(p.difficulty || 'easy').toLowerCase()}`
@@ -452,7 +513,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
 
-            // Match pages
+            // 3. Match Roadmap topics if loaded
+            if (window.CodeArenaRoadmapData && Array.isArray(window.CodeArenaRoadmapData.topics)) {
+                window.CodeArenaRoadmapData.topics.forEach(function (tp) {
+                    const titleMatch = (tp.title || '').toLowerCase().includes(term);
+                    const descMatch = (tp.description || '').toLowerCase().includes(term);
+                    if (titleMatch || descMatch) {
+                        results.push({
+                            type: 'roadmap',
+                            title: tp.title,
+                            desc: `Milestone #${tp.id} · Level ${tp.level}`,
+                            url: `roadmap.html?topic=${encodeURIComponent(tp.id)}`,
+                            badge: 'Roadmap',
+                            badgeClass: 'search-badge-roadmap'
+                        });
+                    }
+                });
+            }
+
+            // 4. Match pages
             platformPages.forEach(function (pg) {
                 const titleMatch = pg.title.toLowerCase().includes(term);
                 const descMatch = pg.desc.toLowerCase().includes(term);
@@ -481,7 +560,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 dashSearchSuggestions.innerHTML = `
                     <div class="search-empty-state">
                         <div>No matching problems or pages found for "<strong>${escapeHtml(query)}</strong>"</div>
-                        <a href="problems.html" class="search-empty-link">Browse Problem Catalogue &rarr;</a>
+                        <a href="practice.html" class="search-empty-link">Browse Practice Hub &rarr;</a>
                     </div>
                 `;
                 dashSearchSuggestions.style.display = 'block';
@@ -489,13 +568,20 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             dashSearchSuggestions.innerHTML = items.map(function (item, idx) {
+                let iconSvg = '';
+                if (item.type === 'roadmap') {
+                    iconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>';
+                } else if (item.type === 'basic' || item.type === 'problem') {
+                    iconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>';
+                } else {
+                    iconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="12 8 8 12 12 16 12 8"/></svg>';
+                }
+
                 return `
                     <div class="search-suggestion-item" data-index="${idx}" role="option" tabindex="-1">
                         <div class="search-suggestion-left">
                             <div class="search-suggestion-icon" aria-hidden="true">
-                                ${item.type === 'problem'
-                                    ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>'
-                                    : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="12 8 8 12 12 16 12 8"/></svg>'}
+                                ${iconSvg}
                             </div>
                             <div class="search-suggestion-info">
                                 <div class="search-suggestion-title">${escapeHtml(item.title)}</div>

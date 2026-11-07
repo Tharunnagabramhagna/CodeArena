@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Java Problems — CodeArena Practice Track</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../assets/logo/codearena-favicon.png">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/secondary.css">
+    <link rel="stylesheet" href="../css/basic_practice.css">
+    <!-- Immediate Theme Application Script (Prevents Flash) -->
+    <script src="../js/theme.js"></script>
+</head>
+<body class="secondary-page-body">
+
+    <!-- Top Standard 60px Secondary Header -->
+    <header class="secondary-header">
+        <div class="secondary-header-left">
+            <a href="../index.html" class="secondary-brand-wrap" title="Return to CodeArena Home" aria-label="CodeArena Home">
+                <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo">
+            </a>
+
+            <nav class="secondary-breadcrumbs" aria-label="Breadcrumbs">
+                <a href="../index.html">Home</a>
+                <span class="crumb-sep">/</span>
+                <a href="practice.html">Practice Tracks</a>
+                <span class="crumb-sep">/</span>
+                <span class="crumb-current">Basic Problems</span>
+            </nav>
+        </div>
+
+        <div class="secondary-header-actions">
+            <a href="practice.html" class="secondary-header-btn" title="Switch Practice Track">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                <span>Switch Track</span>
+            </a>
+            <a href="compiler.html" class="secondary-header-btn" title="Online Java Compiler">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+                <span>Compiler</span>
+            </a>
+            <button class="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+                <svg class="theme-icon theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="secondary-main">
+        <div class="secondary-container">
+
+            <!-- Hero Section -->
+            <section class="feature-hero" aria-labelledby="basic-hero-heading" style="margin-bottom: 32px;">
+                <div class="feature-hero-text">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <span class="preview-badge-pill" style="background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.35); color: #60A5FA;">
+                            Track 1 · Beginner Java Track
+                        </span>
+                    </div>
+                    <h1 id="basic-hero-heading">Basic Java Programming Track</h1>
+                    <p>
+                        Master Java programming from the ground up through 50 hands-on beginner challenges.
+                        Select a category below to explore specific concepts, or filter the full challenge catalogue.
+                    </p>
+                    <div class="basic-hero-stats">
+                        <div class="basic-stat-pill">
+                            <strong id="statBasicTotal">50</strong> Challenges
+                        </div>
+                        <div class="basic-stat-pill">
+                            <strong id="statBasicCats">13</strong> Categories
+                        </div>
+                        <div class="basic-stat-pill">
+                            <strong id="statBasicEasy" style="color: #34D399;">23</strong> Easy
+                        </div>
+                        <div class="basic-stat-pill">
+                            <strong id="statBasicMed" style="color: #FBBF24;">27</strong> Medium
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Honest Demonstration Notice -->
+            <div class="basic-preview-disclaimer" role="note">
+                <svg class="preview-info-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span><strong>Practice environment:</strong> Code execution currently uses a client-side preview. Remote Java execution will be available in a future release.</span>
+            </div>
+
+            <!-- 13 Categories Grid Section -->
+            <section class="basic-categories-section" aria-labelledby="categories-heading">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                    <h2 id="categories-heading" style="font-size: 1.25rem; font-weight: 800; margin: 0; color: var(--color-text-primary); letter-spacing: -0.015em;">
+                        Core Java Categories
+                    </h2>
+                    <span style="font-size: 0.84rem; color: var(--color-text-muted); font-weight: 500;">13 Fundamental Pillars</span>
+                </div>
+                <div class="basic-categories-grid" id="basicCategoriesGrid">
+                    <!-- Populated dynamically by basic_practice.js -->
+                </div>
+            </section>
+
+            <!-- Catalogue Controls Row -->
+            <section class="feature-controls-row" aria-label="Catalogue Search and Filter" id="catalogueAnchor">
+                <div class="search-input-wrap">
+                    <span class="search-icon-left" aria-hidden="true">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </span>
+                    <input type="text" id="basicSearchInput" placeholder="Search challenges by title, category, or keyword..." aria-label="Search basic challenges">
+                    <button type="button" class="clear-icon-btn" id="basicClearSearchBtn" aria-label="Clear search input">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="filter-group-wrap">
+                    <!-- Category Dropdown Filter -->
+                    <select id="basicCategorySelect" class="secondary-header-btn" style="height: 38px; padding: 0 10px; background: var(--color-bg-surface); cursor: pointer;" aria-label="Filter by Category">
+                        <option value="All">All Categories (13)</option>
+                    </select>
+
+                    <!-- Difficulty Filter Pills -->
+                    <div class="feature-tabs-wrap" role="tablist" aria-label="Difficulty Filter">
+                        <button type="button" class="feature-tab-btn basic-diff-tab active" data-diff="All">All</button>
+                        <button type="button" class="feature-tab-btn basic-diff-tab" data-diff="Easy">Easy</button>
+                        <button type="button" class="feature-tab-btn basic-diff-tab" data-diff="Medium">Medium</button>
+                        <button type="button" class="feature-tab-btn basic-diff-tab" data-diff="Hard">Hard</button>
+                    </div>
+
+                    <span id="basicResultsCount" style="font-size: 0.84rem; color: var(--color-text-muted); white-space: nowrap;">
+                        Showing challenges...
+                    </span>
+                </div>
+            </section>
+
+            <!-- Active Filter Chip -->
+            <div id="basicActiveFilterBar" style="display: none; margin-bottom: 16px;">
+                <div class="basic-active-filter-badge">
+                    <span>Active Filter: <strong id="lblActiveFilterName">All</strong></span>
+                    <button type="button" id="btnResetCategoryFilter" title="Clear category filter">✕</button>
+                </div>
+            </div>
+
+            <!-- Problem List Section -->
+            <div class="basic-table-header" aria-hidden="true">
+                <span>#</span>
+                <span>Challenge Title &amp; Snippet</span>
+                <span>Category</span>
+                <span>Difficulty</span>
+                <span style="text-align: right;">Action</span>
+            </div>
+            <section class="basic-problems-list" id="basicProblemsContainer" aria-label="Basic Java Challenges">
+                <!-- Populated dynamically by basic_practice.js -->
+            </section>
+
+            <!-- Empty State -->
+            <div class="feature-empty-state" id="basicEmptyState" style="display: none;" role="status">
+                <span class="feature-empty-icon" aria-hidden="true">🔍</span>
+                <h3 class="feature-empty-title">No Basic Challenges Found</h3>
+                <p class="feature-empty-desc">
+                    No challenges match your active search and filter combination. Try clearing your search keyword or selecting "All Categories".
+                </p>
+                <button type="button" class="secondary-header-btn" id="btnResetBasicFilters" style="margin: 0 auto; padding: 0 18px;">
+                    Reset All Filters
+                </button>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div id="basicPaginationWrap" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin: 24px 0 48px;">
+                <!-- Populated dynamically -->
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Standard Secondary Footer -->
+    <footer class="secondary-footer" role="contentinfo">
+        <div class="secondary-footer-container">
+            <div class="secondary-footer-brand-wrap">
+                <a href="../index.html" class="secondary-footer-brand" aria-label="CodeArena Home">
+                    <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo footer-full-logo">
+                </a>
+                <p class="secondary-footer-tagline">
+                    Master Java programming through structured hands-on challenges. One concept at a time.
+                </p>
+            </div>
+            <nav class="secondary-footer-nav" aria-label="Footer Navigation">
+                <a href="../index.html" class="secondary-footer-link">Home</a>
+                <a href="practice.html" class="secondary-footer-link">Practice Tracks</a>
+                <a href="problems.html" class="secondary-footer-link">DSA Problems</a>
+                <a href="compiler.html" class="secondary-footer-link">Compiler</a>
+            </nav>
+            <p class="secondary-footer-copyright">
+                &copy; 2026 CodeArena. Built for learners, by learners.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../js/basic_problems_data.js"></script>
+    <script src="../js/basic_practice_service.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/basic_practice.js"></script>
+</body>
+</html>
+

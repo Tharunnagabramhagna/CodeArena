@@ -1,0 +1,1483 @@
+/**
+ * CodeArena — Guided Java Learning Roadmap Stylesheet
+ * Premium, cohesive visual identity matching CodeArena Design System.
+ * Zero emojis — strictly vector SVG icons and precise CSS typography.
+ * Supports dark mode (default) and [data-theme="light"].
+ */
+
+/* =========================================================================
+   1. Theme Variables & Base Containers
+   ========================================================================= */
+:root {
+    color-scheme: dark;
+    --roadmap-accent-l1: #3b82f6;
+    --roadmap-accent-l1-glow: rgba(59, 130, 246, 0.15);
+    --roadmap-accent-l2: #10b981;
+    --roadmap-accent-l2-glow: rgba(16, 185, 129, 0.15);
+    --roadmap-accent-l3: #8b5cf6;
+    --roadmap-accent-l3-glow: rgba(139, 92, 246, 0.15);
+    
+    --roadmap-status-completed: #10b981;
+    --roadmap-status-available: #3b82f6;
+    --roadmap-status-locked: #64748b;
+    
+    --roadmap-card-bg: var(--color-bg-secondary, #0D1933);
+    --roadmap-card-hover: var(--color-bg-surface, #102246);
+    --roadmap-border: var(--color-border, #1D3B6F);
+    --roadmap-border-subtle: rgba(255, 255, 255, 0.08);
+    --roadmap-text-primary: var(--color-text-primary, #F1F5F9);
+    --roadmap-text-secondary: var(--color-text-secondary, #CBD5E1);
+    --roadmap-text-muted: var(--color-text-muted, #64748B);
+}
+
+[data-theme="light"] {
+    color-scheme: light;
+    --roadmap-card-bg: #FFFFFF;
+    --roadmap-card-hover: #F8FAFC;
+    --roadmap-border: #E2E8F0;
+    --roadmap-border-subtle: rgba(0, 0, 0, 0.08);
+    --roadmap-text-primary: #0F172A;
+    --roadmap-text-secondary: #334155;
+    --roadmap-text-muted: #64748B;
+}
+
+.roadmap-main-canvas {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 24px 20px 80px;
+}
+
+/* =========================================================================
+   2. Roadmap Hero & Overview Section
+   ========================================================================= */
+.roadmap-hero {
+    margin-bottom: 28px;
+}
+
+.roadmap-hero-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.roadmap-hero-content {
+    flex: 1;
+    min-width: 320px;
+}
+
+.roadmap-tagline-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-primary, #3b82f6);
+    margin-bottom: 12px;
+}
+
+.roadmap-tagline-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.roadmap-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    color: var(--roadmap-text-primary);
+    margin: 0 0 10px;
+}
+
+.roadmap-subtitle {
+    font-size: 0.98rem;
+    line-height: 1.6;
+    color: var(--roadmap-text-muted);
+    max-width: 760px;
+    margin: 0 0 12px;
+}
+
+.roadmap-storage-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.8rem;
+    color: var(--roadmap-text-muted);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--roadmap-border-subtle);
+    padding: 5px 12px;
+    border-radius: 6px;
+}
+
+[data-theme="light"] .roadmap-storage-note {
+    background: #f1f5f9;
+}
+
+/* =========================================================================
+   3. Overview Stat Cards Grid
+   ========================================================================= */
+.roadmap-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.roadmap-stat-card {
+    background: var(--roadmap-card-bg);
+    border: 1px solid var(--roadmap-border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.roadmap-stat-card:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+.stat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--roadmap-text-muted);
+}
+
+.stat-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary, #3b82f6);
+}
+
+[data-theme="light"] .stat-icon {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.stat-value-group {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--roadmap-text-primary);
+    line-height: 1;
+}
+
+.stat-sub {
+    font-size: 0.82rem;
+    color: var(--roadmap-text-muted);
+}
+
+/* Progress bar inside stat card */
+.stat-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-top: 6px;
+}
+
+[data-theme="light"] .stat-progress-bar {
+    background: #e2e8f0;
+}
+
+.stat-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #10b981);
+    border-radius: 9999px;
+    transition: width 0.4s ease;
+}
+
+/* Recommended Topic Card special styling */
+.roadmap-stat-card.card-recommended {
+    background: linear-gradient(145deg, rgba(59, 130, 246, 0.08), rgba(139, 92, 246, 0.08));
+    border-color: rgba(59, 130, 246, 0.35);
+}
+
+[data-theme="light"] .roadmap-stat-card.card-recommended {
+    background: #f0f4ff;
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.rec-title-wrap {
+    margin-bottom: 10px;
+}
+
+.rec-topic-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--roadmap-text-primary);
+    margin: 0 0 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rec-topic-desc {
+    font-size: 0.78rem;
+    color: var(--roadmap-text-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.rec-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--color-primary, #3b82f6);
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.15s ease;
+    align-self: flex-start;
+    margin-top: 8px;
+}
+
+.rec-action-btn:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+/* =========================================================================
+   4. Control Bar: Search & Filters
+   ========================================================================= */
+.roadmap-controls-bar {
+    background: var(--roadmap-card-bg);
+    border: 1px solid var(--roadmap-border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+}
+
+.roadmap-search-box {
+    position: relative;
+    flex: 1;
+    min-width: 260px;
+    max-width: 440px;
+}
+
+.search-icon-pos {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--roadmap-text-muted);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+}
+
+.roadmap-search-input {
+    width: 100%;
+    height: 40px;
+    padding: 0 38px 0 38px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--roadmap-border);
+    border-radius: 8px;
+    font-size: 0.88rem;
+    color: var(--roadmap-text-primary);
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+[data-theme="light"] .roadmap-search-input {
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+.roadmap-search-input:focus {
+    outline: none;
+    border-color: var(--color-primary, #3b82f6);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.search-clear-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--roadmap-text-muted);
+    cursor: pointer;
+    padding: 4px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.search-clear-btn:hover {
+    color: var(--roadmap-text-primary);
+}
+
+.search-clear-btn.visible {
+    display: flex;
+}
+
+.roadmap-filter-tabs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.filter-pill-btn {
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--roadmap-border);
+    color: var(--roadmap-text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+[data-theme="light"] .filter-pill-btn {
+    background: #f8fafc;
+    color: #475569;
+}
+
+.filter-pill-btn:hover {
+    color: var(--roadmap-text-primary);
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+.filter-pill-btn.active {
+    background: var(--color-primary, #3b82f6);
+    border-color: var(--color-primary, #3b82f6);
+    color: #ffffff;
+}
+
+.roadmap-status-filter {
+    height: 38px;
+    padding: 0 32px 0 12px;
+    background-color: var(--roadmap-card-hover, #102246);
+    border: 1px solid var(--roadmap-border);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--roadmap-text-primary);
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    color-scheme: dark;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.roadmap-status-filter:focus {
+    border-color: var(--color-primary, #3b82f6);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+.roadmap-status-filter option {
+    background-color: #0D1933;
+    color: #F1F5F9;
+    padding: 8px 12px;
+}
+
+[data-theme="light"] .roadmap-status-filter {
+    background-color: #FFFFFF;
+    color: #0F172A;
+    border-color: #CBD5E1;
+    color-scheme: light;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+[data-theme="light"] .roadmap-status-filter option {
+    background-color: #FFFFFF;
+    color: #0F172A;
+}
+
+.btn-reset-progress {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 38px;
+    padding: 0 14px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #ef4444;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-reset-progress:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+}
+
+/* =========================================================================
+   5. Levels & Topic Progression Section
+   ========================================================================= */
+.roadmap-levels-container {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.roadmap-level-section {
+    background: var(--roadmap-card-bg);
+    border: 1px solid var(--roadmap-border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+}
+
+.level-header-banner {
+    padding: 22px 28px;
+    border-bottom: 1px solid var(--roadmap-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+[data-theme="light"] .level-header-banner {
+    background: #f8fafc;
+}
+
+.level-meta-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    min-width: 280px;
+}
+
+.level-tier-badge {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.level-tier-1 {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+[data-theme="light"] .level-tier-1 {
+    background: rgba(59, 130, 246, 0.12);
+    color: #2563eb;
+}
+
+.level-tier-2 {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+[data-theme="light"] .level-tier-2 {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+}
+
+.level-tier-3 {
+    background: rgba(139, 92, 246, 0.15);
+    color: #a78bfa;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+[data-theme="light"] .level-tier-3 {
+    background: rgba(139, 92, 246, 0.12);
+    color: #7c3aed;
+}
+
+.level-title-wrap h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--roadmap-text-primary);
+    margin: 0 0 4px;
+}
+
+.level-title-wrap p {
+    font-size: 0.85rem;
+    color: var(--roadmap-text-muted);
+    margin: 0;
+    line-height: 1.45;
+}
+
+.level-progress-summary {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.level-progress-text {
+    text-align: right;
+}
+
+.level-count-info {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--roadmap-text-primary);
+}
+
+.level-percent-info {
+    font-size: 0.76rem;
+    color: var(--roadmap-text-muted);
+}
+
+.level-status-pill {
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.level-status-completed {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.level-status-in-progress {
+    background: rgba(59, 130, 246, 0.12);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.level-status-locked {
+    background: rgba(100, 116, 139, 0.12);
+    color: #64748b;
+    border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+/* Topic Grid Inside Level */
+.level-topics-grid {
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 18px;
+}
+
+/* =========================================================================
+   6. Topic Card Architecture
+   ========================================================================= */
+.roadmap-topic-card {
+    background: var(--roadmap-card-bg);
+    border: 1px solid var(--roadmap-border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+    position: relative;
+    cursor: pointer;
+}
+
+.roadmap-topic-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .roadmap-topic-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.roadmap-topic-card.status-completed {
+    border-color: rgba(16, 185, 129, 0.35);
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.04), transparent 60%), var(--roadmap-card-bg);
+}
+
+.roadmap-topic-card.status-locked {
+    opacity: 0.65;
+    border-style: dashed;
+}
+
+.roadmap-topic-card.status-locked:hover {
+    opacity: 0.9;
+}
+
+.topic-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.topic-seq-tag {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--roadmap-text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.topic-category-pill {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    color: var(--roadmap-text-muted);
+}
+
+[data-theme="light"] .topic-category-pill {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.topic-title {
+    font-size: 1.08rem;
+    font-weight: 700;
+    color: var(--roadmap-text-primary);
+    margin: 0 0 6px;
+    line-height: 1.35;
+}
+
+.topic-desc {
+    font-size: 0.83rem;
+    line-height: 1.5;
+    color: var(--roadmap-text-muted);
+    margin: 0 0 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Prerequisites chips inside card */
+.topic-prereqs-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.prereq-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--roadmap-text-muted);
+}
+
+.prereq-chip {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.prereq-chip.met {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.prereq-chip.pending {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+/* Topic Card Footer */
+.topic-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    border-top: 1px solid var(--roadmap-border-subtle);
+    gap: 12px;
+}
+
+.topic-problem-count {
+    font-size: 0.76rem;
+    color: var(--roadmap-text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.topic-status-badge {
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.status-badge-completed {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10b981;
+}
+
+.status-badge-available {
+    background: rgba(59, 130, 246, 0.12);
+    color: #3b82f6;
+}
+
+.status-badge-locked {
+    background: rgba(100, 116, 139, 0.12);
+    color: #64748b;
+}
+
+/* =========================================================================
+   7. Topic Detail Inspection Drawer & Overlay
+   ========================================================================= */
+.roadmap-detail-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: flex-end;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.roadmap-detail-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.roadmap-detail-drawer {
+    width: 100%;
+    max-width: 760px;
+    height: 100vh;
+    background: var(--roadmap-card-bg);
+    border-left: 1px solid var(--roadmap-border);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.4);
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+.roadmap-detail-overlay.active .roadmap-detail-drawer {
+    transform: translateX(0);
+}
+
+[data-theme="light"] .roadmap-detail-drawer {
+    background: #ffffff;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Drawer Header */
+.drawer-header {
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--roadmap-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+[data-theme="light"] .drawer-header {
+    background: #f8fafc;
+}
+
+.drawer-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.drawer-close-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--roadmap-border);
+    color: var(--roadmap-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+[data-theme="light"] .drawer-close-btn {
+    background: #f1f5f9;
+}
+
+.drawer-close-btn:hover {
+    color: var(--roadmap-text-primary);
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+.drawer-toggle-complete-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.drawer-toggle-complete-btn.mark-completed {
+    background: var(--color-primary, #3b82f6);
+    color: #ffffff;
+    border: none;
+}
+
+.drawer-toggle-complete-btn.mark-completed:hover {
+    background: #2563eb;
+}
+
+.drawer-toggle-complete-btn.is-completed {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.drawer-toggle-complete-btn.is-completed:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.35);
+}
+
+/* Drawer Content Scrollable Area */
+.drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.drawer-topic-heading h1 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--roadmap-text-primary);
+    margin: 0 0 8px;
+    line-height: 1.25;
+}
+
+.drawer-topic-heading p {
+    font-size: 0.95rem;
+    color: var(--roadmap-text-muted);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Drawer Section */
+.drawer-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.section-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-primary, #3b82f6);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Learning Objectives List */
+.objectives-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.objectives-list li {
+    font-size: 0.88rem;
+    color: var(--roadmap-text-primary);
+    line-height: 1.5;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.objective-check-icon {
+    flex-shrink: 0;
+    margin-top: 3px;
+    color: #10b981;
+}
+
+/* Prerequisites Box in Drawer */
+.drawer-prereqs-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--roadmap-border);
+    padding: 12px 16px;
+    border-radius: 8px;
+}
+
+[data-theme="light"] .drawer-prereqs-box {
+    background: #f8fafc;
+}
+
+.prereq-link-chip {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.prereq-link-chip.status-met {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.prereq-link-chip.status-unmet {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+/* Core Concepts Text */
+.concepts-prose {
+    font-size: 0.92rem;
+    line-height: 1.7;
+    color: var(--roadmap-text-primary);
+}
+
+.concepts-prose p {
+    margin: 0 0 12px;
+}
+
+.concepts-prose code {
+    background: rgba(255, 255, 255, 0.07);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.85em;
+    color: #60a5fa;
+}
+
+[data-theme="light"] .concepts-prose code {
+    background: #f1f5f9;
+    color: #2563eb;
+}
+
+/* Code Snippet Box */
+.code-example-container {
+    background: #0d1117;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.code-header-bar {
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.74rem;
+    color: #94a3b8;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.code-block-pre {
+    margin: 0;
+    padding: 16px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.84rem;
+    line-height: 1.55;
+    color: #e2e8f0;
+    overflow-x: auto;
+}
+
+/* Console Output Box */
+.console-output-box {
+    background: #090d16;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.console-output-header {
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.console-output-content {
+    margin: 0;
+    padding: 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.82rem;
+    color: #10b981;
+    white-space: pre-wrap;
+}
+
+/* Common Pitfalls Callout */
+.pitfalls-callout {
+    background: rgba(245, 158, 11, 0.06);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    border-radius: 8px;
+    padding: 16px 18px;
+}
+
+.pitfalls-callout-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #f59e0b;
+    margin-bottom: 10px;
+}
+
+.pitfalls-list {
+    margin: 0;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.pitfalls-list li {
+    font-size: 0.84rem;
+    color: var(--roadmap-text-primary);
+    line-height: 1.45;
+}
+
+/* Curated Practice Problems in Drawer */
+.drawer-practice-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.practice-problem-item {
+    background: var(--roadmap-card-bg);
+    border: 1px solid var(--roadmap-border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.practice-problem-item:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+.problem-item-info {
+    flex: 1;
+}
+
+.problem-item-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.problem-type-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.problem-type-basic {
+    background: rgba(59, 130, 246, 0.12);
+    color: #3b82f6;
+}
+
+.problem-type-dsa {
+    background: rgba(139, 92, 246, 0.12);
+    color: #8b5cf6;
+}
+
+.problem-diff-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.diff-easy {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+
+.diff-medium {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+}
+
+.diff-hard {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+.problem-item-title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--roadmap-text-primary);
+    margin: 0 0 2px;
+}
+
+.problem-item-category {
+    font-size: 0.76rem;
+    color: var(--roadmap-text-muted);
+    margin: 0;
+}
+
+.problem-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-primary, #3b82f6);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.problem-action-btn:hover {
+    background: var(--color-primary, #3b82f6);
+    color: #ffffff;
+}
+
+/* Drawer Footer */
+.drawer-footer {
+    padding: 16px 28px;
+    border-top: 1px solid var(--roadmap-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+[data-theme="light"] .drawer-footer {
+    background: #f8fafc;
+}
+
+.drawer-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--roadmap-border);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--roadmap-text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+[data-theme="light"] .drawer-nav-btn {
+    background: #ffffff;
+    color: #0f172a;
+}
+
+.drawer-nav-btn:hover:not(:disabled) {
+    border-color: rgba(59, 130, 246, 0.4);
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.drawer-nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* =========================================================================
+   8. Reset Confirmation Modal
+   ========================================================================= */
+.roadmap-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 1100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.roadmap-modal-backdrop.active {
+    display: flex;
+}
+
+.roadmap-modal-card {
+    background: var(--roadmap-card-bg);
+    border: 1px solid var(--roadmap-border);
+    border-radius: 14px;
+    padding: 24px;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .roadmap-modal-card {
+    background: #ffffff;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.modal-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--roadmap-text-primary);
+    margin: 0 0 8px;
+}
+
+.modal-desc {
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: var(--roadmap-text-muted);
+    margin: 0 0 20px;
+}
+
+.modal-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-btn-cancel {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--roadmap-border);
+    color: var(--roadmap-text-primary);
+    cursor: pointer;
+}
+
+[data-theme="light"] .modal-btn-cancel {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.modal-btn-confirm {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    background: #ef4444;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.modal-btn-confirm:hover {
+    background: #dc2626;
+}
+
+/* =========================================================================
+   9. Responsive Viewport Adaptations
+   ========================================================================= */
+@media (max-width: 1200px) {
+    .roadmap-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .level-topics-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .secondary-breadcrumbs {
+        display: none;
+    }
+    
+    .roadmap-main-canvas {
+        padding: 16px 14px 60px;
+    }
+    
+    .roadmap-title {
+        font-size: 1.75rem;
+    }
+    
+    .roadmap-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .roadmap-controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .roadmap-search-box {
+        max-width: 100%;
+    }
+    
+    .level-header-banner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .level-progress-summary {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .level-topics-grid {
+        padding: 16px;
+    }
+    
+    .roadmap-detail-drawer {
+        max-width: 100%;
+    }
+    
+    .drawer-body {
+        padding: 20px 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .roadmap-title {
+        font-size: 1.45rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .roadmap-filter-tabs {
+        overflow-x: auto;
+        padding-bottom: 4px;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .filter-pill-btn {
+        white-space: nowrap;
+    }
+}

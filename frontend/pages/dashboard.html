@@ -103,6 +103,16 @@
                         </a>
                     </li>
                     <li class="sidebar-item">
+                        <a href="roadmap.html" class="sidebar-link" data-tooltip="Roadmap">
+                            <span class="nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+                                </svg>
+                            </span>
+                            <span class="nav-label">Roadmap</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
                         <a href="ai_assistant.html" class="sidebar-link" data-tooltip="AI Assistant">
                             <span class="nav-icon" aria-hidden="true">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -163,10 +173,14 @@
 
             <!-- Bottom Promotional Card -->
             <div class="sidebar-promo-card">
-                <div class="promo-icon" aria-hidden="true">✦</div>
-                <h4 class="promo-title">Unlock your coding potential</h4>
-                <p class="promo-subtitle">Practice. Learn. Grow.</p>
-                <a href="practice.html" class="btn btn-primary promo-btn">Get Started →</a>
+                <div class="promo-icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+                    </svg>
+                </div>
+                <h4 class="promo-title">Guided Java Roadmap</h4>
+                <p class="promo-subtitle">30 Milestones &middot; 250 Challenges</p>
+                <a href="roadmap.html" class="btn btn-primary promo-btn">Explore Roadmap &rarr;</a>
             </div>
         </aside>
 
@@ -213,9 +227,15 @@
                                 <h4 class="notif-popover-title">Notifications</h4>
                                 <span class="notif-popover-tag" id="notifHeaderTag">Sample (2 new)</span>
                             </div>
-                            <div class="notif-preview-disclaimer" style="padding: 8px 14px; background: rgba(59, 130, 246, 0.08); border-bottom: 1px solid var(--border-color, #1e293b); font-size: 0.72rem; color: var(--color-text-muted, #94a3b8); display: flex; align-items: center; gap: 6px;">
-                                <span aria-hidden="true">ℹ️</span>
-                                <span>Sample platform announcements — live user alerts activate with backend integration.</span>
+                            <div class="notif-preview-disclaimer" style="padding: 8px 14px; background: rgba(59, 130, 246, 0.08); border-bottom: 1px solid var(--border-color, #1e293b); font-size: 0.72rem; color: var(--color-text-muted, #94a3b8); display: flex; align-items: center; gap: 8px;">
+                                <span class="notif-disclaimer-icon" aria-hidden="true" style="display: inline-flex; align-items: center; color: var(--color-secondary-hover, #60a5fa); flex-shrink: 0;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                    </svg>
+                                </span>
+                                <span>Sample platform announcements &mdash; live user alerts activate with backend integration.</span>
                             </div>
                             <div class="notif-tabs" role="tablist">
                                 <button type="button" class="notif-tab-btn active" data-tab="all" role="tab">All</button>
@@ -296,20 +316,50 @@
                         </div>
 
                         <div class="welcome-shortcuts">
-                            <a href="compiler.html" class="shortcut-pill shortcut-compiler">
-                                <span class="shortcut-icon" aria-hidden="true">&lt;/&gt;</span>
+                            <a href="compiler.html" class="shortcut-pill shortcut-compiler" title="Open in-browser Java compiler">
+                                <span class="shortcut-icon" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="16 18 22 12 16 6"></polyline>
+                                        <polyline points="8 6 2 12 8 18"></polyline>
+                                    </svg>
+                                </span>
                                 <span>Online Compiler</span>
                             </a>
-                            <a href="practice.html" class="shortcut-pill shortcut-practice">
-                                <span class="shortcut-icon" aria-hidden="true">📖</span>
-                                <span>Practice Problems</span>
+                            <a href="practice.html" class="shortcut-pill shortcut-practice" title="Browse two practice tracks">
+                                <span class="shortcut-icon" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+                                        <path d="M6 6h10"></path>
+                                        <path d="M6 10h10"></path>
+                                    </svg>
+                                </span>
+                                <span>Practice Hub</span>
                             </a>
-                            <a href="ai_assistant.html" class="shortcut-pill shortcut-ai">
-                                <span class="shortcut-icon" aria-hidden="true">✦</span>
-                                <span>AI Assistant</span>
+                            <a href="roadmap.html" class="shortcut-pill shortcut-roadmap" title="30 milestone learning path">
+                                <span class="shortcut-icon" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+                                    </svg>
+                                </span>
+                                <span>Guided Roadmap</span>
                             </a>
-                            <a href="progress.html" class="shortcut-pill shortcut-progress">
-                                <span class="shortcut-icon" aria-hidden="true">📊</span>
+                            <a href="learn.html" class="shortcut-pill shortcut-learn" title="14 curriculum modules and JVM visualizers">
+                                <span class="shortcut-icon" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                                        <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                                    </svg>
+                                </span>
+                                <span>Mastery Studio</span>
+                            </a>
+                            <a href="progress.html" class="shortcut-pill shortcut-progress" title="View activity and metrics">
+                                <span class="shortcut-icon" aria-hidden="true">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                                    </svg>
+                                </span>
                                 <span>Track Progress</span>
                             </a>
                         </div>
@@ -343,36 +393,43 @@
                     <div class="section-title-bar">
                         <div class="title-with-desc">
                             <h2 id="platformStatsHeading" class="section-badge-title">Platform Overview</h2>
-                            <span class="section-badge-subtitle">Canonical catalogue figures · Synchronized across active problem modules</span>
+                            <span class="section-badge-subtitle">Canonical catalogue figures &middot; Synchronized across active challenge modules</span>
                         </div>
                         <span class="section-badge-tag">Canonical Catalogue Data</span>
                     </div>
-                    <div class="stats-row" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+                    <div class="stats-row">
                         <div class="stat-card">
-                            <div class="stat-icon-wrapper stat-green" aria-hidden="true">
-                                <span class="stat-icon-symbol">✓</span>
+                            <div class="stat-icon-wrapper stat-icon-emerald" aria-hidden="true">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
                             </div>
                             <div class="stat-details">
-                                <span class="stat-label">Total Problems</span>
-                                <span class="stat-value" id="dashStatProblems">200</span>
-                                <span class="stat-desc">Canonical collection</span>
+                                <span class="stat-label">Total Challenges</span>
+                                <span class="stat-value" id="dashStatProblems">250</span>
+                                <span class="stat-desc">50 Basic + 200 DSA</span>
                             </div>
                         </div>
 
                         <div class="stat-card">
-                            <div class="stat-icon-wrapper" style="background: rgba(16, 185, 129, 0.15); color: #10b981;" aria-hidden="true">
-                                <span class="stat-icon-symbol">🔓</span>
+                            <div class="stat-icon-wrapper stat-icon-emerald" aria-hidden="true">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+                                </svg>
                             </div>
                             <div class="stat-details">
                                 <span class="stat-label">Free Challenges</span>
-                                <span class="stat-value" id="dashStatFree">150</span>
+                                <span class="stat-value" id="dashStatFree">200</span>
                                 <span class="stat-desc">Community accessible</span>
                             </div>
                         </div>
 
                         <div class="stat-card">
-                            <div class="stat-icon-wrapper" style="background: rgba(234, 179, 8, 0.18); color: #facc15;" aria-hidden="true">
-                                <span class="stat-icon-symbol">⭐</span>
+                            <div class="stat-icon-wrapper stat-icon-amber" aria-hidden="true">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                </svg>
                             </div>
                             <div class="stat-details">
                                 <span class="stat-label">Pro Challenges</span>
@@ -382,33 +439,45 @@
                         </div>
 
                         <div class="stat-card">
-                            <div class="stat-icon-wrapper stat-purple" aria-hidden="true">
-                                <span class="stat-icon-symbol">📖</span>
+                            <div class="stat-icon-wrapper stat-icon-purple" aria-hidden="true">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                    <polyline points="2 17 12 22 22 17"></polyline>
+                                    <polyline points="2 12 12 17 22 12"></polyline>
+                                </svg>
                             </div>
                             <div class="stat-details">
-                                <span class="stat-label">Supported Topics</span>
-                                <span class="stat-value" id="dashStatTopics">12</span>
-                                <span class="stat-desc">Core DSA domains</span>
+                                <span class="stat-label">Supported Domains</span>
+                                <span class="stat-value" id="dashStatTopics">25</span>
+                                <span class="stat-desc">13 Pillars + 12 Patterns</span>
                             </div>
                         </div>
 
                         <div class="stat-card">
-                            <div class="stat-icon-wrapper stat-blue" aria-hidden="true">
-                                <span class="stat-icon-symbol">⚡</span>
+                            <div class="stat-icon-wrapper stat-icon-blue" aria-hidden="true">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                </svg>
                             </div>
                             <div class="stat-details">
                                 <span class="stat-label">Algorithmic Patterns</span>
                                 <span class="stat-value" id="dashStatPatterns">63</span>
-                                <span class="stat-desc">Pattern categories</span>
+                                <span class="stat-desc">200 Animated Visualizers</span>
                             </div>
                         </div>
 
                         <div class="stat-card">
-                            <div class="stat-icon-wrapper stat-amber" aria-hidden="true">
-                                <span class="stat-icon-symbol">🏆</span>
+                            <div class="stat-icon-wrapper stat-icon-cyan" aria-hidden="true">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                                    <path d="M4 22h16"></path>
+                                    <path d="M10 14.66V17c0 .55-.45 1-1 1H8c-.55 0-1 .45-1 1v1h10v-1c0-.55-.45-1-1-1h-1c-.55 0-1-.45-1-1v-2.34"></path>
+                                    <path d="M6 4h12v7a6 6 0 0 1-12 0V4Z"></path>
+                                </svg>
                             </div>
                             <div class="stat-details">
-                                <span class="stat-label">Upcoming Contests</span>
+                                <span class="stat-label">Tournaments &amp; Contests</span>
                                 <span class="stat-value" id="dashStatContests">4</span>
                                 <span class="stat-desc">Preview tournaments</span>
                             </div>
@@ -416,7 +485,119 @@
                     </div>
                 </section>
 
-                <!-- Row 3: Two-Column Main Content Grid -->
+                <!-- Row 3: Practice Tracks & Guided Learning Section -->
+                <section class="dash-tracks-section" aria-labelledby="practiceTracksHeading">
+                    <div class="section-title-bar">
+                        <div class="title-with-desc">
+                            <h2 id="practiceTracksHeading" class="section-badge-title">Practice Tracks &amp; Guided Learning</h2>
+                            <span class="section-badge-subtitle">Choose your learning path &mdash; beginner foundations, advanced algorithms, or structured roadmap</span>
+                        </div>
+                        <a href="practice.html" class="section-link-action">Practice Hub &rarr;</a>
+                    </div>
+
+                    <div class="dash-tracks-grid">
+                        <!-- Track Card 1: Basic Java Programming -->
+                        <div class="dash-track-card track-card-basic">
+                            <div class="track-card-header">
+                                <div class="track-card-icon-wrap basic-icon-wrap" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="16 18 22 12 16 6"></polyline>
+                                        <polyline points="8 6 2 12 8 18"></polyline>
+                                    </svg>
+                                </div>
+                                <span class="track-card-badge badge-beginner">Beginner Friendly</span>
+                            </div>
+                            <div class="track-card-body">
+                                <h3 class="track-card-title">Basic Java Problems</h3>
+                                <p class="track-card-desc">
+                                    Learn Java programming from the ground up through 50 structured hands-on challenges across 13 core language pillars.
+                                </p>
+                                <div class="track-card-topics">
+                                    <span class="topic-pill">I/O &amp; Syntax</span>
+                                    <span class="topic-pill">Control Flow</span>
+                                    <span class="topic-pill">Arrays &amp; Strings</span>
+                                    <span class="topic-pill">OOP &amp; Exceptions</span>
+                                </div>
+                            </div>
+                            <div class="track-card-footer">
+                                <div class="track-card-stat">
+                                    <span class="track-stat-num">50</span>
+                                    <span class="track-stat-lbl">Challenges</span>
+                                </div>
+                                <a href="basic-practice.html" class="btn btn-sm btn-track btn-track-basic">
+                                    Start Learning &rarr;
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Track Card 2: Advanced DSA Track -->
+                        <div class="dash-track-card track-card-dsa">
+                            <div class="track-card-header">
+                                <div class="track-card-icon-wrap dsa-icon-wrap" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                    </svg>
+                                </div>
+                                <span class="track-card-badge badge-advanced">Intermediate to Advanced</span>
+                            </div>
+                            <div class="track-card-body">
+                                <h3 class="track-card-title">DSA Problems (Advanced)</h3>
+                                <p class="track-card-desc">
+                                    Master algorithmic problem-solving with 200 challenges, progressive 3-level hints, and step-by-step interactive animations.
+                                </p>
+                                <div class="track-card-topics">
+                                    <span class="topic-pill">Hash Maps</span>
+                                    <span class="topic-pill">Trees &amp; Graphs</span>
+                                    <span class="topic-pill">Dynamic Programming</span>
+                                    <span class="topic-pill">Algorithm Visualizer</span>
+                                </div>
+                            </div>
+                            <div class="track-card-footer">
+                                <div class="track-card-stat">
+                                    <span class="track-stat-num">200</span>
+                                    <span class="track-stat-lbl">Challenges</span>
+                                </div>
+                                <a href="problems.html" class="btn btn-sm btn-track btn-track-dsa">
+                                    Explore DSA &rarr;
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Track Card 3: Guided Learning Roadmap -->
+                        <div class="dash-track-card track-card-roadmap">
+                            <div class="track-card-header">
+                                <div class="track-card-icon-wrap roadmap-icon-wrap" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+                                    </svg>
+                                </div>
+                                <span class="track-card-badge badge-roadmap">Guided Learning Path</span>
+                            </div>
+                            <div class="track-card-body">
+                                <h3 class="track-card-title">Guided Java Roadmap</h3>
+                                <p class="track-card-desc">
+                                    Step-by-step learning path through 30 milestones with prerequisite DAG, code references, and local progress tracking.
+                                </p>
+                                <div class="track-card-topics">
+                                    <span class="topic-pill">Level 1: Fundamentals</span>
+                                    <span class="topic-pill">Level 2: Core Java</span>
+                                    <span class="topic-pill">Level 3: Algorithms</span>
+                                </div>
+                            </div>
+                            <div class="track-card-footer">
+                                <div class="track-card-stat">
+                                    <span class="track-stat-num">30</span>
+                                    <span class="track-stat-lbl">Milestones</span>
+                                </div>
+                                <a href="roadmap.html" class="btn btn-sm btn-track btn-track-roadmap">
+                                    View Roadmap &rarr;
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Row 4: Two-Column Main Content Grid -->
                 <div class="dashboard-columns-grid">
                     <!-- Left Column: Featured Problems -->
                     <section class="dash-panel featured-problems-panel" aria-labelledby="featuredHeading">
@@ -426,49 +607,76 @@
                         </div>
 
                         <div class="problem-list">
-                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Two Sum" data-id="two-sum">
-                                <span class="diff-badge diff-easy">Easy</span>
+                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Two Sum" data-id="two-sum" data-track="dsa">
+                                <div class="problem-item-badges">
+                                    <span class="track-badge-tag track-badge-dsa">DSA Track</span>
+                                    <span class="diff-badge diff-easy">Easy</span>
+                                </div>
                                 <div class="problem-info">
                                     <h3 class="problem-name">Two Sum</h3>
-                                    <p class="problem-snippet">Find two numbers in an array that add up to a target.</p>
+                                    <p class="problem-snippet">Find two indices in an array whose values sum to the target.</p>
                                 </div>
-                                <span class="problem-arrow" aria-hidden="true">→</span>
+                                <span class="problem-arrow" aria-hidden="true">&rarr;</span>
                             </article>
 
-                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Reverse a String" data-id="reverse-string">
-                                <span class="diff-badge diff-medium">Medium</span>
+                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Hello World" data-id="hello-world" data-track="basic">
+                                <div class="problem-item-badges">
+                                    <span class="track-badge-tag track-badge-basic">Basic Track</span>
+                                    <span class="diff-badge diff-easy">Easy</span>
+                                </div>
                                 <div class="problem-info">
-                                    <h3 class="problem-name">Reverse a String</h3>
-                                    <p class="problem-snippet">Reverse the given string.</p>
+                                    <h3 class="problem-name">Hello World</h3>
+                                    <p class="problem-snippet">Output the canonical greeting line using System.out.println.</p>
                                 </div>
-                                <span class="problem-arrow" aria-hidden="true">→</span>
+                                <span class="problem-arrow" aria-hidden="true">&rarr;</span>
                             </article>
 
-                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Valid Parentheses" data-id="valid-parentheses">
-                                <span class="diff-badge diff-medium">Medium</span>
+                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Reverse Linked List" data-id="reverse-linked-list" data-track="dsa">
+                                <div class="problem-item-badges">
+                                    <span class="track-badge-tag track-badge-dsa">DSA Track</span>
+                                    <span class="diff-badge diff-easy">Easy</span>
+                                </div>
+                                <div class="problem-info">
+                                    <h3 class="problem-name">Reverse Linked List</h3>
+                                    <p class="problem-snippet">Invert pointer references sequentially with interactive step-by-step visualizer.</p>
+                                </div>
+                                <span class="problem-arrow" aria-hidden="true">&rarr;</span>
+                            </article>
+
+                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Largest of Three Numbers" data-id="largest-of-three-numbers" data-track="basic">
+                                <div class="problem-item-badges">
+                                    <span class="track-badge-tag track-badge-basic">Basic Track</span>
+                                    <span class="diff-badge diff-easy">Easy</span>
+                                </div>
+                                <div class="problem-info">
+                                    <h3 class="problem-name">Largest of Three Numbers</h3>
+                                    <p class="problem-snippet">Evaluate three input integers and determine the maximum value.</p>
+                                </div>
+                                <span class="problem-arrow" aria-hidden="true">&rarr;</span>
+                            </article>
+
+                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Valid Parentheses" data-id="valid-parentheses" data-track="dsa">
+                                <div class="problem-item-badges">
+                                    <span class="track-badge-tag track-badge-dsa">DSA Track</span>
+                                    <span class="diff-badge diff-medium">Medium</span>
+                                </div>
                                 <div class="problem-info">
                                     <h3 class="problem-name">Valid Parentheses</h3>
-                                    <p class="problem-snippet">Check if the parentheses are valid.</p>
+                                    <p class="problem-snippet">Validate bracket matching and nesting order using a stack.</p>
                                 </div>
-                                <span class="problem-arrow" aria-hidden="true">→</span>
+                                <span class="problem-arrow" aria-hidden="true">&rarr;</span>
                             </article>
 
-                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Merge K Sorted Lists" data-id="merge-k-sorted-lists">
-                                <span class="diff-badge diff-hard">Hard</span>
-                                <div class="problem-info">
-                                    <h3 class="problem-name">Merge K Sorted Lists</h3>
-                                    <p class="problem-snippet">Merge k sorted linked lists into one sorted list.</p>
+                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Fibonacci Number" data-id="fibonacci-number" data-track="basic">
+                                <div class="problem-item-badges">
+                                    <span class="track-badge-tag track-badge-basic">Basic Track</span>
+                                    <span class="diff-badge diff-easy">Easy</span>
                                 </div>
-                                <span class="problem-arrow" aria-hidden="true">→</span>
-                            </article>
-
-                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Binary Search" data-id="binary-search">
-                                <span class="diff-badge diff-easy">Easy</span>
                                 <div class="problem-info">
-                                    <h3 class="problem-name">Binary Search</h3>
-                                    <p class="problem-snippet">Find the target element using binary search.</p>
+                                    <h3 class="problem-name">Fibonacci Number</h3>
+                                    <p class="problem-snippet">Compute the n-th Fibonacci number through iterative state updates.</p>
                                 </div>
-                                <span class="problem-arrow" aria-hidden="true">→</span>
+                                <span class="problem-arrow" aria-hidden="true">&rarr;</span>
                             </article>
                         </div>
                     </section>
@@ -482,40 +690,60 @@
                             </div>
 
                             <div class="quick-actions-grid">
-                                <a href="compiler.html" class="action-card action-compiler">
-                                    <div class="action-icon-box" aria-hidden="true">&lt;/&gt;</div>
+                                <a href="compiler.html" class="action-card action-compiler" title="Write and execute Java code in browser">
+                                    <div class="action-icon-box" aria-hidden="true">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="16 18 22 12 16 6"></polyline>
+                                            <polyline points="8 6 2 12 8 18"></polyline>
+                                        </svg>
+                                    </div>
                                     <div class="action-text-box">
                                         <h3 class="action-title">Open Compiler</h3>
-                                        <p class="action-subtitle">Write and run Java code</p>
+                                        <p class="action-subtitle">OpenJDK 17 preview execution</p>
                                     </div>
-                                    <span class="action-arrow" aria-hidden="true">→</span>
+                                    <span class="action-arrow" aria-hidden="true">&rarr;</span>
                                 </a>
 
-                                <a href="practice.html" class="action-card action-practice">
-                                    <div class="action-icon-box" aria-hidden="true">📖</div>
-                                    <div class="action-text-box">
-                                        <h3 class="action-title">Practice Problems</h3>
-                                        <p class="action-subtitle">Solve and improve</p>
+                                <a href="practice.html" class="action-card action-practice" title="Choose between Basic Java and DSA Tracks">
+                                    <div class="action-icon-box" aria-hidden="true">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+                                            <path d="M6 6h10"></path>
+                                            <path d="M6 10h10"></path>
+                                        </svg>
                                     </div>
-                                    <span class="action-arrow" aria-hidden="true">→</span>
+                                    <div class="action-text-box">
+                                        <h3 class="action-title">Practice Tracks</h3>
+                                        <p class="action-subtitle">50 Basic + 200 DSA challenges</p>
+                                    </div>
+                                    <span class="action-arrow" aria-hidden="true">&rarr;</span>
                                 </a>
 
-                                <a href="ai_assistant.html" class="action-card action-ai">
-                                    <div class="action-icon-box" aria-hidden="true">✦</div>
-                                    <div class="action-text-box">
-                                        <h3 class="action-title">Ask AI Assistant</h3>
-                                        <p class="action-subtitle">Get hints and explanations</p>
+                                <a href="roadmap.html" class="action-card action-roadmap" title="30 milestone structured learning roadmap">
+                                    <div class="action-icon-box" aria-hidden="true">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+                                        </svg>
                                     </div>
-                                    <span class="action-arrow" aria-hidden="true">→</span>
+                                    <div class="action-text-box">
+                                        <h3 class="action-title">Learning Roadmap</h3>
+                                        <p class="action-subtitle">30 milestone prerequisites</p>
+                                    </div>
+                                    <span class="action-arrow" aria-hidden="true">&rarr;</span>
                                 </a>
 
-                                <a href="contests.html" class="action-card action-contests">
-                                    <div class="action-icon-box" aria-hidden="true">🏆</div>
-                                    <div class="action-text-box">
-                                        <h3 class="action-title">View Contests</h3>
-                                        <p class="action-subtitle">Compete and win</p>
+                                <a href="solution-animation.html?id=two-sum" class="action-card action-visualizer" title="Interactive step-by-step algorithm animation studio">
+                                    <div class="action-icon-box" aria-hidden="true">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                                        </svg>
                                     </div>
-                                    <span class="action-arrow" aria-hidden="true">→</span>
+                                    <div class="action-text-box">
+                                        <h3 class="action-title">Algorithm Studio</h3>
+                                        <p class="action-subtitle">Step-by-step 200 visualizers</p>
+                                    </div>
+                                    <span class="action-arrow" aria-hidden="true">&rarr;</span>
                                 </a>
                             </div>
                         </section>
@@ -570,6 +798,8 @@
     </div>
 
     <!-- Dashboard JavaScript -->
+    <script src="../js/basic_problems_data.js"></script>
+    <script src="../js/roadmap_data.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/toast.js"></script>
     <script src="../js/dashboard.js" defer></script>

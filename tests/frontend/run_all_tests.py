@@ -29,6 +29,13 @@ TEST_SUITES = [
     ("Phase 7 DSA Expansion and UI", os.path.join("tests", "frontend", "automated", "test_phase7_dsa_hints_splitter.py")),
     ("Phase 8 User Access and Premium", os.path.join("tests", "frontend", "automated", "test_phase8_user_access_premium_dashboard.py")),
     ("UI Refinements (Logo, Theme, CTA)", os.path.join("tests", "frontend", "automated", "test_ui_refinements.py")),
+    ("Glassmorphism Auth Modal", os.path.join("tests", "frontend", "automated", "test_auth_modal_glassmorphism.py")),
+    ("Compiler Split Controls", os.path.join("tests", "frontend", "automated", "test_compiler_split_controls.py")),
+    ("Feature 3 Workspace & Learning", os.path.join("tests", "frontend", "automated", "test_workspace_problem_learning.py")),
+    ("Solution Animation Experience", os.path.join("tests", "frontend", "automated", "test_solution_animation.py")),
+    ("Universal Animation Engine (200 Problems)", os.path.join("tests", "frontend", "automated", "test_universal_animation_engine.py")),
+    ("Two-Track Practice & Beginner Java", os.path.join("tests", "frontend", "automated", "test_practice_tracks.py")),
+    ("Guided Java Learning Roadmap", os.path.join("tests", "frontend", "automated", "test_guided_roadmap.py")),
 
     # Regression Suites
     ("Branding Consistency", os.path.join("tests", "frontend", "regression", "test_branding_consistency.py")),

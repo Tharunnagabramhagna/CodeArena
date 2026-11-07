@@ -726,72 +726,117 @@
                     id: 'iterative-pointers',
                     name: 'Iterative 3-Pointer Reversal',
                     timeComplexity: 'O(n)',
-                    timeExplanation: 'Traverses each node in the linked list exactly once.',
+                    timeExplanation: 'Traverses each node in the linked list exactly once in linear time.',
                     spaceComplexity: 'O(1)',
-                    spaceExplanation: 'Maintains only three pointer references (prev, curr, next) regardless of list size.',
+                    spaceExplanation: 'Maintains only three pointer references (prev, curr, nextNode) regardless of list size.',
+                    javaCode: [
+                        'class Solution {',
+                        '    public ListNode reverseList(ListNode head) {',
+                        '        ListNode prev = null;',
+                        '        ListNode curr = head;',
+                        '        while (curr != null) {',
+                        '            ListNode nextNode = curr.next;',
+                        '            curr.next = prev;',
+                        '            prev = curr;',
+                        '            curr = nextNode;',
+                        '        }',
+                        '        return prev;',
+                        '    }',
+                        '}'
+                    ].join('\n'),
                     steps: [
                         {
-                            title: 'Initialize prev = null, curr = Node(1)',
-                            what: 'List: 1 -> 2 -> 3 -> 4 -> null. Set prev = null, curr = head (1). Save next = curr.next (2).',
-                            why: 'Reversing a unidirectional pointer requires caching the next node before overwriting .next.',
-                            variables: { prev: 'null', curr: '1', next: '2' },
+                            title: 'Initialize prev = null, curr = head (Node 1)',
+                            what: 'List: 1 -> 2 -> 3 -> 4 -> 5 -> null. Set prev = null, curr = head (1). Pre-cache nextNode = curr.next (2).',
+                            why: 'Reversing a unidirectional pointer requires caching nextNode before overwriting curr.next; otherwise the remainder of the list is lost.',
+                            variables: { prev: 'null', curr: 1, next: 2, head: 1 },
                             takeaway: 'Always save curr.next first so you never lose the remainder of the list.',
-                            render: () => `
-                                <div class="anim-visual-block">
-                                    <span class="anim-block-label">Initial State: prev=null, curr=1</span>
-                                    <div class="anim-ll-wrap">
-                                        <div class="anim-ll-node active-examined"><span class="anim-ll-val">1</span><span class="anim-ll-ptr">next</span></div>
-                                        <span class="anim-ll-arrow">→</span>
-                                        <div class="anim-ll-node"><span class="anim-ll-val">2</span><span class="anim-ll-ptr">next</span></div>
-                                        <span class="anim-ll-arrow">→</span>
-                                        <div class="anim-ll-node"><span class="anim-ll-val">3</span><span class="anim-ll-ptr">next</span></div>
-                                        <span class="anim-ll-arrow">→</span>
-                                        <div class="anim-ll-node"><span class="anim-ll-val">4</span><span class="anim-ll-ptr">null</span></div>
-                                    </div>
-                                </div>
-                            `
+                            javaLine: 3,
+                            render: () => window.CodeArenaVisualizers.renderLinkedList({
+                                nodes: [1, 2, 3, 4, 5],
+                                pointers: [
+                                    { name: 'prev', index: -1, className: 'pin-warning' },
+                                    { name: 'curr', index: 0, className: 'pin-primary' },
+                                    { name: 'next', index: 1, className: 'pin-secondary' }
+                                ],
+                                highlights: { 0: 'active-examined' },
+                                nullLeft: true,
+                                label: 'Initial State: prev=null, curr=1, nextNode=2'
+                            })
                         },
                         {
-                            title: 'Reverse curr.next = prev (1 -> null)',
-                            what: 'Set curr.next = prev (1.next = null). Advance prev = 1, curr = next (2).',
-                            why: 'Node 1 now points backward to null (becoming the new tail).',
-                            variables: { prev: '1', curr: '2', '1.next': 'null' },
-                            takeaway: 'Pointer redirection happens one link at a time.',
-                            render: () => `
-                                <div class="anim-visual-block">
-                                    <span class="anim-block-label">Reversed Node 1 (1 -> null)</span>
-                                    <div class="anim-ll-wrap">
-                                        <div class="anim-ll-node active-matched"><span class="anim-ll-val">1</span><span class="anim-ll-ptr">null</span></div>
-                                        <div style="margin: 0 10px; color: var(--color-text-muted);">| curr=2:</div>
-                                        <div class="anim-ll-node active-examined"><span class="anim-ll-val">2</span><span class="anim-ll-ptr">→3</span></div>
-                                        <span class="anim-ll-arrow">→</span>
-                                        <div class="anim-ll-node"><span class="anim-ll-val">3</span></div>
-                                        <span class="anim-ll-arrow">→</span>
-                                        <div class="anim-ll-node"><span class="anim-ll-val">4</span></div>
-                                    </div>
-                                </div>
-                            `
+                            title: 'Reverse Link 1: curr.next = prev (1 -> null)',
+                            what: 'Set curr.next = prev (1.next = null). Advance prev = 1, curr = nextNode (2). Pre-cache nextNode = 3.',
+                            why: 'Node 1 now points backward to null (becoming the new tail of the reversed list).',
+                            variables: { prev: 1, curr: 2, next: 3, '1.next': 'null' },
+                            takeaway: 'Pointer redirection happens one link at a time in O(1) space.',
+                            javaLine: 7,
+                            render: () => window.CodeArenaVisualizers.renderLinkedList({
+                                nodes: [1, 2, 3, 4, 5],
+                                pointers: [
+                                    { name: 'prev', index: 0, className: 'pin-warning' },
+                                    { name: 'curr', index: 1, className: 'pin-primary' },
+                                    { name: 'next', index: 2, className: 'pin-secondary' }
+                                ],
+                                highlights: { 0: 'active-swapped', 1: 'active-examined' },
+                                arrowDirections: { [-1]: 'left', 0: 'none' },
+                                nullLeft: true,
+                                label: 'Reversed Node 1: curr.next = prev (1 -> null)'
+                            })
                         },
                         {
-                            title: 'Reverse Nodes 2, 3, and 4',
-                            what: 'Repeat process for all nodes: 2.next = 1, 3.next = 2, 4.next = 3. Finally curr = null, prev = Node(4).',
-                            why: 'When curr hits null, prev points to the new head of the reversed list.',
-                            variables: { curr: 'null', prev: '4', newHead: '4' },
-                            takeaway: 'Return prev as the new head: 4 -> 3 -> 2 -> 1 -> null.',
-                            render: () => `
-                                <div class="anim-visual-block">
-                                    <span class="anim-block-label" style="color: #34D399;">Reversal Complete: 4 -> 3 -> 2 -> 1 -> null</span>
-                                    <div class="anim-ll-wrap">
-                                        <div class="anim-ll-node active-matched"><span class="anim-ll-val">4</span><span class="anim-ll-ptr">next</span></div>
-                                        <span class="anim-ll-arrow">→</span>
-                                        <div class="anim-ll-node active-matched"><span class="anim-ll-val">3</span><span class="anim-ll-ptr">next</span></div>
-                                        <span class="anim-ll-arrow">→</span>
-                                        <div class="anim-ll-node active-matched"><span class="anim-ll-val">2</span><span class="anim-ll-ptr">next</span></div>
-                                        <span class="anim-ll-arrow">→</span>
-                                        <div class="anim-ll-node active-matched"><span class="anim-ll-val">1</span><span class="anim-ll-ptr">null</span></div>
-                                    </div>
-                                </div>
-                            `
+                            title: 'Reverse Link 2: curr.next = prev (2 -> 1)',
+                            what: 'Set curr.next = prev (2.next = 1). Advance prev = 2, curr = nextNode (3). Pre-cache nextNode = 4.',
+                            why: 'Node 2 points to Node 1: reversed sublist is now 2 -> 1 -> null.',
+                            variables: { prev: 2, curr: 3, next: 4, '2.next': 1 },
+                            takeaway: 'Reversed chain grows from the left: 2 -> 1 -> null.',
+                            javaLine: 7,
+                            render: () => window.CodeArenaVisualizers.renderLinkedList({
+                                nodes: [2, 1, 3, 4, 5],
+                                pointers: [
+                                    { name: 'prev', index: 0, className: 'pin-warning' },
+                                    { name: 'curr', index: 2, className: 'pin-primary' },
+                                    { name: 'next', index: 3, className: 'pin-secondary' }
+                                ],
+                                highlights: { 0: 'active-swapped', 1: 'active-swapped', 2: 'active-examined' },
+                                arrowDirections: { 0: 'right', 1: 'none' },
+                                label: 'Reversed Node 2: curr.next = prev (2 -> 1 -> null)'
+                            })
+                        },
+                        {
+                            title: 'Reverse Links 3 and 4: Advance Along List',
+                            what: 'Repeat process: 3.next = 2, then 4.next = 3. Advance prev = 4, curr = nextNode (5). Pre-cache nextNode = null.',
+                            why: 'Loop invariants guarantee constant O(1) auxiliary memory throughout traversal.',
+                            variables: { prev: 4, curr: 5, next: 'null', '4.next': 3 },
+                            takeaway: 'Reversed chain is now 4 -> 3 -> 2 -> 1 -> null.',
+                            javaLine: 8,
+                            render: () => window.CodeArenaVisualizers.renderLinkedList({
+                                nodes: [4, 3, 2, 1, 5],
+                                pointers: [
+                                    { name: 'prev', index: 0, className: 'pin-warning' },
+                                    { name: 'curr', index: 4, className: 'pin-primary' }
+                                ],
+                                highlights: { 0: 'active-swapped', 1: 'active-swapped', 2: 'active-swapped', 3: 'active-swapped', 4: 'active-examined' },
+                                arrowDirections: { 0: 'right', 1: 'right', 2: 'right', 3: 'none' },
+                                label: 'Reversed Sublist: 4 -> 3 -> 2 -> 1 -> null'
+                            })
+                        },
+                        {
+                            title: 'Reverse Final Link 5 & Return prev as New Head',
+                            what: 'Set 5.next = 4. Advance prev = 5, curr = null. Loop terminates because curr == null. Return prev (Node 5).',
+                            why: 'When curr hits null, prev points to the new head of the completely reversed list.',
+                            variables: { curr: 'null', prev: 5, newHead: 5, status: 'Reversal Complete' },
+                            takeaway: 'Return prev as new head: 5 -> 4 -> 3 -> 2 -> 1 -> null.',
+                            javaLine: 11,
+                            render: () => window.CodeArenaVisualizers.renderLinkedList({
+                                nodes: [5, 4, 3, 2, 1],
+                                pointers: [
+                                    { name: 'head (new)', index: 0, className: 'pin-success' },
+                                    { name: 'curr', index: 5, className: 'pin-primary' }
+                                ],
+                                highlights: { 0: 'active-matched', 1: 'active-matched', 2: 'active-matched', 3: 'active-matched', 4: 'active-matched' },
+                                label: 'Reversal Complete: 5 -> 4 -> 3 -> 2 -> 1 -> null'
+                            })
                         }
                     ]
                 }
@@ -1041,6 +1086,10 @@
 
         dom.approachSelectorWrap = document.getElementById('approachSelectorWrap');
         dom.selectApproach = document.getElementById('selectApproach');
+        dom.customApproachDropdown = document.getElementById('customApproachDropdown');
+        dom.customApproachTrigger = document.getElementById('customApproachTrigger');
+        dom.customApproachSelectedText = document.getElementById('customApproachSelectedText');
+        dom.customApproachMenu = document.getElementById('customApproachMenu');
 
         dom.btnBackToProblem = document.getElementById('btnBackToProblem');
         dom.themeToggleBtn = document.getElementById('themeToggleBtn');
@@ -1074,6 +1123,14 @@
         dom.textSpaceComplexity = document.getElementById('textSpaceComplexity');
 
         dom.btnSidebarBack = document.getElementById('btnSidebarBack');
+
+        // Java Code Reference Card DOM Caching
+        dom.javaCodeCard = document.getElementById('javaCodeCard');
+        dom.javaCodeTitle = document.getElementById('javaCodeTitle');
+        dom.javaActiveLineBadge = document.getElementById('javaActiveLineBadge');
+        dom.javaCodeWrapper = document.getElementById('javaCodeWrapper');
+        dom.javaCodeBlock = document.getElementById('javaCodeBlock');
+        dom.javaLineExplanation = document.getElementById('javaLineExplanation');
 
         dom.comingSoonTitle = document.getElementById('comingSoonTitle');
         dom.comingSoonDesc = document.getElementById('comingSoonDesc');
@@ -1143,8 +1200,14 @@
         if (dom.btnSidebarBack) dom.btnSidebarBack.href = backUrl;
         if (dom.btnComingSoonBack) dom.btnComingSoonBack.href = backUrl;
 
-        // Check if bespoke animation exists in registry
-        const animDef = ANIMATIONS_REGISTRY[prob.id];
+        // Check if animation exists in Universal Animation Engine or bespoke registry
+        let animDef = null;
+        if (window.CodeArenaAnimationEngine && typeof window.CodeArenaAnimationEngine.getAnimation === 'function') {
+            animDef = window.CodeArenaAnimationEngine.getAnimation(prob.id, prob);
+        }
+        if (!animDef) {
+            animDef = ANIMATIONS_REGISTRY[prob.id];
+        }
 
         if (animDef && Array.isArray(animDef.approaches) && animDef.approaches.length > 0) {
             currentAnimation = animDef;
@@ -1165,12 +1228,36 @@
         if (!dom.selectApproach || !dom.approachSelectorWrap) return;
 
         dom.selectApproach.innerHTML = '';
+        if (dom.customApproachMenu) dom.customApproachMenu.innerHTML = '';
 
         approaches.forEach((app, idx) => {
+            // Native select option (fallback & automated test compatibility)
             const opt = document.createElement('option');
             opt.value = app.id;
             opt.textContent = app.name;
             dom.selectApproach.appendChild(opt);
+
+            // Custom accessible dropdown option
+            if (dom.customApproachMenu) {
+                const li = document.createElement('li');
+                li.className = 'custom-approach-option';
+                li.setAttribute('role', 'option');
+                li.setAttribute('data-value', app.id);
+                li.setAttribute('id', `opt-${app.id}`);
+                li.setAttribute('tabindex', '-1');
+                li.innerHTML = `
+                    <span class="custom-approach-opt-label">${app.name}</span>
+                    <svg class="custom-approach-opt-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                `;
+                li.addEventListener('click', () => {
+                    selectApproach(app);
+                    closeCustomDropdown();
+                    if (dom.customApproachTrigger) dom.customApproachTrigger.focus();
+                });
+                dom.customApproachMenu.appendChild(li);
+            }
         });
 
         // Show approach dropdown only if multiple approaches exist
@@ -1188,11 +1275,48 @@
     }
 
     /**
+     * Helper methods for custom accessible approach dropdown
+     */
+    function openCustomDropdown() {
+        if (!dom.customApproachMenu || !dom.customApproachTrigger) return;
+        dom.customApproachMenu.style.display = 'block';
+        dom.customApproachTrigger.setAttribute('aria-expanded', 'true');
+        
+        // Focus the selected option or first option
+        const selectedOpt = dom.customApproachMenu.querySelector('.custom-approach-option[aria-selected="true"]') ||
+                            dom.customApproachMenu.querySelector('.custom-approach-option');
+        if (selectedOpt) {
+            selectedOpt.focus();
+        }
+    }
+
+    function closeCustomDropdown() {
+        if (!dom.customApproachMenu || !dom.customApproachTrigger) return;
+        dom.customApproachMenu.style.display = 'none';
+        dom.customApproachTrigger.setAttribute('aria-expanded', 'false');
+    }
+
+    function isCustomDropdownOpen() {
+        return dom.customApproachMenu && dom.customApproachMenu.style.display === 'block';
+    }
+
+    /**
      * Selects an approach and resets step index to 0.
      */
     function selectApproach(app) {
         activeApproach = app;
         if (dom.selectApproach) dom.selectApproach.value = app.id;
+        if (dom.customApproachSelectedText) dom.customApproachSelectedText.textContent = app.name;
+
+        // Synchronize custom dropdown menu selection states
+        if (dom.customApproachMenu) {
+            dom.customApproachMenu.querySelectorAll('.custom-approach-option').forEach(opt => {
+                const isSelected = opt.getAttribute('data-value') === app.id;
+                opt.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+                opt.classList.toggle('selected', isSelected);
+            });
+        }
+
         currentStepIndex = 0;
         pause();
 
@@ -1204,6 +1328,20 @@
 
         if (dom.stageApproachHeading) {
             dom.stageApproachHeading.textContent = `${currentProblem.title} — ${app.name}`;
+        }
+
+        // Synchronize Java reference code panel
+        if (dom.javaCodeCard) {
+            if (app.javaCode && dom.javaCodeBlock) {
+                dom.javaCodeCard.style.display = 'block';
+                const lines = app.javaCode.split('\n');
+                dom.javaCodeBlock.innerHTML = lines.map((codeLine, idx) => {
+                    const lineNum = idx + 1;
+                    return `<div class="java-code-line" data-line="${lineNum}"><span class="line-num">${lineNum}</span><span class="line-content">${escapeHtml(codeLine)}</span></div>`;
+                }).join('');
+            } else {
+                dom.javaCodeCard.style.display = 'none';
+            }
         }
 
         renderCurrentStep();
@@ -1266,6 +1404,30 @@
                     `;
                     dom.variablesGrid.appendChild(pill);
                 });
+            }
+        }
+
+        // 6. Java Code Synchronization
+        if (dom.javaCodeBlock && dom.javaCodeCard && dom.javaCodeCard.style.display !== 'none') {
+            const codeLines = dom.javaCodeBlock.querySelectorAll('.java-code-line');
+            codeLines.forEach(l => l.classList.remove('active-line'));
+
+            if (step.javaLine) {
+                const targetLine = dom.javaCodeBlock.querySelector(`.java-code-line[data-line="${step.javaLine}"]`);
+                if (targetLine) {
+                    targetLine.classList.add('active-line');
+                    if (dom.javaActiveLineBadge) dom.javaActiveLineBadge.textContent = `Line ${step.javaLine}`;
+                    if (dom.javaCodeWrapper) {
+                        const topPos = targetLine.offsetTop - dom.javaCodeBlock.offsetTop;
+                        dom.javaCodeWrapper.scrollTop = Math.max(0, topPos - 35);
+                    }
+                }
+            } else {
+                if (dom.javaActiveLineBadge) dom.javaActiveLineBadge.textContent = 'Reference';
+            }
+
+            if (dom.javaLineExplanation) {
+                dom.javaLineExplanation.textContent = step.javaExplanation || (step.what ? step.what : 'Java statement synchronized with current visual state.');
             }
         }
     }
@@ -1400,6 +1562,65 @@
             });
         }
 
+        // Custom Accessible Dropdown Events
+        if (dom.customApproachTrigger && dom.customApproachMenu) {
+            dom.customApproachTrigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (isCustomDropdownOpen()) {
+                    closeCustomDropdown();
+                } else {
+                    openCustomDropdown();
+                }
+            });
+
+            dom.customApproachTrigger.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openCustomDropdown();
+                }
+            });
+
+            dom.customApproachMenu.addEventListener('keydown', (e) => {
+                const options = Array.from(dom.customApproachMenu.querySelectorAll('.custom-approach-option'));
+                const currentIndex = options.indexOf(document.activeElement);
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const nextIndex = (currentIndex + 1) % options.length;
+                    options[nextIndex].focus();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const prevIndex = (currentIndex - 1 + options.length) % options.length;
+                    options[prevIndex].focus();
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    if (options.length > 0) options[0].focus();
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    if (options.length > 0) options[options.length - 1].focus();
+                } else if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    if (document.activeElement && document.activeElement.classList.contains('custom-approach-option')) {
+                        document.activeElement.click();
+                    }
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeCustomDropdown();
+                    if (dom.customApproachTrigger) dom.customApproachTrigger.focus();
+                } else if (e.key === 'Tab') {
+                    closeCustomDropdown();
+                }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (isCustomDropdownOpen() && dom.customApproachDropdown && !dom.customApproachDropdown.contains(e.target)) {
+                    closeCustomDropdown();
+                }
+            });
+        }
+
+        // Native select synchronization (fallback & programmatic compatibility)
         if (dom.selectApproach) {
             dom.selectApproach.addEventListener('change', (e) => {
                 if (currentAnimation && Array.isArray(currentAnimation.approaches)) {
@@ -1409,24 +1630,10 @@
             });
         }
 
-        // Theme toggle synchronization with theme.js
-        if (dom.themeToggleBtn) {
-            dom.themeToggleBtn.addEventListener('click', () => {
-                if (window.CodeArenaTheme && typeof window.CodeArenaTheme.toggle === 'function') {
-                    window.CodeArenaTheme.toggle();
-                } else {
-                    const curr = document.documentElement.getAttribute('data-theme') || 'dark';
-                    const next = (curr === 'dark') ? 'light' : 'dark';
-                    document.documentElement.setAttribute('data-theme', next);
-                    try { localStorage.setItem('codearena_theme', next); } catch (e) { }
-                }
-            });
-        }
-
         // Keyboard navigation shortcuts
         document.addEventListener('keydown', (e) => {
-            // Ignore when typing in select or inputs
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
+            // Ignore when typing in select or inputs or navigating custom dropdown
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA' || isCustomDropdownOpen()) {
                 return;
             }
 
@@ -1481,7 +1688,12 @@
             }
         },
         isComingSoon: () => currentAnimation === null,
-        getRegistry: () => ANIMATIONS_REGISTRY
+        getRegistry: () => {
+            if (window.CodeArenaAnimationEngine && typeof window.CodeArenaAnimationEngine.getBespokeRegistry === 'function') {
+                return Object.assign({}, ANIMATIONS_REGISTRY, window.CodeArenaAnimationEngine.getBespokeRegistry());
+            }
+            return ANIMATIONS_REGISTRY;
+        }
     };
 
 })();

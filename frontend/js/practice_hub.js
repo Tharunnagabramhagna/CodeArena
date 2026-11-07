@@ -158,6 +158,11 @@
         if (dom.mediumCountStat) dom.mediumCountStat.textContent = med;
         if (dom.hardCountStat) dom.hardCountStat.textContent = hard;
 
+        const lblBasic = document.getElementById('lblBasicCount');
+        if (lblBasic && window.CodeArenaBasicPractice) {
+            lblBasic.textContent = window.CodeArenaBasicPractice.getStats().totalProblems;
+        }
+
         renderRecommendedSection();
         renderTopicsGrid();
         filterAndRenderProblems();

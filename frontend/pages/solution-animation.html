@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CodeArena — Animate the Solution</title>
+    <link rel="icon" type="image/png" href="../assets/logo/codearena-favicon.png">
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/animation.css">
     <!-- Immediate Theme Application Script (Zero Flash) -->
@@ -14,8 +15,8 @@
     <!-- Top Application Navbar -->
     <header class="workspace-header anim-navbar" role="banner">
         <div class="workspace-header-left anim-navbar-left">
-            <a href="../index.html" class="workspace-brand-wrap" title="Return to CodeArena Home">
-                <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo">
+            <a href="../index.html" class="workspace-brand-wrap" title="Return to CodeArena Home" aria-label="CodeArena Home">
+                <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo" onerror="this.onerror=null; this.src='../assets/logo/codearena-logo.png';">
             </a>
             <span class="anim-nav-divider" aria-hidden="true">/</span>
             <div class="anim-nav-problem-info">
@@ -32,8 +33,33 @@
         <div class="workspace-header-actions anim-navbar-right">
             <!-- Approach Selector (visible for problems with multiple approaches like Two Sum) -->
             <div class="approach-selector-wrap" id="approachSelectorWrap" style="display: none;">
-                <label for="selectApproach" class="approach-selector-label">Approach:</label>
-                <select id="selectApproach" class="approach-select-control" aria-label="Select Algorithmic Approach">
+                <label for="customApproachTrigger" class="approach-selector-label" id="approachSelectorLabel">Approach:</label>
+                
+                <!-- Custom Accessible Dropdown Component -->
+                <div class="custom-approach-dropdown" id="customApproachDropdown">
+                    <button type="button" 
+                            class="custom-approach-trigger" 
+                            id="customApproachTrigger" 
+                            aria-haspopup="listbox" 
+                            aria-expanded="false" 
+                            aria-labelledby="approachSelectorLabel customApproachSelectedText">
+                        <span class="custom-approach-selected-text" id="customApproachSelectedText">Select approach...</span>
+                        <svg class="custom-dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <ul class="custom-approach-menu" 
+                        id="customApproachMenu" 
+                        role="listbox" 
+                        aria-labelledby="approachSelectorLabel" 
+                        tabindex="-1" 
+                        style="display: none;">
+                        <!-- Populated dynamically -->
+                    </ul>
+                </div>
+
+                <!-- Hidden native select for test suite compatibility & fallback -->
+                <select id="selectApproach" class="approach-select-control sr-only" aria-label="Select Algorithmic Approach" tabindex="-1">
                     <!-- Populated dynamically -->
                 </select>
             </div>
@@ -167,7 +193,12 @@
                 <!-- Card 2: Complexity Analysis -->
                 <div class="anim-info-card complexity-card" id="complexityCard">
                     <div class="info-card-header">
-                        <span class="complexity-icon" aria-hidden="true">⏱️</span>
+                        <span class="complexity-icon" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </span>
                         <h3 class="info-header-title">Complexity Analysis</h3>
                     </div>
                     <div class="info-card-body">
@@ -188,7 +219,34 @@
                     </div>
                 </div>
 
-                <!-- Card 3: Return to Workspace -->
+                <!-- Card 3: Java Solution Reference -->
+                <div class="anim-info-card java-code-card" id="javaCodeCard">
+                    <div class="info-card-header">
+                        <span class="java-icon" aria-hidden="true">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="16 18 22 12 16 6"></polyline>
+                                <polyline points="8 6 2 12 8 18"></polyline>
+                            </svg>
+                        </span>
+                        <h3 class="info-header-title" id="javaCodeTitle">Java Solution Reference</h3>
+                        <span class="java-active-line-badge" id="javaActiveLineBadge">Line 1</span>
+                    </div>
+                    <div class="info-card-body">
+                        <div class="java-code-wrapper" id="javaCodeWrapper">
+                            <pre class="java-code-pre" id="javaCodePre"><code id="javaCodeBlock"></code></pre>
+                        </div>
+                        <p class="java-sync-note" id="javaSyncNote">
+                            <span class="sync-icon" aria-hidden="true">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                </svg>
+                            </span>
+                            <span id="javaLineExplanation">Highlighted line corresponds to active algorithmic step.</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Card 4: Return to Workspace -->
                 <div class="anim-info-card back-workspace-card">
                     <h4 class="back-card-title">Ready to code?</h4>
                     <p class="back-card-desc">Apply what you learned directly in the CodeArena problem-solving workspace.</p>
@@ -204,7 +262,11 @@
         <!-- COMING SOON VIEW (For problems without a bespoke animation) -->
         <div class="anim-coming-soon-layout" id="viewComingSoon" style="display: none;">
             <div class="coming-soon-card">
-                <div class="coming-soon-icon" aria-hidden="true">🎨</div>
+                <div class="coming-soon-icon" aria-hidden="true">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                </div>
                 <span class="coming-soon-tag">Interactive Animation Studio</span>
                 <h2 class="coming-soon-title" id="comingSoonTitle">Visualization In Development</h2>
                 <p class="coming-soon-desc" id="comingSoonDesc">
@@ -215,7 +277,7 @@
                         <span>← Back to Problem Workspace</span>
                     </a>
                     <a href="solution-animation.html?id=two-sum" class="btn-coming-soon-secondary">
-                        <span>Explore Two Sum Animation ⚡</span>
+                        <span>Explore Two Sum Animation →</span>
                     </a>
                 </div>
 
@@ -282,6 +344,8 @@
     <!-- Scripts -->
     <script src="../js/api.js"></script>
     <script src="../js/theme.js"></script>
+    <script src="../js/animation_visualizers.js"></script>
+    <script src="../js/animation_engine.js"></script>
     <script src="../js/solution_animation.js"></script>
 </body>
 </html>
