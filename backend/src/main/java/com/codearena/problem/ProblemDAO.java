@@ -13,13 +13,40 @@ import java.util.List;
 
 public class ProblemDAO {
 
+    // Convert database result into Problem object
+    private Problem mapProblem(ResultSet result) throws SQLException {
+
+        Problem problem = new Problem();
+
+        problem.setId(result.getInt("id"));
+        problem.setTitle(result.getString("title"));
+        problem.setDescription(result.getString("description"));
+        problem.setDifficulty(result.getString("difficulty"));
+        problem.setConstraints(result.getString("constraints_text"));
+        problem.setInputFormat(result.getString("input_format"));
+        problem.setOutputFormat(result.getString("output_format"));
+        problem.setSampleInput(result.getString("sample_input"));
+        problem.setSampleOutput(result.getString("sample_output"));
+        problem.setCreatedAt(result.getString("created_at"));
+        problem.setActive(result.getBoolean("active"));
+
+        // New frontend fields
+        problem.setTopic(result.getString("topic"));
+        problem.setPattern(result.getString("pattern"));
+        problem.setPremium(result.getBoolean("is_premium"));
+        problem.setSnippet(result.getString("snippet"));
+
+        return problem;
+    }
+
     // 1. Add a new problem
     public boolean addProblem(Problem problem) {
 
         String sql = "INSERT INTO problems "
                 + "(title, description, difficulty, constraints_text, "
-                + "input_format, output_format, sample_input, sample_output) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                + "input_format, output_format, sample_input, sample_output, "
+                + "topic, pattern, is_premium, snippet) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -32,9 +59,12 @@ public class ProblemDAO {
             statement.setString(6, problem.getOutputFormat());
             statement.setString(7, problem.getSampleInput());
             statement.setString(8, problem.getSampleOutput());
+            statement.setString(9, problem.getTopic());
+            statement.setString(10, problem.getPattern());
+            statement.setBoolean(11, problem.isPremium());
+            statement.setString(12, problem.getSnippet());
 
-            int rows = statement.executeUpdate();
-            return rows > 0;
+            return statement.executeUpdate() > 0;
 
         } catch (SQLException e) {
             System.out.println("Error adding problem!");
@@ -55,22 +85,7 @@ public class ProblemDAO {
              ResultSet result = statement.executeQuery()) {
 
             while (result.next()) {
-
-                Problem problem = new Problem();
-
-                problem.setId(result.getInt("id"));
-                problem.setTitle(result.getString("title"));
-                problem.setDescription(result.getString("description"));
-                problem.setDifficulty(result.getString("difficulty"));
-                problem.setConstraints(result.getString("constraints_text"));
-                problem.setInputFormat(result.getString("input_format"));
-                problem.setOutputFormat(result.getString("output_format"));
-                problem.setSampleInput(result.getString("sample_input"));
-                problem.setSampleOutput(result.getString("sample_output"));
-                problem.setCreatedAt(result.getString("created_at"));
-                problem.setActive(result.getBoolean("active"));
-
-                problems.add(problem);
+                problems.add(mapProblem(result));
             }
 
         } catch (SQLException e) {
@@ -94,22 +109,7 @@ public class ProblemDAO {
             try (ResultSet result = statement.executeQuery()) {
 
                 if (result.next()) {
-
-                    Problem problem = new Problem();
-
-                    problem.setId(result.getInt("id"));
-                    problem.setTitle(result.getString("title"));
-                    problem.setDescription(result.getString("description"));
-                    problem.setDifficulty(result.getString("difficulty"));
-                    problem.setConstraints(result.getString("constraints_text"));
-                    problem.setInputFormat(result.getString("input_format"));
-                    problem.setOutputFormat(result.getString("output_format"));
-                    problem.setSampleInput(result.getString("sample_input"));
-                    problem.setSampleOutput(result.getString("sample_output"));
-                    problem.setCreatedAt(result.getString("created_at"));
-                    problem.setActive(result.getBoolean("active"));
-
-                    return problem;
+                    return mapProblem(result);
                 }
             }
 
@@ -124,9 +124,11 @@ public class ProblemDAO {
     // 4. Update an existing problem
     public boolean updateProblem(Problem problem) {
 
-        String sql = "UPDATE problems SET title = ?, description = ?, "
-                + "difficulty = ?, constraints_text = ?, input_format = ?, "
-                + "output_format = ?, sample_input = ?, sample_output = ? "
+        String sql = "UPDATE problems SET "
+                + "title = ?, description = ?, difficulty = ?, "
+                + "constraints_text = ?, input_format = ?, "
+                + "output_format = ?, sample_input = ?, sample_output = ?, "
+                + "topic = ?, pattern = ?, is_premium = ?, snippet = ? "
                 + "WHERE id = ? AND active = TRUE";
 
         try (Connection connection = DBConnection.getConnection();
@@ -140,10 +142,13 @@ public class ProblemDAO {
             statement.setString(6, problem.getOutputFormat());
             statement.setString(7, problem.getSampleInput());
             statement.setString(8, problem.getSampleOutput());
-            statement.setInt(9, problem.getId());
+            statement.setString(9, problem.getTopic());
+            statement.setString(10, problem.getPattern());
+            statement.setBoolean(11, problem.isPremium());
+            statement.setString(12, problem.getSnippet());
+            statement.setInt(13, problem.getId());
 
-            int rows = statement.executeUpdate();
-            return rows > 0;
+            return statement.executeUpdate() > 0;
 
         } catch (SQLException e) {
             System.out.println("Error updating problem!");
@@ -163,8 +168,7 @@ public class ProblemDAO {
 
             statement.setInt(1, id);
 
-            int rows = statement.executeUpdate();
-            return rows > 0;
+            return statement.executeUpdate() > 0;
 
         } catch (SQLException e) {
             System.out.println("Error deactivating problem!");

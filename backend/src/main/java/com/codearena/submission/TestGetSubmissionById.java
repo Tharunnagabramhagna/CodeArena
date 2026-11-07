@@ -1,4 +1,3 @@
-
 package com.codearena.submission;
 
 import com.codearena.model.Submission;

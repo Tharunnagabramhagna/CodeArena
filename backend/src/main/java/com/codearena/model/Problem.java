@@ -1,8 +1,9 @@
+
 package com.codearena.model;
 
 public class Problem {
 
-    // Problem details
+    // Existing problem details
     private int id;
     private String title;
     private String description;
@@ -15,12 +16,17 @@ public class Problem {
     private String createdAt;
     private boolean active;
 
+    // New fields required by frontend
+    private String topic;
+    private String pattern;
+    private boolean premium;
+    private String snippet;
+
     // Default constructor
     public Problem() {
-
     }
 
-    // Parameterized constructor
+    // Existing parameterized constructor
     public Problem(int id, String title, String description, String difficulty) {
         this.id = id;
         this.title = title;
@@ -28,113 +34,127 @@ public class Problem {
         this.difficulty = difficulty;
     }
 
-    // Getter for id
+    // Getters and setters
+
     public int getId() {
         return id;
     }
 
-    // Setter for id
     public void setId(int id) {
-    this.id = id;
+        this.id = id;
     }
 
-    // Getter for title
     public String getTitle() {
         return title;
     }
 
-    //setter for title
     public void setTitle(String title) {
         this.title = title;
     }
 
-    // Getter for description
     public String getDescription() {
         return description;
     }
 
-    // Setter for description
     public void setDescription(String description) {
         this.description = description;
-    }   
-
-    // Getter for difficulty
-    public String getDifficulty() {
-       return difficulty;
     }
 
-    // Setter for difficulty
+    public String getDifficulty() {
+        return difficulty;
+    }
+
     public void setDifficulty(String difficulty) {
         this.difficulty = difficulty;
     }
 
-    // Getter for constraints
     public String getConstraints() {
         return constraints;
     }
 
-    // Setter for constraints
     public void setConstraints(String constraints) {
         this.constraints = constraints;
     }
 
-    // Getter for inputFormat
     public String getInputFormat() {
-       return inputFormat;
+        return inputFormat;
     }
 
-    // Setter for inputFormat
     public void setInputFormat(String inputFormat) {
         this.inputFormat = inputFormat;
     }
 
-    // Getter for outputFormat
     public String getOutputFormat() {
         return outputFormat;
     }
 
-    // Setter for outputFormat
     public void setOutputFormat(String outputFormat) {
         this.outputFormat = outputFormat;
     }
 
-    // Getter for sampleInput
-    public String getSampleInput() {    
+    public String getSampleInput() {
         return sampleInput;
-    }           
+    }
 
-    // Setter for sampleInput
-    public void setSampleInput(String sampleInput) {        
+    public void setSampleInput(String sampleInput) {
         this.sampleInput = sampleInput;
     }
 
-    // Getter for sampleOutput
-    public String getSampleOutput() {        
+    public String getSampleOutput() {
         return sampleOutput;
-    }                   
+    }
 
-    // Setter for sampleOutput
     public void setSampleOutput(String sampleOutput) {
         this.sampleOutput = sampleOutput;
-    }               
+    }
 
-    // Getter for createdAt
     public String getCreatedAt() {
         return createdAt;
-    }   
+    }
 
-    // Setter for createdAt
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
-    }   
+    }
 
-    // Getter for active
-    public boolean isActive() { 
+    public boolean isActive() {
         return active;
     }
 
-    // Setter for active
     public void setActive(boolean active) {
         this.active = active;
-    }                       
+    }
+
+    // New field getters and setters
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public String getPattern() {
+        return pattern;
+    }
+
+    public void setPattern(String pattern) {
+        this.pattern = pattern;
+    }
+
+    public boolean isPremium() {
+        return premium;
+    }
+
+    public void setPremium(boolean premium) {
+        this.premium = premium;
+    }
+
+    public String getSnippet() {
+        return snippet;
+    }
+
+    public void setSnippet(String snippet) {
+        this.snippet = snippet;
+    }
 }
