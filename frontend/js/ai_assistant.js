@@ -226,40 +226,55 @@
         simulateAssistantResponse(text);
     }
 
-    function simulateAssistantResponse(userPrompt) {
-        const lowerPrompt = userPrompt.toLowerCase();
-        let matched = null;
+async function simulateAssistantResponse(userPrompt) {
+    const history = getHistory();
+    const now = new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 
-        for (const item of KNOWLEDGE_BASE) {
-            if (item.keywords.some(kw => lowerPrompt.includes(kw))) {
-                matched = item;
-                break;
+    try {
+        const response = await fetch(
+            'http://localhost:8080/codearena/api/ai-assistant',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: userPrompt
+                })
             }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || 'Unable to get a response.');
         }
 
-        setTimeout(() => {
-            const history = getHistory();
-            const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        history.push({
+            sender: 'assistant',
+            text: data.reply,
+            code: null,
+            timestamp: now
+        });
 
-            if (matched) {
-                history.push({
-                    sender: 'assistant',
-                    text: `### ${matched.title}\n\n${matched.response}`,
-                    code: matched.code,
-                    timestamp: now
-                });
-            } else {
-                history.push({
-                    sender: 'assistant',
-                    text: `Great question regarding: **"${escapeHtml(userPrompt)}"**.\n\nIn Java development, approach this problem systematically:\n1. **Verify Types & Signatures:** Check parameter types and return contracts.\n2. **Handle Edge Cases:** Test empty arrays, \`null\` pointers, and boundary numbers (0, negative).\n3. **Measure Time & Space Complexity:** Identify whether nested loops can be optimized using hash structures.\n\n*Note: This is a simulated learning response demonstrating CodeArena's upcoming AI mentoring assistant.*`,
-                    code: `// Sample Java skeleton to test your logic\npublic class Solution {\n    public static void main(String[] args) {\n        System.out.println("Testing hypothesis...");\n    }\n}`,
-                    timestamp: now
-                });
-            }
-            saveHistory(history);
-            renderHistory();
-        }, 500);
+    } catch (error) {
+        console.error('AI Assistant API error:', error);
+
+        history.push({
+            sender: 'assistant',
+            text: 'I could not connect to the AI Assistant server. Please check whether the backend is running.',
+            code: null,
+            timestamp: now
+        });
     }
+
+    saveHistory(history);
+    renderHistory();
+}
+
 
     function handleClearChat() {
         if (confirm('Clear your current conversation history? (This will reset the session chat)')) {
