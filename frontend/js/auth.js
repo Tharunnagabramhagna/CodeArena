@@ -32,6 +32,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // --------------------------------------------------------------------------
     // 2. Login Form Client-Side Validation & API Service Dispatch
     // --------------------------------------------------------------------------
+    const loginForm = document.getElementById('loginForm');
+    const loginFeedback = document.getElementById('authFeedback');
+
     const forgotPasswordLink = document.getElementById('forgotPasswordLink');
     if (forgotPasswordLink && loginFeedback) {
         forgotPasswordLink.addEventListener('click', function (e) {
@@ -39,9 +42,6 @@ document.addEventListener('DOMContentLoaded', function () {
             showFeedback(loginFeedback, 'Password reset will be enabled when backend email service is connected.', 'info');
         });
     }
-
-    const loginForm = document.getElementById('loginForm');
-    const loginFeedback = document.getElementById('authFeedback');
 
     if (loginForm && loginFeedback) {
         loginForm.addEventListener('submit', async function (e) {
@@ -202,6 +202,26 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    // --------------------------------------------------------------------------
+    // 4. Social Authentication Preview Handlers (Google & Facebook)
+    // --------------------------------------------------------------------------
+    const socialButtons = document.querySelectorAll('.btn-auth-social');
+    socialButtons.forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const provider = btn.getAttribute('data-provider') || 'Social';
+            const feedbackEl = document.getElementById('authFeedback');
+            if (feedbackEl) {
+                showFeedback(
+                    feedbackEl,
+                    `${provider} authentication will be available when the authentication backend is integrated.`,
+                    'info'
+                );
+                feedbackEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        });
+    });
 
     // --------------------------------------------------------------------------
     // Helper: Display Feedback Message

@@ -1,0 +1,140 @@
+# CodeArena — Database Developer Setup Guide
+
+This guide describes how to install, initialize, migrate, seed, and verify the CodeArena MySQL 8.0 database environment.
+
+---
+
+## 1. Prerequisites
+
+- **MySQL Server**: Version 8.0.28 or later (Tested on MySQL Community Server 8.0.46 Win64 / Linux x86_64).
+- **Default Port**: 3306.
+- **Python**: 3.8+ (Used for offline schema validation).
+- **Node.js**: 18+ (Optional, used if re-generating seeds from canonical data).
+
+---
+
+## 2. Quickstart: Automated Setup
+
+### Step 2.1 — Run Schema Migrations in Sequence
+
+Execute `001_initial_schema.sql` to create `codearena_db`, foundational 32 tables, foreign keys, and indexes, followed by `002_user_oauth_accounts.sql` for OAuth account linking:
+
+```bash
+# 1. Baseline Migration (32 tables)
+mysql -u root -p < database/migrations/001_initial_schema.sql
+
+# 2. OAuth Feature Migration (33rd table: user_oauth_accounts)
+mysql -u root -p codearena_db < database/migrations/002_user_oauth_accounts.sql
+```
+
+*(Enter your MySQL root password when prompted)*
+
+### Step 2.2 — Load Canonical Seed Data
+
+Load the seeds in sequential order:
+
+```bash
+# 1. Reference Data (Roles, Statuses, Tracks, Categories, Difficulties, Languages, Levels)
+mysql -u root -p codearena_db < database/seeds/01_reference_data.sql
+
+# 2. 50 Canonical Basic Java Problems & Sample Test Cases
+mysql -u root -p codearena_db < database/seeds/02_basic_problems_seed.sql
+
+# 3. 200 Canonical DSA Problems, 600 Hints, Sample Test Cases & Tags
+mysql -u root -p codearena_db < database/seeds/03_dsa_problems_seed.sql
+
+# 4. 30 Guided Roadmap Topics, Prerequisite DAG Edges & Problem Links
+mysql -u root -p codearena_db < database/seeds/04_roadmap_seed.sql
+
+# 5. (Development Only) Dev Test Accounts, Profiles, Preferences & Sample Submissions
+mysql -u root -p codearena_db < database/seeds/05_dev_sample_data.sql
+```
+
+---
+
+## 3. Alternative: Step-by-Step Manual Schema Setup
+
+If you prefer applying schemas individually from `database/schema/`:
+
+```bash
+mysql -u root -p < database/schema/01_create_database.sql
+mysql -u root -p codearena_db < database/schema/02_users.sql
+mysql -u root -p codearena_db < database/schema/03_problems.sql
+mysql -u root -p codearena_db < database/schema/04_submissions.sql
+mysql -u root -p codearena_db < database/schema/05_learning.sql
+mysql -u root -p codearena_db < database/schema/06_user_activity.sql
+mysql -u root -p codearena_db < database/schema/07_contests.sql
+mysql -u root -p codearena_db < database/schema/08_ai_assistant.sql
+```
+
+---
+
+## 4. Verification & Testing
+
+### 4.1 Offline Structural Integrity Linter (Zero Credentials Required)
+
+Run the Python verification test suite to validate all 32 tables, 40 foreign key references, and seed structures:
+
+```bash
+python database/tests/verify_schema_syntax.py
+```
+
+Expected output:
+```
+============================================================
+ AUDIT RESULTS SUMMARY
+============================================================
+Warnings: 0
+
+STATUS: ALL INTEGRITY CHECKS PASSED SUCCESSFULLY (24/24 Tables Validated).
+```
+
+### 4.2 Live MySQL Integration Test Suite
+
+Once MySQL credentials are provided, run the live test suite to verify primary keys, foreign key rejections, check constraints, and cascading deletes:
+
+```bash
+mysql -u root -p codearena_db < database/tests/test_schema_mysql.sql
+```
+
+Expected output:
+```
+PASS: Core tables present (Found: 32 tables)
+PASS: Duplicate email constraint successfully rejected
+PASS: Foreign key rejection on invalid role_id verified
+PASS: Composite uniqueness on user_bookmarks (user_id, problem_id) verified
+PASS: Check constraint chk_prereq_no_self prevented self-prerequisite
+PASS: ON DELETE CASCADE from users to user_profiles verified
+```
+
+---
+
+## 5. Inspecting the Database
+
+### 5.1 Using MySQL CLI
+
+```sql
+USE codearena_db;
+
+-- Check problems count per track
+SELECT t.name AS track, COUNT(p.id) AS total_problems
+FROM tracks t
+LEFT JOIN problems p ON p.track_id = t.id
+GROUP BY t.id, t.name;
+
+-- Verify 30 roadmap topics and prerequisite counts
+SELECT rt.sequence_order, rt.title, COUNT(rp.prerequisite_topic_id) AS prereq_count
+FROM roadmap_topics rt
+LEFT JOIN roadmap_prerequisites rp ON rp.topic_id = rt.id
+GROUP BY rt.id, rt.sequence_order, rt.title
+ORDER BY rt.sequence_order ASC
+LIMIT 10;
+```
+
+### 5.2 Connecting with GUI Tools
+- **Host**: `127.0.0.1`
+- **Port**: `3306`
+- **Database**: `codearena_db`
+- **Username**: `root` (or application user)
+- **SSL**: Optional for local development
+

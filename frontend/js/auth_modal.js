@@ -931,7 +931,7 @@
             btn.addEventListener('click', function (e) {
                 e.preventDefault();
                 const provider = btn.getAttribute('data-provider') || 'Social';
-                showModalFeedback(`${provider} sign-in will be available when authentication integration is enabled.`, 'info');
+                showModalFeedback(`${provider} authentication will be available when the authentication backend is integrated.`, 'info');
             });
         });
 
