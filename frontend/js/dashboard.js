@@ -234,10 +234,13 @@ document.addEventListener('DOMContentLoaded', function () {
             window.CodeArenaAPI.authService &&
             window.CodeArenaAPI.authService.isAuthenticated()
         );
-        const userRes = (isAuth && window.CodeArenaAPI.authService.getCurrentUser)
-            ? window.CodeArenaAPI.authService.getCurrentUser()
-            : null;
-        const user = (userRes && userRes.data) || null;
+        let userRes = null;
+        if (isAuth && window.CodeArenaAPI && window.CodeArenaAPI.authService) {
+            userRes = window.CodeArenaAPI.authService.getCurrentUserSync
+                ? window.CodeArenaAPI.authService.getCurrentUserSync()
+                : (window.CodeArenaAPI.authService.getCurrentUser ? window.CodeArenaAPI.authService.getCurrentUser() : null);
+        }
+
         const isPro = Boolean(
             window.CodeArenaAPI &&
             window.CodeArenaAPI.subscriptionService &&
@@ -249,12 +252,40 @@ document.addEventListener('DOMContentLoaded', function () {
         const userNameEl = document.getElementById('userName');
         const userRoleEl = document.getElementById('userRole');
         const userAvatarEl = document.getElementById('userAvatar');
+        const menuUserNameEl = document.getElementById('menuUserName');
+        const menuUserEmailEl = document.getElementById('menuUserEmail');
+        const menuUserTierEl = document.getElementById('menuUserTier');
         const promoCard = document.querySelector('.sidebar-promo-card');
 
+        function applyUserData(userData) {
+            if (!userData) return;
+            const displayName = userData.name || userData.fullName || userData.username || (userData.email ? userData.email.split('@')[0] : 'Student');
+            const displayEmail = userData.email || 'student@codearena.dev';
+            const initial = displayName.charAt(0).toUpperCase() || 'U';
+            const tierText = isPro ? 'Pro Member' : 'Free Tier';
+
+            if (userNameEl) userNameEl.textContent = displayName;
+            if (userRoleEl) userRoleEl.textContent = tierText;
+            if (userAvatarEl) userAvatarEl.textContent = initial;
+
+            if (menuUserNameEl) menuUserNameEl.textContent = displayName;
+            if (menuUserEmailEl) menuUserEmailEl.textContent = displayEmail;
+            if (menuUserTierEl) menuUserTierEl.textContent = tierText;
+        }
+
         if (!isAuth) {
-            // Guest preview mode
+            // Guest mode
             if (guestAuthActions) guestAuthActions.style.display = 'flex';
-            if (userProfileArea) userProfileArea.style.display = 'none';
+            if (userProfileArea) {
+                userProfileArea.style.display = 'none';
+                userProfileArea.classList.add('auth-hidden');
+                userProfileArea.setAttribute('aria-hidden', 'true');
+            }
+            const userProfileMenu = document.getElementById('userProfileMenu');
+            if (userProfileMenu) userProfileMenu.classList.remove('menu-open');
+            const userProfileTrigger = document.getElementById('userProfileTrigger');
+            if (userProfileTrigger) userProfileTrigger.setAttribute('aria-expanded', 'false');
+
             if (promoCard) {
                 promoCard.innerHTML = `
                     <div class="promo-icon" aria-hidden="true">
@@ -268,15 +299,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 `;
             }
         } else {
-            // Authenticated preview mode
+            // Authenticated mode
             if (guestAuthActions) guestAuthActions.style.display = 'none';
             if (userProfileArea) {
                 userProfileArea.style.display = 'flex';
                 userProfileArea.classList.remove('auth-hidden');
+                userProfileArea.setAttribute('aria-hidden', 'false');
             }
-            if (userNameEl && user) userNameEl.textContent = user.name || 'Student';
-            if (userRoleEl) userRoleEl.textContent = isPro ? 'Pro Member' : 'Free Tier';
-            if (userAvatarEl && user) userAvatarEl.textContent = (user.name || 'U').charAt(0).toUpperCase();
+
+            if (userRes && typeof userRes.then === 'function') {
+                userRes.then(res => {
+                    if (res && res.data) applyUserData(res.data);
+                });
+            } else if (userRes && userRes.data) {
+                applyUserData(userRes.data);
+            }
 
             if (promoCard) {
                 if (isPro) {
@@ -314,20 +351,83 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // --------------------------------------------------------------------------
-    // 4. Future Authenticated User Profile Menu Toggle (Ready for Backend)
+    // 4. Authenticated User Profile Menu & Logout Controller
     // --------------------------------------------------------------------------
     const userProfileTrigger = document.getElementById('userProfileTrigger');
     const userProfileMenu = document.getElementById('userProfileMenu');
     const logoutBtn = document.getElementById('logoutBtn');
+    const logoutModalOverlay = document.getElementById('logoutModalOverlay');
+    const btnCancelLogout = document.getElementById('btnCancelLogout');
+    const btnConfirmLogout = document.getElementById('btnConfirmLogout');
+
+    function closeUserProfileMenu() {
+        if (userProfileMenu) userProfileMenu.classList.remove('menu-open');
+        if (userProfileTrigger) userProfileTrigger.setAttribute('aria-expanded', 'false');
+    }
+
+    function openLogoutModal() {
+        closeUserProfileMenu();
+        if (logoutModalOverlay) {
+            logoutModalOverlay.style.display = 'flex';
+            if (btnCancelLogout) btnCancelLogout.focus();
+        }
+    }
+
+    function closeLogoutModal() {
+        if (logoutModalOverlay) {
+            logoutModalOverlay.style.display = 'none';
+        }
+        if (userProfileTrigger) userProfileTrigger.focus();
+    }
 
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', function () {
-            if (window.CodeArenaAPI && window.CodeArenaAPI.authService) {
-                window.CodeArenaAPI.authService.logout();
-                if (window.CodeArenaToast) {
-                    window.CodeArenaToast.info('Logged out of preview session. Guest mode restored.');
+        logoutBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            openLogoutModal();
+        });
+    }
+
+    if (btnCancelLogout) {
+        btnCancelLogout.addEventListener('click', function () {
+            closeLogoutModal();
+        });
+    }
+
+    if (btnConfirmLogout) {
+        btnConfirmLogout.addEventListener('click', async function () {
+            btnConfirmLogout.disabled = true;
+            btnConfirmLogout.textContent = 'Logging out...';
+            try {
+                if (window.CodeArenaAPI && window.CodeArenaAPI.authService) {
+                    const res = await window.CodeArenaAPI.authService.logout();
+                    if (res && res.success !== false) {
+                        closeLogoutModal();
+                        updateAuthStateUI();
+                        if (window.CodeArenaToast) {
+                            window.CodeArenaToast.info('Logged out successfully. Returned to guest mode.');
+                        }
+                    } else {
+                        if (window.CodeArenaToast) {
+                            window.CodeArenaToast.error(res.message || 'Logout failed on server.');
+                        }
+                    }
                 }
-                updateAuthStateUI();
+            } catch (err) {
+                if (window.CodeArenaToast) {
+                    window.CodeArenaToast.error('An error occurred during logout.');
+                }
+            } finally {
+                btnConfirmLogout.disabled = false;
+                btnConfirmLogout.textContent = 'Log Out';
+            }
+        });
+    }
+
+    if (logoutModalOverlay) {
+        logoutModalOverlay.addEventListener('click', function (e) {
+            if (e.target === logoutModalOverlay) {
+                closeLogoutModal();
             }
         });
     }
@@ -338,12 +438,46 @@ document.addEventListener('DOMContentLoaded', function () {
             const isOpen = userProfileMenu.classList.contains('menu-open');
             userProfileMenu.classList.toggle('menu-open', !isOpen);
             userProfileTrigger.setAttribute('aria-expanded', !isOpen ? 'true' : 'false');
+            if (!isOpen) {
+                const firstItem = userProfileMenu.querySelector('.menu-item');
+                if (firstItem) firstItem.focus();
+            }
         });
 
+        // Close on clicking outside
         document.addEventListener('click', function (e) {
             if (!userProfileTrigger.contains(e.target) && !userProfileMenu.contains(e.target)) {
-                userProfileMenu.classList.remove('menu-open');
-                userProfileTrigger.setAttribute('aria-expanded', 'false');
+                closeUserProfileMenu();
+            }
+        });
+
+        // Keyboard navigation and Escape dismissal
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                if (logoutModalOverlay && logoutModalOverlay.style.display === 'flex') {
+                    closeLogoutModal();
+                    return;
+                }
+                if (userProfileMenu.classList.contains('menu-open')) {
+                    closeUserProfileMenu();
+                    userProfileTrigger.focus();
+                }
+            }
+        });
+
+        userProfileMenu.addEventListener('keydown', function (e) {
+            const items = Array.from(userProfileMenu.querySelectorAll('.menu-item'));
+            if (!items.length) return;
+            const currentIndex = items.indexOf(document.activeElement);
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const nextIndex = (currentIndex + 1) % items.length;
+                items[nextIndex].focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prevIndex = (currentIndex - 1 + items.length) % items.length;
+                items[prevIndex].focus();
             }
         });
     }

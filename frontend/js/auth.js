@@ -35,6 +35,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const loginForm = document.getElementById('loginForm');
     const loginFeedback = document.getElementById('authFeedback');
 
+    // Check URL parameters for authentication notices (e.g. AI Assistant gate)
+    const urlParams = new URLSearchParams(window.location.search);
+    const authNotice = urlParams.get('notice');
+    if ((authNotice === 'ai_auth_required' || authNotice === 'auth_required') && loginFeedback) {
+        showFeedback(loginFeedback, 'Authentication is required to use the CodeArena AI Assistant. Please sign in or register to continue to your coding sessions.', 'info');
+    }
+
     const forgotPasswordLink = document.getElementById('forgotPasswordLink');
     if (forgotPasswordLink && loginFeedback) {
         forgotPasswordLink.addEventListener('click', function (e) {

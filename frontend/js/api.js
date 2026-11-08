@@ -76,6 +76,7 @@ async function apiClient(endpoint, options = {}) {
  * Prepared for real Java Servlet endpoints.
  */
 const AUTH_STORAGE_KEY = 'codearena_preview_auth_user';
+const LEGACY_AUTH_STORAGE_KEY = 'codearena_auth_user';
 const PLAN_STORAGE_KEY = 'codearena_preview_plan';
 
 // Safe storage helper with memory fallback for Node.js / test environments
@@ -107,7 +108,10 @@ function _storageRemove(k) {
 const authMockAdapter = {
     isAuthenticated() {
         try {
-            return _storageGet(AUTH_STORAGE_KEY) !== null;
+            const raw = _storageGet(AUTH_STORAGE_KEY) || _storageGet(LEGACY_AUTH_STORAGE_KEY);
+            if (!raw) return false;
+            const parsed = JSON.parse(raw);
+            return Boolean(parsed && (parsed.id || parsed.userId || parsed.email));
         } catch (e) {
             return false;
         }
@@ -115,10 +119,13 @@ const authMockAdapter = {
 
     getCurrentUser() {
         try {
-
-            const raw = _storageGet(AUTH_STORAGE_KEY);
+            const raw = _storageGet(AUTH_STORAGE_KEY) || _storageGet(LEGACY_AUTH_STORAGE_KEY);
             if (!raw) return { success: false, data: null };
-            return { success: true, data: JSON.parse(raw) };
+            const parsed = JSON.parse(raw);
+            // Synchronize both shared storage keys
+            if (!_storageGet(AUTH_STORAGE_KEY) && raw) _storageSet(AUTH_STORAGE_KEY, raw);
+            if (!_storageGet(LEGACY_AUTH_STORAGE_KEY) && raw) _storageSet(LEGACY_AUTH_STORAGE_KEY, raw);
+            return { success: true, data: parsed };
         } catch (e) {
             return { success: false, data: null };
         }
@@ -126,17 +133,22 @@ const authMockAdapter = {
 
     login(credentials = {}) {
         const email = (credentials.email || 'student@codearena.dev').trim();
+        const baseName = credentials.fullName || credentials.name;
+        const name = baseName || (email.includes('@') ? (email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1)) : 'Student');
         const user = {
-            id: 'usr_prev_' + Math.random().toString(36).substring(2, 8),
-            name: credentials.fullName || (email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1)),
+            id: credentials.id || 'usr_prev_' + Math.random().toString(36).substring(2, 8),
+            name: name,
+            fullName: name,
             email: email,
-            role: 'Student',
+            role: credentials.role || 'Student',
             plan: typeof subscriptionService !== 'undefined' ? subscriptionService.getCurrentPlan() : 'free',
             loginTime: new Date().toISOString(),
             isMockSession: true
         };
         try {
-            _storageSet(AUTH_STORAGE_KEY, JSON.stringify(user));
+            const serialized = JSON.stringify(user);
+            _storageSet(AUTH_STORAGE_KEY, serialized);
+            _storageSet(LEGACY_AUTH_STORAGE_KEY, serialized);
         } catch (e) {}
         return { success: true, data: { user } };
     },
@@ -148,6 +160,17 @@ const authMockAdapter = {
     logout() {
         try {
             _storageRemove(AUTH_STORAGE_KEY);
+            _storageRemove(LEGACY_AUTH_STORAGE_KEY);
+            if (typeof window !== 'undefined') {
+                if (window.localStorage) {
+                    window.localStorage.removeItem(AUTH_STORAGE_KEY);
+                    window.localStorage.removeItem(LEGACY_AUTH_STORAGE_KEY);
+                }
+                if (window.sessionStorage) {
+                    window.sessionStorage.removeItem(AUTH_STORAGE_KEY);
+                    window.sessionStorage.removeItem(LEGACY_AUTH_STORAGE_KEY);
+                }
+            }
         } catch (e) {}
         return { success: true };
     },
@@ -156,6 +179,7 @@ const authMockAdapter = {
         const user = {
             id: 'usr_demo_student',
             name: 'Demo Student',
+            fullName: 'Demo Student',
             email: 'student.demo@codearena.dev',
             role: 'Student',
             plan: plan,
@@ -163,7 +187,9 @@ const authMockAdapter = {
             isMockSession: true
         };
         try {
-            _storageSet(AUTH_STORAGE_KEY, JSON.stringify(user));
+            const serialized = JSON.stringify(user);
+            _storageSet(AUTH_STORAGE_KEY, serialized);
+            _storageSet(LEGACY_AUTH_STORAGE_KEY, serialized);
             _storageSet(PLAN_STORAGE_KEY, plan);
         } catch (e) {}
         return { success: true, data: { user } };
@@ -179,49 +205,8 @@ const authService = {
         return authMockAdapter.isAuthenticated();
     },
 
-    async login(credentials) {
-        if (API_CONFIG.useMockAdapter) {
-            return authMockAdapter.login(credentials);
-        }
-        const res = await apiClient('/auth/login', {
-            method: 'POST',
-            body: {
-                email: credentials.email,
-                password: credentials.password,
-                rememberMe: Boolean(credentials.rememberMe)
-            }
-        });
-        if (!res.success && res.isNetworkFailure) {
-            return authMockAdapter.login(credentials);
-        }
-        return res;
-    },
-
-    async register(userData) {
-        if (API_CONFIG.useMockAdapter) {
-            return authMockAdapter.register(userData);
-        }
-        const res = await apiClient('/auth/register', {
-            method: 'POST',
-            body: {
-                fullName: userData.fullName,
-                email: userData.email,
-                password: userData.password
-            }
-        });
-        if (!res.success && res.isNetworkFailure) {
-            return authMockAdapter.register(userData);
-        }
-        return res;
-    },
-
-    async logout() {
-        if (API_CONFIG.useMockAdapter) {
-            return authMockAdapter.logout();
-        }
-        const res = await apiClient('/auth/logout', { method: 'POST' });
-        authMockAdapter.logout();
-        return res;
+    getCurrentUserSync() {
+        return authMockAdapter.getCurrentUser();
     },
 
     async getCurrentUser() {
@@ -235,8 +220,88 @@ const authService = {
         return res;
     },
 
+    async login(credentials) {
+        let res;
+        if (API_CONFIG.useMockAdapter) {
+            res = authMockAdapter.login(credentials);
+        } else {
+            res = await apiClient('/auth/login', {
+                method: 'POST',
+                body: {
+                    email: credentials.email,
+                    password: credentials.password,
+                    rememberMe: Boolean(credentials.rememberMe)
+                }
+            });
+            if (!res.success && res.isNetworkFailure) {
+                res = authMockAdapter.login(credentials);
+            }
+        }
+        if (res && res.success) {
+            const user = (res.data && res.data.user) || credentials;
+            if (typeof document !== 'undefined') {
+                document.dispatchEvent(new CustomEvent('codearena:auth-changed', {
+                    detail: { action: 'login', user: user }
+                }));
+            }
+        }
+        return res;
+    },
+
+    async register(userData) {
+        let res;
+        if (API_CONFIG.useMockAdapter) {
+            res = authMockAdapter.register(userData);
+        } else {
+            res = await apiClient('/auth/register', {
+                method: 'POST',
+                body: {
+                    fullName: userData.fullName,
+                    email: userData.email,
+                    password: userData.password
+                }
+            });
+            if (!res.success && res.isNetworkFailure) {
+                res = authMockAdapter.register(userData);
+            }
+        }
+        if (res && res.success) {
+            const user = (res.data && res.data.user) || userData;
+            if (typeof document !== 'undefined') {
+                document.dispatchEvent(new CustomEvent('codearena:auth-changed', {
+                    detail: { action: 'register', user: user }
+                }));
+            }
+        }
+        return res;
+    },
+
+    async logout() {
+        let res = { success: true };
+        if (!API_CONFIG.useMockAdapter) {
+            try {
+                res = await apiClient('/auth/logout', { method: 'POST' });
+            } catch (e) {
+                res = { success: false, message: 'Server communication failed during logout.' };
+            }
+        }
+        authMockAdapter.logout();
+        if (typeof document !== 'undefined') {
+            document.dispatchEvent(new CustomEvent('codearena:auth-changed', {
+                detail: { action: 'logout', user: null }
+            }));
+        }
+        return res;
+    },
+
     demoLogin(plan = 'free') {
-        return authMockAdapter.demoLogin(plan);
+        const res = authMockAdapter.demoLogin(plan);
+        if (typeof document !== 'undefined') {
+            document.dispatchEvent(new CustomEvent('codearena:auth-changed', {
+                detail: { action: 'login', user: res.data.user }
+            }));
+        }
+        return res;
     }
 };
 
@@ -305,6 +370,7 @@ const subscriptionService = {
             if (userRes && userRes.success && userRes.data) {
                 userRes.data.plan = validPlan;
                 _storageSet(AUTH_STORAGE_KEY, JSON.stringify(userRes.data));
+                _storageSet(LEGACY_AUTH_STORAGE_KEY, JSON.stringify(userRes.data));
             }
         } catch (e) {}
         return { success: true, plan: validPlan };
@@ -317,6 +383,7 @@ const subscriptionService = {
             if (userRes && userRes.success && userRes.data) {
                 userRes.data.plan = 'free';
                 _storageSet(AUTH_STORAGE_KEY, JSON.stringify(userRes.data));
+                _storageSet(LEGACY_AUTH_STORAGE_KEY, JSON.stringify(userRes.data));
             }
         } catch (e) {}
         return { success: true, plan: 'free' };
@@ -9640,6 +9707,353 @@ const submissionService = {
     }
 };
 
+/* ==========================================================================
+   AI Assistant Service & Mock Storage Adapter (Person 3 Domain)
+   Manages authenticated conversations, message persistence, auto-titling,
+   and deterministic pedagogical mentoring in alignment with Batch 06 tables.
+   ========================================================================== */
+
+const aiMockAdapter = {
+    _getActiveUserId() {
+        try {
+            if (typeof authService !== 'undefined' && authService.isAuthenticated()) {
+                const cur = authService.getCurrentUser();
+                if (cur && cur.data && cur.data.id) return String(cur.data.id);
+            }
+            const raw = _storageGet('codearena_auth_user') || _storageGet(AUTH_STORAGE_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && (parsed.id || parsed.userId)) return String(parsed.id || parsed.userId);
+            }
+        } catch (e) {}
+        return null;
+    },
+
+    _getConvsKey(userId) {
+        return `codearena_ai_convs_${userId || 'guest'}`;
+    },
+
+    _getMsgsKey(convUid) {
+        return `codearena_ai_msgs_${convUid}`;
+    },
+
+    listConversations() {
+        const userId = this._getActiveUserId();
+        if (!userId) {
+            return { success: false, status: 401, message: 'Authentication required to access conversations.' };
+        }
+        try {
+            const raw = _storageGet(this._getConvsKey(userId));
+            let list = raw ? JSON.parse(raw) : [];
+            if (!Array.isArray(list)) list = [];
+            // If user has no conversations yet, create initial default conversation
+            if (list.length === 0) {
+                const initialConv = {
+                    id: Date.now(),
+                    conversationUid: 'conv_' + Math.random().toString(36).substring(2, 10),
+                    userId: userId,
+                    problemId: null,
+                    title: 'Coding Session',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    messageCount: 0
+                };
+                list.push(initialConv);
+                _storageSet(this._getConvsKey(userId), JSON.stringify(list));
+            }
+            return { success: true, data: list };
+        } catch (e) {
+            return { success: true, data: [] };
+        }
+    },
+
+    getConversation(convUid) {
+        const userId = this._getActiveUserId();
+        if (!userId) {
+            return { success: false, status: 401, message: 'Authentication required.' };
+        }
+        const raw = _storageGet(this._getConvsKey(userId));
+        const list = raw ? JSON.parse(raw) : [];
+        const conv = list.find(c => c.conversationUid === convUid);
+        if (!conv) {
+            return { success: false, status: 404, message: 'Conversation not found or unauthorized.' };
+        }
+        const rawMsgs = _storageGet(this._getMsgsKey(convUid));
+        const messages = rawMsgs ? JSON.parse(rawMsgs) : [];
+        return { success: true, data: { conversation: conv, messages: messages } };
+    },
+
+    createConversation(title = 'Coding Session', problemId = null) {
+        const userId = this._getActiveUserId();
+        if (!userId) {
+            return { success: false, status: 401, message: 'Authentication required.' };
+        }
+        const safeTitle = (title && String(title).trim()) ? String(title).trim().substring(0, 100) : 'Coding Session';
+        const newConv = {
+            id: Date.now(),
+            conversationUid: 'conv_' + Math.random().toString(36).substring(2, 10),
+            userId: userId,
+            problemId: problemId,
+            title: safeTitle,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            messageCount: 0
+        };
+        const raw = _storageGet(this._getConvsKey(userId));
+        const list = raw ? JSON.parse(raw) : [];
+        list.unshift(newConv);
+        _storageSet(this._getConvsKey(userId), JSON.stringify(list));
+        return { success: true, data: newConv };
+    },
+
+    sendMessage(convUid, content) {
+        const userId = this._getActiveUserId();
+        if (!userId) {
+            return { success: false, status: 401, message: 'Authentication required.' };
+        }
+        if (!content || !String(content).trim()) {
+            return { success: false, status: 400, message: 'Message content cannot be empty.' };
+        }
+
+        const raw = _storageGet(this._getConvsKey(userId));
+        const list = raw ? JSON.parse(raw) : [];
+        const conv = list.find(c => c.conversationUid === convUid);
+        if (!conv) {
+            return { success: false, status: 404, message: 'Conversation not found or unauthorized.' };
+        }
+
+        const cleanQuery = String(content).trim();
+        const rawMsgs = _storageGet(this._getMsgsKey(convUid));
+        const messages = rawMsgs ? JSON.parse(rawMsgs) : [];
+
+        const now = new Date().toISOString();
+        const userMsg = {
+            id: Date.now(),
+            conversationId: conv.id,
+            senderRole: 'user',
+            content: cleanQuery,
+            promptTokens: Math.max(1, Math.round(cleanQuery.length / 4)),
+            completionTokens: 0,
+            createdAt: now
+        };
+        messages.push(userMsg);
+
+        // Generate response using built-in pedagogical knowledge base
+        const responseContent = this._generatePedagogicalResponse(cleanQuery);
+        const assistantMsg = {
+            id: Date.now() + 1,
+            conversationId: conv.id,
+            senderRole: 'assistant',
+            content: responseContent,
+            promptTokens: 0,
+            completionTokens: Math.max(1, Math.round(responseContent.length / 4)),
+            createdAt: new Date().toISOString()
+        };
+        messages.push(assistantMsg);
+        _storageSet(this._getMsgsKey(convUid), JSON.stringify(messages));
+
+        // Auto-title conversation from opening query if default title
+        if (conv.title === 'Coding Session' || conv.title === 'New Conversation') {
+            conv.title = this._generateSmartTitle(cleanQuery);
+        }
+        conv.updatedAt = now;
+        conv.messageCount = messages.length;
+        _storageSet(this._getConvsKey(userId), JSON.stringify(list));
+
+        return {
+            success: true,
+            data: {
+                conversation: conv,
+                userMessage: userMsg,
+                assistantMessage: assistantMsg,
+                isExternal: false,
+                isFallback: false,
+                provider: 'Built-in Assistant'
+            }
+        };
+    },
+
+    renameConversation(convUid, newTitle) {
+        const userId = this._getActiveUserId();
+        if (!userId) return { success: false, status: 401, message: 'Authentication required.' };
+        if (!newTitle || !String(newTitle).trim()) {
+            return { success: false, status: 400, message: 'Title cannot be empty.' };
+        }
+        const raw = _storageGet(this._getConvsKey(userId));
+        const list = raw ? JSON.parse(raw) : [];
+        const conv = list.find(c => c.conversationUid === convUid);
+        if (!conv) return { success: false, status: 404, message: 'Conversation not found.' };
+
+        conv.title = String(newTitle).trim().substring(0, 100);
+        conv.updatedAt = new Date().toISOString();
+        _storageSet(this._getConvsKey(userId), JSON.stringify(list));
+        return { success: true, message: 'Conversation renamed.' };
+    },
+
+    deleteConversation(convUid) {
+        const userId = this._getActiveUserId();
+        if (!userId) return { success: false, status: 401, message: 'Authentication required.' };
+        const raw = _storageGet(this._getConvsKey(userId));
+        let list = raw ? JSON.parse(raw) : [];
+        const initialLen = list.length;
+        list = list.filter(c => c.conversationUid !== convUid);
+        if (list.length === initialLen) {
+            return { success: false, status: 404, message: 'Conversation not found.' };
+        }
+        _storageSet(this._getConvsKey(userId), JSON.stringify(list));
+        _storageRemove(this._getMsgsKey(convUid));
+        return { success: true, message: 'Conversation deleted.' };
+    },
+
+    getStatus() {
+        return {
+            success: true,
+            data: {
+                configured: false,
+                provider: 'Built-in Assistant',
+                model: 'OpenJDK 17 Pedagogical Mentor'
+            }
+        };
+    },
+
+    _generateSmartTitle(query) {
+        const q = String(query || '').toLowerCase().trim();
+        if (/^(hi|hello|hey|how are you|greetings|good\s+(morning|afternoon|evening))/i.test(q)) {
+            return 'General Discussion';
+        }
+        if (q.includes('stream') || q.includes('lambda')) return 'Java 8 Streams & Lambdas';
+        if (q.includes('exception') || q.includes('throwable') || q.includes('try-catch')) return 'Java Exception Handling';
+        if (q.includes('hashmap') || q.includes('collision') || q.includes('treeify')) return 'HashMap Internals';
+        if (q.includes('recursion') || q.includes('call stack')) return 'Recursion & Call Stacks';
+        if (q.includes('complexity') || q.includes('big-o') || q.includes('big o')) return 'Big-O Algorithmic Complexity';
+        if (q.includes('npe') || q.includes('nullpointer') || q.includes('compiler') || q.includes('error')) return 'Compiler Debugging';
+
+        let clean = query.replace(/[\r\n]+/g, ' ').trim();
+        clean = clean.replace(/^(can you explain|explain|how do i|how to|what is|why is|tell me about)\s+/i, '');
+        clean = clean.replace(/[?!.]+$/, '');
+        if (clean.length > 40) clean = clean.substring(0, 37) + '...';
+        if (!clean) return 'Coding Session';
+        return clean.charAt(0).toUpperCase() + clean.slice(1);
+    },
+
+    _generatePedagogicalResponse(query) {
+        const q = String(query || '').toLowerCase().trim();
+
+        // Conversational greetings
+        if (/^(hi|hello|hey|how are you|greetings|good\s+(morning|afternoon|evening)|sup)\b/i.test(q)) {
+            return `Hello! I am your CodeArena coding mentor. I'm here to help you master Java programming, understand data structures and algorithms, debug compiler issues, and write clean, idiomatic code.\n\nFeel free to ask a question about Java syntax, paste a tricky compiler error, or pick one of the quick inquiries from the sidebar to get started!`;
+        }
+
+        if (q.includes('stream') || q.includes('lambda') || q.includes('filter')) {
+            return `Java 8 introduced the **Stream API** to enable functional, declarative processing of sequences of elements.\n\n### Pipeline Architecture\n1. **Source:** Collections, arrays, or I/O channels.\n2. **Intermediate Operations (Lazy):** Transform streams without executing until needed (\`filter()\`, \`map()\`, \`sorted()\`).\n3. **Terminal Operations (Eager):** Produce a concrete result (\`collect()\`, \`forEach()\`, \`count()\`).\n\n\`\`\`java\nimport java.util.*;\nimport java.util.stream.Collectors;\n\npublic class StreamsDemo {\n    public static void main(String[] args) {\n        List<String> names = List.of("Alice", "Bob", "Charlie", "Andrew");\n        List<String> filtered = names.stream()\n                .filter(name -> name.startsWith("A"))\n                .map(String::toUpperCase)\n                .collect(Collectors.toList());\n        System.out.println(filtered); // [ALICE, ANDREW]\n    }\n}\n\`\`\``;
+        }
+        if (q.includes('exception') || q.includes('checked') || q.includes('unchecked')) {
+            return `In Java, all exceptions inherit from \`java.lang.Throwable\`.\n\n### Checked vs Unchecked Exceptions\n- **Checked Exceptions (inherit from \`Exception\` but not \`RuntimeException\`):** Validated at compile time. Methods must catch them with \`try-catch\` or declare with \`throws\` (e.g. \`IOException\`, \`SQLException\`).\n- **Unchecked Exceptions (inherit from \`RuntimeException\`):** Occur at runtime, usually reflecting programming bugs (e.g. \`NullPointerException\`, \`ArrayIndexOutOfBoundsException\`). Handling is optional at compile-time.`;
+        }
+        if (q.includes('hashmap') || q.includes('collision') || q.includes('bucket')) {
+            return `Java's \`HashMap\` uses an array of buckets combined with linked lists and balanced trees.\n\n### Collision Resolution\n1. **Hash Distribution:** Spreads higher and lower bits to reduce collisions.\n2. **Chaining:** Colliding elements are stored in linked \`Node<K,V>\` objects.\n3. **Treeification:** When bucket length reaches 8 and total capacity is ≥ 64, the linked list converts to a **Red-Black Tree**, reducing lookup from O(n) to O(log n).`;
+        }
+        if (q.includes('recursion') || q.includes('stack')) {
+            return `Recursion is a programming technique where a method calls itself to solve a smaller instance of the same problem.\n\n### Critical Components\n1. **Base Case:** Halts recursion and prevents \`StackOverflowError\`.\n2. **Recursive Step:** Moves the problem closer to the base case through stack frame reduction.\n\n\`\`\`java\npublic class Factorial {\n    public static long factorial(int n) {\n        if (n <= 1) return 1; // Base case\n        return n * factorial(n - 1); // Recursive step\n    }\n}\n\`\`\``;
+        }
+        if (q.includes('complexity') || q.includes('big-o') || q.includes('big o')) {
+            return `### Big-O Algorithmic Complexity in Java\n\n- **O(1) Constant:** Array index access, \`HashMap.get()\`.\n- **O(log n) Logarithmic:** Binary search (\`Arrays.binarySearch()\`).\n- **O(n) Linear:** Single loop over a collection.\n- **O(n log n) Linearithmic:** Merge Sort, Dual-Pivot QuickSort (\`Arrays.sort()\`).\n- **O(n²) Quadratic:** Nested iteration loops.`;
+        }
+
+        return `Here is some guidance on approaching this in modern Java (OpenJDK 17+):\n\n1. **Design & Type Safety:** Leverage Java's strong static typing, records for immutable data, and clear interfaces.\n2. **Collection Selection:** Choose \`ArrayList\` for index-based access, \`ArrayDeque\` for stacks and queues, and \`HashMap\` or \`HashSet\` for average O(1) lookups.\n3. **Defensive Coding:** Guard against null values with \`Optional\` or explicit validations, and handle edge cases (empty inputs, bounds) cleanly.\n\nIf you have specific code you'd like to review or debug, feel free to paste it here!`;
+    }
+};
+
+const aiService = {
+    async listConversations() {
+        if (API_CONFIG.useMockAdapter) {
+            return aiMockAdapter.listConversations();
+        }
+        const res = await apiClient('/ai/conversations', { method: 'GET' });
+        if (!res.success && res.isNetworkFailure) {
+            return aiMockAdapter.listConversations();
+        }
+        return res;
+    },
+
+    async getConversation(convUid) {
+        if (API_CONFIG.useMockAdapter) {
+            return aiMockAdapter.getConversation(convUid);
+        }
+        const res = await apiClient(`/ai/conversations/${encodeURIComponent(convUid)}`, { method: 'GET' });
+        if (!res.success && res.isNetworkFailure) {
+            return aiMockAdapter.getConversation(convUid);
+        }
+        return res;
+    },
+
+    async createConversation(title, problemId) {
+        if (API_CONFIG.useMockAdapter) {
+            return aiMockAdapter.createConversation(title, problemId);
+        }
+        const res = await apiClient('/ai/conversations', {
+            method: 'POST',
+            body: { title, problemId }
+        });
+        if (!res.success && res.isNetworkFailure) {
+            return aiMockAdapter.createConversation(title, problemId);
+        }
+        return res;
+    },
+
+    async sendMessage(convUid, content) {
+        if (API_CONFIG.useMockAdapter) {
+            return aiMockAdapter.sendMessage(convUid, content);
+        }
+        const res = await apiClient(`/ai/conversations/${encodeURIComponent(convUid)}/messages`, {
+            method: 'POST',
+            body: { content }
+        });
+        if (!res.success && res.isNetworkFailure) {
+            return aiMockAdapter.sendMessage(convUid, content);
+        }
+        return res;
+    },
+
+    async renameConversation(convUid, title) {
+        if (API_CONFIG.useMockAdapter) {
+            return aiMockAdapter.renameConversation(convUid, title);
+        }
+        const res = await apiClient(`/ai/conversations/${encodeURIComponent(convUid)}`, {
+            method: 'PATCH',
+            body: { title }
+        });
+        if (!res.success && res.isNetworkFailure) {
+            return aiMockAdapter.renameConversation(convUid, title);
+        }
+        return res;
+    },
+
+    async deleteConversation(convUid) {
+        if (API_CONFIG.useMockAdapter) {
+            return aiMockAdapter.deleteConversation(convUid);
+        }
+        const res = await apiClient(`/ai/conversations/${encodeURIComponent(convUid)}`, {
+            method: 'DELETE'
+        });
+        if (!res.success && res.isNetworkFailure) {
+            return aiMockAdapter.deleteConversation(convUid);
+        }
+        return res;
+    },
+
+    async getStatus() {
+        if (API_CONFIG.useMockAdapter) {
+            return aiMockAdapter.getStatus();
+        }
+        const res = await apiClient('/ai/status', { method: 'GET' });
+        if (!res.success && res.isNetworkFailure) {
+            return aiMockAdapter.getStatus();
+        }
+        return res;
+    }
+};
+
 const models = Object.freeze({
     EXECUTION_STATUS,
     SUBMISSION_VERDICT,
@@ -9659,8 +10073,8 @@ if (typeof window !== 'undefined') {
         compilerService: compilerService,
         problemService: problemService,
         submissionService: submissionService,
-        subscriptionService,
         subscriptionService: subscriptionService,
+        aiService: aiService,
         models: models
     };
 }
@@ -9675,6 +10089,7 @@ if (typeof module !== 'undefined' && module.exports) {
         problemService,
         submissionService,
         subscriptionService,
+        aiService,
         models
     };
 }
