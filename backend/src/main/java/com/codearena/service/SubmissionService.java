@@ -1,3 +1,4 @@
+
 package com.codearena.service;
 
 import com.codearena.model.Submission;
@@ -50,7 +51,6 @@ public class SubmissionService {
             return false;
         }
 
-        // Set initial status
         submission.setStatus("PENDING");
         submission.setVerdict("PENDING");
 
@@ -88,5 +88,42 @@ public class SubmissionService {
         }
 
         return submissionDAO.getSubmissionsByProblemId(problemId);
+    }
+
+    // 5. Update submission result after judging
+    public boolean updateSubmissionResult(
+            int submissionId,
+            String status,
+            String verdict,
+            long executionTime,
+            long memoryUsed) {
+
+        if (submissionId <= 0) {
+            System.out.println("Invalid submission ID!");
+            return false;
+        }
+
+        if (status == null || status.trim().isEmpty()) {
+            System.out.println("Submission status is required!");
+            return false;
+        }
+
+        if (verdict == null || verdict.trim().isEmpty()) {
+            System.out.println("Submission verdict is required!");
+            return false;
+        }
+
+        if (executionTime < 0 || memoryUsed < 0) {
+            System.out.println("Invalid execution or memory usage!");
+            return false;
+        }
+
+        return submissionDAO.updateSubmissionResult(
+                submissionId,
+                status,
+                verdict,
+                executionTime,
+                memoryUsed
+        );
     }
 }
