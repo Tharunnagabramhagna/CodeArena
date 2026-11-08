@@ -16,13 +16,21 @@ public class JudgeService {
     private final SubmissionService submissionService;
     private final OutputComparator outputComparator;
     private final VerdictManager verdictManager;
+    private final ExecutionEngine executionEngine;
 
+    // Constructor for existing judging operations
     public JudgeService() {
+        this(null);
+    }
+
+    // Constructor for future execution-engine integration
+    public JudgeService(ExecutionEngine executionEngine) {
         this.submissionDAO = new SubmissionDAO();
         this.testCaseDAO = new TestCaseDAO();
         this.submissionService = new SubmissionService();
         this.outputComparator = new OutputComparator();
         this.verdictManager = new VerdictManager();
+        this.executionEngine = executionEngine;
     }
 
     public boolean validateSubmissionForJudging(int submissionId) {
@@ -64,6 +72,50 @@ public class JudgeService {
 
         return outputComparator.compareOutputs(
                 expectedOutput, actualOutput);
+    }
+
+    // Execute one test case using the supplied execution engine
+    public boolean executeAndCompareTestCase(
+            Submission submission,
+            TestCase testCase) {
+
+        if (executionEngine == null) {
+            System.out.println("Execution engine is not connected!");
+            return false;
+        }
+
+        if (submission == null || testCase == null) {
+            System.out.println("Invalid submission or test case!");
+            return false;
+        }
+
+        ExecutionRequest request = new ExecutionRequest(
+                submission.getSourceCode(),
+                testCase.getInput(),
+                submission.getLanguage()
+        );
+
+        ExecutionResult result = executionEngine.execute(request);
+
+        if (result == null) {
+            System.out.println("Execution engine returned no result!");
+            return false;
+        }
+
+        if (result.isCompilationError()) {
+            System.out.println("Compilation error: " + result.getError());
+            return false;
+        }
+
+        if (!result.isSuccessful()) {
+            System.out.println("Execution failed: " + result.getError());
+            return false;
+        }
+
+        return outputComparator.compareOutputs(
+                testCase.getExpectedOutput(),
+                result.getOutput()
+        );
     }
 
     public boolean saveJudgingResult(
