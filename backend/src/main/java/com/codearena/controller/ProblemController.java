@@ -49,4 +49,40 @@ public class ProblemController {
                 .status(HttpStatus.BAD_REQUEST)
                 .body("Unable to add problem. Please check the details.");
     }
+
+    // 4. Update an existing problem
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateProblem(
+            @PathVariable int id,
+            @RequestBody Problem problem) {
+
+        problem.setId(id);
+
+        boolean updated = problemService.updateProblem(problem);
+
+        if (updated) {
+            return ResponseEntity.ok("Problem updated successfully!");
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body("Unable to update problem. Please check the details.");
+    }
+
+    // 5. Deactivate an existing problem
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deactivateProblem(
+            @PathVariable int id) {
+
+        boolean deactivated = problemService.deactivateProblem(id);
+
+        if (deactivated) {
+            return ResponseEntity.ok(
+                    "Problem deactivated successfully!");
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body("Problem not found or could not be deactivated.");
+    }
 }
