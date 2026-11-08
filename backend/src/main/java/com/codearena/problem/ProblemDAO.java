@@ -13,7 +13,6 @@ import java.util.List;
 
 public class ProblemDAO {
 
-    // Convert database result into Problem object
     private Problem mapProblem(ResultSet result) throws SQLException {
 
         Problem problem = new Problem();
@@ -30,7 +29,6 @@ public class ProblemDAO {
         problem.setCreatedAt(result.getString("created_at"));
         problem.setActive(result.getBoolean("active"));
 
-        // New frontend fields
         problem.setTopic(result.getString("topic"));
         problem.setPattern(result.getString("pattern"));
         problem.setPremium(result.getBoolean("is_premium"));
@@ -39,7 +37,6 @@ public class ProblemDAO {
         return problem;
     }
 
-    // 1. Add a new problem
     public boolean addProblem(Problem problem) {
 
         String sql = "INSERT INTO problems "
@@ -73,7 +70,6 @@ public class ProblemDAO {
         }
     }
 
-    // 2. Retrieve all active problems
     public List<Problem> getAllProblems() {
 
         List<Problem> problems = new ArrayList<>();
@@ -96,7 +92,6 @@ public class ProblemDAO {
         return problems;
     }
 
-    // 3. Retrieve one active problem by ID
     public Problem getProblemById(int id) {
 
         String sql = "SELECT * FROM problems WHERE id = ? AND active = TRUE";
@@ -121,7 +116,6 @@ public class ProblemDAO {
         return null;
     }
 
-    // 4. Update an existing problem
     public boolean updateProblem(Problem problem) {
 
         String sql = "UPDATE problems SET "
@@ -157,7 +151,6 @@ public class ProblemDAO {
         }
     }
 
-    // 5. Deactivate an existing problem
     public boolean deactivateProblem(int id) {
 
         String sql = "UPDATE problems SET active = FALSE "
