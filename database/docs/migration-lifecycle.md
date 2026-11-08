@@ -159,3 +159,25 @@ SELECT
 FROM schema_migrations
 ORDER BY applied_at ASC;
 ```
+
+---
+
+## 7. TiDB Cloud Migration Lifecycle & Online DDL
+
+TiDB Cloud Serverless (`8.0.11-TiDB-v8.5.3-serverless`) introduces distinct distributed lifecycle behaviors compared to standalone MySQL 8.0:
+
+### 7.1 Online Asynchronous Schema Evolution (Google F1 Protocol)
+In TiDB, DDL statements do not lock tables or block concurrent queries. DDL transitions through online states (`None` -> `Delete Only` -> `Write Only` -> `Public`) across all TiDB server instances. 
+- Multi-statement migrations execute reliably across distributed TiKV storage regions.
+- `CREATE TABLE IF NOT EXISTS` ensures cluster-wide idempotency without risk of duplicate table creation.
+
+### 7.2 CHECK Constraint Activation Requirement
+TiDB v8.5 supports `CHECK` constraints syntactically, but enforcement is disabled by default (`tidb_enable_check_constraint = OFF`).
+To preserve referential and constraint security on TiDB Cloud:
+```sql
+SET @@session.tidb_enable_check_constraint = ON;
+```
+
+### 7.3 TiDB-Specific Migration Path
+For dedicated TiDB Cloud deployments, CodeArena provides modular TiDB migrations in [`database/tidb/migrations/`](../tidb/migrations/) and a turnkey single-script deployer [`database/tidb/deploy_tidb_cloud.sql`](../tidb/deploy_tidb_cloud.sql), while keeping the original MySQL migrations in [`database/migrations/`](../migrations/) 100% intact.
+

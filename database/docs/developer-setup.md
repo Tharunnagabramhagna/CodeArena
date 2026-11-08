@@ -138,3 +138,51 @@ LIMIT 10;
 - **Username**: `root` (or application user)
 - **SSL**: Optional for local development
 
+---
+
+## 6. TiDB Cloud Serverless Setup & Deployment
+
+CodeArena is fully compatible with **TiDB Cloud Starter / Serverless** (`8.0.11-TiDB-v8.5.3-serverless`).
+
+### 6.1 Cluster & Database Specifications
+- **Cluster**: `codearena-db`
+- **Database**: `codearena_db`
+- **Port**: `4000`
+- **SSL/TLS**: Required (`--ssl-mode=VERIFY_IDENTITY`)
+
+### 6.2 Turnkey Deployment via TiDB Cloud SQL Editor
+1. In the TiDB Cloud Console, open the **SQL Editor** for cluster `codearena-db`.
+2. Select database `codearena_db`.
+3. Open and execute [`database/tidb/deploy_tidb_cloud.sql`](../tidb/deploy_tidb_cloud.sql) to initialize all 33 tables, OAuth accounts, and all 5 canonical seed datasets (reference data, 50 basic problems, 200 DSA problems + 600 hints, 520 test cases, 30 roadmap topics, and test fixtures).
+4. Execute [`database/tests/test_schema_tidb.sql`](../tests/test_schema_tidb.sql) to audit the live cluster (zero stored procedures, 100% TiDB-compatible).
+
+### 6.3 Deployment via MySQL CLI over TLS
+```bash
+export MYSQL_PWD="your_tidb_cloud_password"
+
+# 1. Deploy schema and reference data
+mysql -h gateway01.your-region.prod.aws.tidbcloud.com \
+      -P 4000 \
+      -u 'your_prefix.root' \
+      --ssl-mode=VERIFY_IDENTITY \
+      --default-character-set=utf8mb4 \
+      codearena_db < database/tidb/deploy_tidb_cloud.sql
+
+# 2. Run declarative TiDB validation test suite
+mysql -h gateway01.your-region.prod.aws.tidbcloud.com \
+      -P 4000 \
+      -u 'your_prefix.root' \
+      --ssl-mode=VERIFY_IDENTITY \
+      --default-character-set=utf8mb4 \
+      codearena_db < database/tests/test_schema_tidb.sql
+```
+
+### 6.4 Offline TiDB Compatibility Verification
+Run the offline TiDB compatibility audit tool to verify DDL, collations, and constraint syntax without connecting to the cloud:
+```bash
+python database/tests/verify_tidb_compatibility.py
+```
+
+For complete technical specifications, review [**TiDB Cloud Compatibility Audit**](tidb-cloud-compatibility-audit.md).
+
+
