@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Java Problem — CodeArena</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../assets/logo/codearena-favicon.png">
+
+    <!-- CodeMirror 5 Local Distribution Stylesheet -->
+    <link rel="stylesheet" href="../vendor/codemirror/lib/codemirror.css">
+
+    <!-- CodeArena Design System & Workspace Styles -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/compiler.css">
+    <link rel="stylesheet" href="../css/workspace.css">
+    <link rel="stylesheet" href="../css/basic_practice.css">
+
+    <!-- Immediate Theme Application Script (Prevents Flash) -->
+    <script src="../js/theme.js"></script>
+</head>
+<body class="basic-workspace-body">
+
+    <!-- Top Workspace Header Bar (60px) -->
+    <header class="workspace-header">
+        <div class="workspace-header-left">
+            <a href="../index.html" class="workspace-brand-wrap" title="Return to CodeArena Home" aria-label="CodeArena Home">
+                <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo">
+            </a>
+
+            <nav class="workspace-breadcrumbs" aria-label="Breadcrumb">
+                <a href="../index.html">Home</a>
+                <span class="crumb-sep">/</span>
+                <a href="practice.html">Practice Tracks</a>
+                <span class="crumb-sep">/</span>
+                <a href="basic-practice.html">Basic Problems</a>
+                <span class="crumb-sep">/</span>
+                <span class="crumb-current" id="basicBreadcrumbTitle">Loading...</span>
+            </nav>
+        </div>
+
+        <div class="workspace-header-actions">
+            <a href="basic-practice.html" class="workspace-header-btn" title="Return to Basic Problems Catalogue">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Basic Track</span>
+            </a>
+            <a href="problems.html" class="workspace-header-btn" title="Switch to Advanced DSA Track">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+                <span>DSA Track</span>
+            </a>
+            <a href="compiler.html" class="workspace-header-btn" title="Open Full Java Compiler">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+                <span>Compiler</span>
+            </a>
+            <button class="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+                <svg class="theme-icon theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Two-Pane Problem Workspace Container -->
+    <main class="basic-workspace-container" id="basicWorkspaceMain">
+
+        <!-- Left Pane: Problem Description -->
+        <section class="basic-left-pane" aria-label="Problem Description">
+            <a href="basic-practice.html" class="basic-back-link" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: #818CF8; margin-bottom: 16px; text-decoration: none; font-weight: 600;">
+                <span aria-hidden="true">&larr;</span> Back to Basic Practice
+            </a>
+
+            <!-- Meta Header (Number, Category, Difficulty, Status) -->
+            <div class="basic-prob-header-meta">
+                <span class="basic-prob-id" id="basicProbNumber">#1</span>
+                <span class="basic-prob-category" id="basicProbCategory" style="background: rgba(99, 102, 241, 0.15); color: #818CF8; padding: 3px 8px; border-radius: 6px; font-size: 0.76rem; font-weight: 700;">Fundamentals</span>
+                <span class="basic-prob-diff-badge" id="basicProbDifficulty">Easy</span>
+                <span class="basic-prob-status" id="basicProbStatus" style="font-size: 0.74rem; font-weight: 700; color: #94A3B8;">Unattempted</span>
+            </div>
+
+            <!-- Problem Title -->
+            <h1 class="basic-prob-headline" id="basicProblemTitle">Loading Challenge...</h1>
+
+            <!-- Practice Environment Notice -->
+            <div class="basic-preview-disclaimer" role="note">
+                <svg class="preview-info-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span><strong>Practice environment:</strong> Code execution currently uses a client-side preview. Remote Java execution will be available in a future release.</span>
+            </div>
+
+            <!-- Problem Description -->
+            <div class="basic-desc-section">
+                <h2 class="basic-desc-heading">Problem Description</h2>
+                <div class="basic-desc-content" id="basicProblemDesc"></div>
+            </div>
+
+            <!-- Input Format -->
+            <div class="basic-desc-section">
+                <h2 class="basic-desc-heading">Input Format</h2>
+                <div class="basic-desc-content" id="basicInputFormat"></div>
+            </div>
+
+            <!-- Output Format -->
+            <div class="basic-desc-section">
+                <h2 class="basic-desc-heading">Output Format</h2>
+                <div class="basic-desc-content" id="basicOutputFormat"></div>
+            </div>
+
+            <!-- Constraints -->
+            <div class="basic-desc-section">
+                <h2 class="basic-desc-heading">Constraints</h2>
+                <div class="basic-sample-box" id="basicConstraints"></div>
+            </div>
+
+            <!-- Sample Input & Output -->
+            <div class="basic-desc-section">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <h2 class="basic-desc-heading" style="margin-bottom: 0;">Sample Input</h2>
+                    <button class="basic-editor-btn" id="btnCopySampleInput" title="Copy sample input">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span>Copy</span>
+                    </button>
+                </div>
+                <pre class="basic-sample-box" id="basicSampleInput"></pre>
+
+                <h2 class="basic-desc-heading" style="margin-top: 14px;">Sample Output</h2>
+                <pre class="basic-sample-box" id="basicSampleOutput"></pre>
+            </div>
+
+            <!-- Explanation -->
+            <div class="basic-desc-section" id="basicExplanationSection">
+                <h2 class="basic-desc-heading">Explanation &amp; Logic</h2>
+                <div class="basic-desc-content" id="basicExplanation"></div>
+            </div>
+
+            <!-- Related Concepts -->
+            <div class="basic-desc-section">
+                <h2 class="basic-desc-heading">Related Java Concepts</h2>
+                <div class="basic-concepts-row" id="basicConceptsRow"></div>
+            </div>
+        </section>
+
+        <!-- Right Pane: CodeMirror Editor & Console -->
+        <section class="basic-right-pane" aria-label="Java Code Editor and Console">
+
+            <!-- Editor Header & Controls -->
+            <div class="basic-editor-header">
+                <div class="basic-editor-lang-badge">
+                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10B981;" aria-hidden="true"></span>
+                    <span>Java 17 (OpenJDK 17 Preview)</span>
+                </div>
+                <div class="basic-editor-actions">
+                    <span style="font-size: 0.76rem; color: var(--color-text-muted); margin-right: 4px;" id="fontSizeLabel">14px</span>
+                    <button class="basic-editor-btn" id="btnFontDec" title="Decrease font size" aria-label="Decrease font size">A-</button>
+                    <button class="basic-editor-btn" id="btnFontInc" title="Increase font size" aria-label="Increase font size">A+</button>
+                    <button class="basic-editor-btn" id="btnResetCode" title="Reset to initial starter code">Reset</button>
+                    <button class="basic-editor-btn" id="btnCopyCode" title="Copy code to clipboard">Copy</button>
+                </div>
+            </div>
+
+            <!-- CodeMirror Editor Container -->
+            <div class="basic-cm-container" id="basicCodeMirrorContainer">
+                <textarea id="basicCodeTextarea" class="sr-only" aria-label="Java Solution Source Code"></textarea>
+            </div>
+
+            <!-- Console / Execution Tabs -->
+            <div class="basic-console-wrapper">
+                <div class="basic-console-tabs" role="tablist" aria-label="Console Panes">
+                    <button class="basic-console-tab-btn active" id="tabOutput" role="tab" aria-selected="true" data-tab="output">Output (stdout)</button>
+                    <button class="basic-console-tab-btn" id="tabInput" role="tab" aria-selected="false" data-tab="input">Custom Input (stdin)</button>
+                    <button class="basic-console-tab-btn" id="tabTestCases" role="tab" aria-selected="false" data-tab="testcases">Test Cases</button>
+                    <button class="basic-console-tab-btn" id="tabDiagnostics" role="tab" aria-selected="false" data-tab="diagnostics">Diagnostics</button>
+                </div>
+
+                <!-- Tab Panel 1: Output -->
+                <div class="basic-console-content" id="panelOutput" role="tabpanel" aria-labelledby="tabOutput">
+                    <pre id="basicStdoutPre" style="margin: 0; white-space: pre-wrap; font-family: inherit;">Run code (or press Ctrl+Enter) to preview stdout output...</pre>
+                </div>
+
+                <!-- Tab Panel 2: Custom Input -->
+                <div class="basic-console-content" id="panelInput" role="tabpanel" aria-labelledby="tabInput" style="display: none;">
+                    <textarea id="basicCustomInput" style="width: 100%; height: 100%; background: transparent; border: 1px solid rgba(255,255,255,0.1); color: inherit; font-family: inherit; font-size: inherit; resize: none; padding: 8px; border-radius: 6px;" placeholder="Provide custom arguments or standard input lines for execution preview..."></textarea>
+                </div>
+
+                <!-- Tab Panel 3: Test Cases -->
+                <div class="basic-console-content" id="panelTestCases" role="tabpanel" aria-labelledby="tabTestCases" style="display: none;">
+                    <div id="basicTestCasesContainer">Click "Run Code" or "Submit Solution" to evaluate test cases.</div>
+                </div>
+
+                <!-- Tab Panel 4: Diagnostics -->
+                <div class="basic-console-content" id="panelDiagnostics" role="tabpanel" aria-labelledby="tabDiagnostics" style="display: none;">
+                    <pre id="basicDiagnosticsPre" style="margin: 0; white-space: pre-wrap; font-family: inherit; color: #94A3B8;">Code analysis ready. No errors detected.</pre>
+                </div>
+            </div>
+
+            <!-- Execution Footer Bar -->
+            <div class="basic-exec-footer">
+                <div class="basic-preview-pill" title="Preview Mode &middot; Client-side structural syntax &amp; test check" data-preview-mode="client-side">
+                    <svg class="preview-info-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span>Client-side Preview</span>
+                </div>
+                <div class="basic-exec-actions">
+                    <button class="btn-exec-run" id="btnRunBasicCode" title="Run code preview (Ctrl+Enter)">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        <span>Run Code</span>
+                    </button>
+                    <button class="btn-exec-submit" id="btnSubmitBasicSolution" title="Submit solution">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Submit Solution</span>
+                    </button>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- CodeMirror 5 Local Distribution Scripts -->
+    <script src="../vendor/codemirror/lib/codemirror.js"></script>
+    <script src="../vendor/codemirror/mode/clike/clike.js"></script>
+    <script src="../vendor/codemirror/addon/edit/matchbrackets.js"></script>
+    <script src="../vendor/codemirror/addon/edit/closebrackets.js"></script>
+    <script src="../vendor/codemirror/addon/selection/active-line.js"></script>
+
+    <!-- Application Data & Services -->
+    <script src="../js/basic_problems_data.js"></script>
+    <script src="../js/basic_practice_service.js"></script>
+    <script src="../js/toast.js"></script>
+    <script src="../js/basic_problem_workspace.js"></script>
+</body>
+</html>
+

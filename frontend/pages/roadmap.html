@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guided Java Learning Roadmap — CodeArena</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../assets/logo/codearena-favicon.png">
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/auth_modal.css">
+    <link rel="stylesheet" href="../css/secondary.css">
+    <link rel="stylesheet" href="../css/basic_practice.css">
+    <link rel="stylesheet" href="../css/roadmap.css">
+    <!-- Immediate Theme Application Script (Prevents Flash) -->
+    <script src="../js/theme.js"></script>
+</head>
+<body class="secondary-page-body">
+
+    <!-- Top Standard 60px Secondary Header -->
+    <header class="secondary-header">
+        <div class="secondary-header-left">
+            <a href="../index.html" class="secondary-brand-wrap" title="Return to CodeArena Home" aria-label="CodeArena Home">
+                <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo">
+            </a>
+
+            <nav class="secondary-breadcrumbs" aria-label="Breadcrumbs">
+                <a href="../index.html">Home</a>
+                <span class="crumb-sep">/</span>
+                <a href="learn.html">Learn</a>
+                <span class="crumb-sep">/</span>
+                <span class="crumb-current">Java Learning Roadmap</span>
+            </nav>
+        </div>
+
+        <div class="secondary-header-actions">
+            <a href="practice.html" class="secondary-header-btn" title="Practice Problem Hub">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+                    <path d="M6 6h10"></path>
+                    <path d="M6 10h10"></path>
+                </svg>
+                <span>Practice Hub</span>
+            </a>
+            <a href="learn.html" class="secondary-header-btn" title="Curriculum & Interactive Studio">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                </svg>
+                <span>Mastery Studio</span>
+            </a>
+            <a href="compiler.html" class="secondary-header-btn" title="Online Java Compiler">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                </svg>
+                <span>Compiler</span>
+            </a>
+            <button class="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch to light theme">
+                <svg class="theme-icon theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Guided Roadmap Canvas -->
+    <main class="secondary-main">
+        <div class="roadmap-main-canvas">
+
+            <!-- Hero & Overview Header -->
+            <section class="roadmap-hero" aria-labelledby="roadmap-main-heading">
+                <div class="roadmap-hero-top">
+                    <div class="roadmap-hero-content">
+                        <div class="roadmap-tagline-wrap">
+                            <span class="roadmap-tagline-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+                                </svg>
+                            </span>
+                            <span>Guided Learning Journey</span>
+                        </div>
+                        <h1 class="roadmap-title" id="roadmap-main-heading">Java Learning Roadmap</h1>
+                        <p class="roadmap-subtitle">
+                            A structured, concept-by-concept engineering roadmap through Java fundamentals, core programming patterns, and data structures & algorithms. Progress through prerequisite-checked milestones, study canonical code implementations, and solve curated challenges.
+                        </p>
+                        <div class="roadmap-storage-note">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                            <span>Local Browser Storage Active: Progress is preserved on this device. Remote synchronization connects in a future release.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Overview Stat Cards Grid -->
+                <div class="roadmap-stats-grid">
+                    <!-- Stat 1: Overall Progress -->
+                    <div class="roadmap-stat-card">
+                        <div>
+                            <div class="stat-header">
+                                <span class="stat-label">Overall Progress</span>
+                                <div class="stat-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="stat-value-group">
+                                <span class="stat-value" id="statOverallProgress">0%</span>
+                                <span class="stat-sub">Curriculum Complete</span>
+                            </div>
+                        </div>
+                        <div class="stat-progress-bar">
+                            <div class="stat-progress-fill" id="statOverallFill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Stat 2: Topics Completed -->
+                    <div class="roadmap-stat-card">
+                        <div>
+                            <div class="stat-header">
+                                <span class="stat-label">Topics Mastered</span>
+                                <div class="stat-icon" style="color: #10b981;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+                                        <path d="M6 6h10"></path>
+                                        <path d="M6 10h10"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="stat-value-group">
+                                <span class="stat-value" id="statCompletedCount">0 of 30</span>
+                                <span class="stat-sub">Total Milestones</span>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.78rem; color: var(--color-text-muted);">Sequential prerequisite milestones</div>
+                    </div>
+
+                    <!-- Stat 3: Current Phase / Level -->
+                    <div class="roadmap-stat-card">
+                        <div>
+                            <div class="stat-header">
+                                <span class="stat-label">Active Learning Tier</span>
+                                <div class="stat-icon" style="color: #8b5cf6;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                        <polyline points="2 17 12 22 22 17"></polyline>
+                                        <polyline points="2 12 12 17 22 12"></polyline>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="stat-value-group">
+                                <span class="stat-value" id="statCurrentLevelBadge">Level 1</span>
+                                <span class="stat-sub">Fundamentals</span>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.78rem; color: var(--color-text-muted);">Adapts dynamically as you master topics</div>
+                    </div>
+
+                    <!-- Stat 4: Recommended Next Topic Card -->
+                    <div class="roadmap-stat-card card-recommended" id="recTopicCard">
+                        <div class="stat-header">
+                            <span class="stat-label" style="color: var(--color-primary);">Recommended Next Step</span>
+                            <div class="stat-icon" style="color: var(--color-primary);">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 14 14"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                        <div id="recTopicContainer">
+                            <!-- Populated dynamically by roadmap.js -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Interactive Control Bar: Search & Filtering -->
+            <section class="roadmap-controls-bar" aria-label="Roadmap Filters and Controls">
+                <!-- Search Box -->
+                <div class="roadmap-search-box">
+                    <span class="search-icon-pos" aria-hidden="true">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </span>
+                    <input type="text" class="roadmap-search-input" id="roadmapSearchInput" placeholder="Search concepts or topics..." aria-label="Search roadmap topics">
+                    <button type="button" class="search-clear-btn" id="searchClearBtn" aria-label="Clear search">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Level Filter Pills -->
+                <div class="roadmap-filter-tabs" role="tablist" aria-label="Filter by Level">
+                    <button type="button" class="filter-pill-btn active" data-level="all" role="tab" aria-selected="true">
+                        <span>All Levels (30)</span>
+                    </button>
+                    <button type="button" class="filter-pill-btn" data-level="1" role="tab" aria-selected="false">
+                        <span>Level 1: Fundamentals (8)</span>
+                    </button>
+                    <button type="button" class="filter-pill-btn" data-level="2" role="tab" aria-selected="false">
+                        <span>Level 2: Core Java (9)</span>
+                    </button>
+                    <button type="button" class="filter-pill-btn" data-level="3" role="tab" aria-selected="false">
+                        <span>Level 3: DSA (13)</span>
+                    </button>
+                </div>
+
+                <!-- Status Filter Dropdown & Reset Action -->
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <select class="roadmap-status-filter" id="statusFilterSelect" aria-label="Filter by completion status">
+                        <option value="all">All Statuses</option>
+                        <option value="in-progress">In Progress / Available</option>
+                        <option value="completed">Completed Only</option>
+                    </select>
+
+                    <button type="button" class="btn-reset-progress" id="btnResetProgress" title="Reset all roadmap progress">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                            <path d="M3 3v5h5"></path>
+                        </svg>
+                        <span>Reset</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Roadmap Levels & Topics Container -->
+            <div class="roadmap-levels-container" id="roadmapLevelsContainer">
+                <!-- Dynamically populated by roadmap.js -->
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Topic Detail Inspection Drawer & Overlay -->
+    <div class="roadmap-detail-overlay" id="roadmapDetailOverlay" role="dialog" aria-modal="true" aria-labelledby="drawerHeading">
+        <div class="roadmap-detail-drawer" id="roadmapDetailDrawer">
+            <!-- Drawer Header -->
+            <div class="drawer-header">
+                <div class="drawer-header-left">
+                    <button type="button" class="drawer-close-btn" id="btnCloseDrawer" aria-label="Close details" title="Close details (Esc)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div id="drawerHeading" class="drawer-topic-heading">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <div>
+                    <button type="button" class="drawer-toggle-complete-btn mark-completed" id="drawerToggleCompleteBtn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>Mark Completed</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Drawer Body Scrollable Content -->
+            <div class="drawer-body" id="drawerBody">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Drawer Footer: Topic Pagination -->
+            <div class="drawer-footer">
+                <button type="button" class="drawer-nav-btn" id="drawerPrevBtn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    <span>Previous Topic</span>
+                </button>
+                <button type="button" class="drawer-nav-btn" id="drawerNextBtn">
+                    <span>Next Topic</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div class="roadmap-modal-backdrop" id="resetModal" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+        <div class="roadmap-modal-card">
+            <div class="modal-header-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </div>
+            <h3 class="modal-title" id="resetModalTitle">Reset Roadmap Progress?</h3>
+            <p class="modal-desc">
+                Are you sure you want to clear all completed milestones on your Java Learning Roadmap? This action will reset your overall progress on this browser and cannot be undone.
+            </p>
+            <div class="modal-actions">
+                <button type="button" class="modal-btn-cancel" id="btnCancelReset">Cancel</button>
+                <button type="button" class="modal-btn-confirm" id="btnConfirmReset">Confirm Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/basic_problems_data.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/roadmap_data.js"></script>
+    <script src="../js/roadmap_service.js"></script>
+    <script src="../js/roadmap.js"></script>
+</body>
+</html>
+
