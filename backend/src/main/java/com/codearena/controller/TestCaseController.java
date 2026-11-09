@@ -22,10 +22,19 @@ public class TestCaseController {
 
     // 1. Get all test cases for a problem
     @GetMapping
-    public List<TestCase> getTestCases(
+    public ResponseEntity<?> getTestCases(
             @PathVariable int problemId) {
 
-        return testCaseService.getTestCasesByProblemId(problemId);
+        if (problemId <= 0) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Invalid problem ID!");
+        }
+
+        List<TestCase> testCases =
+                testCaseService.getTestCasesByProblemId(problemId);
+
+        return ResponseEntity.ok(testCases);
     }
 
     // 2. Add a test case to a problem
@@ -33,6 +42,18 @@ public class TestCaseController {
     public ResponseEntity<String> addTestCase(
             @PathVariable int problemId,
             @RequestBody TestCase testCase) {
+
+        if (problemId <= 0) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Invalid problem ID!");
+        }
+
+        if (testCase == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Test case cannot be empty!");
+        }
 
         testCase.setProblemId(problemId);
 
