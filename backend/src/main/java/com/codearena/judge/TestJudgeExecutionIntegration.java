@@ -3,6 +3,8 @@ package com.codearena.judge;
 
 import com.codearena.model.Submission;
 import com.codearena.model.TestCase;
+import com.codearena.model.ExecutionRequest;
+import com.codearena.execution.ExecutionResult;
 
 public class TestJudgeExecutionIntegration {
 
@@ -17,13 +19,11 @@ public class TestJudgeExecutionIntegration {
                 System.out.println("Received input: " + request.getInput());
 
                 return new ExecutionResult(
+                        "SUCCESS",
                         "20",
                         "",
-                        false,
-                        true,
-                        0,
                         100,
-                        1024
+                        0
                 );
             }
         };
