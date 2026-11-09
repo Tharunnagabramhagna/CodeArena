@@ -8,6 +8,7 @@ public class Submission {
     private String submissionUid;
     private int problemId;
     private int userId;
+    private String problemTitle;
     private String sourceCode;
     private String language;
     private String status;
@@ -18,6 +19,19 @@ public class Submission {
 
     // Default constructor
     public Submission() {
+        this.language = "Java";
+        this.status = "QUEUED";
+        this.verdict = "PENDING";
+    }
+
+    // Constructor for history and student services
+    public Submission(int userId, int problemId, String problemTitle, String language, String code) {
+        this();
+        this.userId = userId;
+        this.problemId = problemId;
+        this.problemTitle = problemTitle;
+        this.language = language;
+        this.sourceCode = code;
     }
 
     // Parameterized constructor
@@ -149,5 +163,42 @@ public class Submission {
 
     public void setMemoryUsedKb(long memoryUsedKb) {
         this.memoryUsed = memoryUsedKb;
+    }
+
+    // Student & History Service Helpers
+    public String getProblemTitle() {
+        return problemTitle != null ? problemTitle : "Problem " + problemId;
+    }
+
+    public void setProblemTitle(String problemTitle) {
+        this.problemTitle = problemTitle;
+    }
+
+    public String getCode() {
+        return sourceCode;
+    }
+
+    public void setCode(String code) {
+        this.sourceCode = code;
+    }
+
+    public int getMemoryKb() {
+        return (int) memoryUsed;
+    }
+
+    public void setMemoryKb(int memoryKb) {
+        this.memoryUsed = memoryKb;
+    }
+
+    public void setExecutionTimeMs(int executionTimeMs) {
+        this.executionTime = executionTimeMs;
+    }
+
+    public SubmissionVerdict getSubmissionVerdict() {
+        return SubmissionVerdict.fromString(verdict);
+    }
+
+    public void setVerdict(SubmissionVerdict verdict) {
+        this.verdict = verdict != null ? verdict.name() : "PENDING";
     }
 }

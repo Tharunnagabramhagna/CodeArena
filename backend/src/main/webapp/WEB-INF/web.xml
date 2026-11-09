@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee 
+         https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+         version="5.0">
+
+    <display-name>CodeArena Online Coding Platform</display-name>
+    <description>
+        Backend Services for CodeArena: Authentication, Security, Student Profiles, 
+        Learning Progress Tracking, and Submissions History.
+    </description>
+
+    <!-- Application Lifecycle Listener -->
+    <listener>
+        <listener-class>com.codearena.config.AppLifecycleListener</listener-class>
+    </listener>
+
+    <!-- CORS Filter (First in chain) -->
+    <filter>
+        <filter-name>CorsFilter</filter-name>
+        <filter-class>com.codearena.security.CorsFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>CorsFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <!-- Authentication Security Filter -->
+    <filter>
+        <filter-name>AuthFilter</filter-name>
+        <filter-class>com.codearena.security.AuthFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/api/*</url-pattern>
+    </filter-mapping>
+
+    <!-- Authentication Servlets -->
+    <servlet>
+        <servlet-name>RegisterServlet</servlet-name>
+        <servlet-class>com.codearena.auth.RegisterServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RegisterServlet</servlet-name>
+        <url-pattern>/api/auth/register</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>com.codearena.auth.LoginServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/api/auth/login</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>com.codearena.auth.LogoutServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/api/auth/logout</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CurrentUserServlet</servlet-name>
+        <servlet-class>com.codearena.auth.CurrentUserServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CurrentUserServlet</servlet-name>
+        <url-pattern>/api/users/me</url-pattern>
+    </servlet-mapping>
+
+    <!-- Student Services Servlets -->
+    <servlet>
+        <servlet-name>StudentProfileServlet</servlet-name>
+        <servlet-class>com.codearena.student.StudentProfileServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>StudentProfileServlet</servlet-name>
+        <url-pattern>/api/student/profile</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>StudentProgressServlet</servlet-name>
+        <servlet-class>com.codearena.student.StudentProgressServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>StudentProgressServlet</servlet-name>
+        <url-pattern>/api/student/progress</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>SubmissionHistoryServlet</servlet-name>
+        <servlet-class>com.codearena.student.SubmissionHistoryServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SubmissionHistoryServlet</servlet-name>
+        <url-pattern>/api/student/submissions</url-pattern>
+    </servlet-mapping>
+
+    <!-- Secure Session Configuration -->
+    <session-config>
+        <session-timeout>60</session-timeout>
+        <cookie-config>
+            <http-only>true</http-only>
+            <secure>false</secure> <!-- set to true in production with HTTPS -->
+            <name>CODEARENA_JSESSIONID</name>
+        </cookie-config>
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
+
+    <!-- Welcome File List -->
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+        <welcome-file>pages/dashboard.html</welcome-file>
+    </welcome-file-list>
+
+</web-app>
+
