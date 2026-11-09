@@ -40,13 +40,21 @@ public class SubmissionController {
 
     // 2. Get submission by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Submission> getSubmissionById(
+    public ResponseEntity<?> getSubmissionById(
             @PathVariable int id) {
+
+        if (id <= 0) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Invalid submission ID!");
+        }
 
         Submission submission = submissionService.getSubmissionById(id);
 
         if (submission == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Submission not found!");
         }
 
         return ResponseEntity.ok(submission);
@@ -54,17 +62,35 @@ public class SubmissionController {
 
     // 3. Get submissions by user ID
     @GetMapping("/user/{userId}")
-    public List<Submission> getSubmissionsByUserId(
+    public ResponseEntity<?> getSubmissionsByUserId(
             @PathVariable int userId) {
 
-        return submissionService.getSubmissionsByUserId(userId);
+        if (userId <= 0) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Invalid user ID!");
+        }
+
+        List<Submission> submissions =
+                submissionService.getSubmissionsByUserId(userId);
+
+        return ResponseEntity.ok(submissions);
     }
 
     // 4. Get submissions by problem ID
     @GetMapping("/problem/{problemId}")
-    public List<Submission> getSubmissionsByProblemId(
+    public ResponseEntity<?> getSubmissionsByProblemId(
             @PathVariable int problemId) {
 
-        return submissionService.getSubmissionsByProblemId(problemId);
+        if (problemId <= 0) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Invalid problem ID!");
+        }
+
+        List<Submission> submissions =
+                submissionService.getSubmissionsByProblemId(problemId);
+
+        return ResponseEntity.ok(submissions);
     }
 }
