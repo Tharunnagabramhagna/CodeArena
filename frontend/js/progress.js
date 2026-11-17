@@ -10,33 +10,28 @@
 
     // State
     const state = {
-        submissions: [],
-        canonicalProblems: [],
-        stats: {
-            totalSolved: 0,
-            easySolved: 0,
-            medSolved: 0,
-            hardSolved: 0,
-            totalEasy: 6,
-            totalMed: 4,
-            totalHard: 2,
-            streakDays: 3,
-            completionRate: 0
-        }
+        authenticated: false,
+        analytics: null,
+        catalogStats: null
     };
 
     // DOM Elements Cache
     let dom = {};
 
-    function init() {
+    async function init() {
         cacheElements();
-        loadData();
-        calculateMetrics();
+        await loadData();
         renderAnalytics();
+        document.addEventListener('codearena:auth-changed', async function () {
+            await loadData();
+            renderAnalytics();
+        });
     }
 
     function cacheElements() {
         dom = {
+            statusPill: document.getElementById('progressStatusPill'),
+            heroDesc: document.getElementById('progressHeroDesc'),
             totalSolvedVal: document.getElementById('metricTotalSolved'),
             completionRateVal: document.getElementById('metricCompletionRate'),
             currentStreakVal: document.getElementById('metricCurrentStreak'),
@@ -52,142 +47,166 @@
         };
     }
 
-    function loadData() {
+    async function loadData() {
+        state.authenticated = false;
+        state.analytics = null;
+
+        if (!window.CodeArenaAPI) return;
+
         try {
-            const raw = sessionStorage.getItem('codearena_guest_preview_submissions');
-            if (raw) {
-                state.submissions = JSON.parse(raw);
-            }
-        } catch (e) {
-            state.submissions = [];
-        }
-
-        if (window.CodeArenaAPI && window.CodeArenaAPI.problemService) {
-            window.CodeArenaAPI.problemService.getProblems({ limit: 100 }).then(res => {
-                if (res && res.success && res.data && res.data.problems) {
-                    state.canonicalProblems = res.data.problems;
-                    calculateMetrics();
-                    renderAnalytics();
+            if (window.CodeArenaAPI.authService) {
+                if (!window.CodeArenaAPI.authService.isAuthenticated()) {
+                    await window.CodeArenaAPI.authService.getCurrentUser().catch(() => null);
                 }
-            }).catch(() => {});
+                state.authenticated = window.CodeArenaAPI.authService.isAuthenticated();
+            }
+
+            if (state.authenticated && window.CodeArenaAPI.studentService) {
+                const aRes = await window.CodeArenaAPI.studentService.getAnalytics();
+                if (aRes && aRes.success && aRes.data) {
+                    state.analytics = aRes.data;
+                }
+            } else if (window.CodeArenaAPI.problemService && window.CodeArenaAPI.problemService.getStats) {
+                const sRes = await window.CodeArenaAPI.problemService.getStats();
+                if (sRes && sRes.success && sRes.data) {
+                    state.catalogStats = sRes.data;
+                }
+            }
+        } catch (err) {
+            console.warn('[Progress] Error loading analytics:', err);
         }
-    }
-
-    function calculateMetrics() {
-        // Collect solved problem IDs from successful session submissions
-        const solvedIds = new Set();
-        state.submissions.forEach(sub => {
-            if (sub.verdict === 'PREVIEW_PASSED' || sub.verdict === 'ACCEPTED') {
-                solvedIds.add(sub.problemId);
-            }
-        });
-
-        // Only genuinely solved session submissions are counted
-
-        state.stats.totalSolved = solvedIds.size;
-
-        // Categorize by difficulty
-        let easy = 0, med = 0, hard = 0;
-        let totalEasy = 0, totalMed = 0, totalHard = 0;
-
-        state.canonicalProblems.forEach(p => {
-            const diff = (p.difficulty || '').toLowerCase();
-            if (diff === 'easy') totalEasy++;
-            else if (diff === 'medium') totalMed++;
-            else if (diff === 'hard') totalHard++;
-
-            if (solvedIds.has(p.id) || solvedIds.has(p.slug)) {
-                if (diff === 'easy') easy++;
-                else if (diff === 'medium') med++;
-                else if (diff === 'hard') hard++;
-            }
-        });
-
-        state.stats.easySolved = easy;
-        state.stats.medSolved = med;
-        state.stats.hardSolved = hard;
-        state.stats.totalEasy = Math.max(totalEasy, 6);
-        state.stats.totalMed = Math.max(totalMed, 4);
-        state.stats.totalHard = Math.max(totalHard, 2);
-
-        const totalProbs = state.canonicalProblems.length || 12;
-        state.stats.completionRate = Math.round((state.stats.totalSolved / totalProbs) * 100);
     }
 
     function renderAnalytics() {
-        if (dom.totalSolvedVal) dom.totalSolvedVal.textContent = state.stats.totalSolved;
-        if (dom.completionRateVal) dom.completionRateVal.textContent = `${state.stats.completionRate}%`;
-        if (dom.currentStreakVal) {
-            dom.currentStreakVal.textContent = state.stats.totalSolved > 0 ? `${state.stats.streakDays} Days` : '0 Days';
+        const data = state.analytics;
+        if (!state.authenticated || !data) {
+            if (dom.statusPill) dom.statusPill.textContent = 'Sign In for Personal Metrics';
+            if (dom.heroDesc) dom.heroDesc.textContent = 'Log in to track solved problems, difficulty breakdowns, topic mastery, and your 64-day activity heatmap.';
+            const totalProbs = (state.catalogStats && state.catalogStats.totalProblems) || 250;
+            if (dom.totalSolvedVal) dom.totalSolvedVal.textContent = '0';
+            if (dom.completionRateVal) dom.completionRateVal.textContent = '0%';
+            if (dom.currentStreakVal) dom.currentStreakVal.textContent = '0 Days';
+
+            if (dom.easyBarFill) dom.easyBarFill.style.width = '0%';
+            if (dom.easyBarText) dom.easyBarText.textContent = '0 / 0 (0%)';
+            if (dom.medBarFill) dom.medBarFill.style.width = '0%';
+            if (dom.medBarText) dom.medBarText.textContent = '0 / 0 (0%)';
+            if (dom.hardBarFill) dom.hardBarFill.style.width = '0%';
+            if (dom.hardBarText) dom.hardBarText.textContent = '0 / 0 (0%)';
+
+            renderTopicMastery([]);
+            renderActivityHeatmap([]);
+            renderRecentActivity([], false, totalProbs);
+            return;
         }
 
-        // Render Difficulty Bars
-        const easyPct = Math.round((state.stats.easySolved / state.stats.totalEasy) * 100);
-        const medPct = Math.round((state.stats.medSolved / state.stats.totalMed) * 100);
-        const hardPct = Math.round((state.stats.hardSolved / state.stats.totalHard) * 100);
+        if (dom.statusPill) dom.statusPill.textContent = 'Verified Account Analytics';
+        if (dom.heroDesc) dom.heroDesc.textContent = 'Metrics reflect your verified CodeArena judging history across all tracks.';
+
+        const totalSolved = Number(data.totalSolved || 0);
+        const totalProbs = Number(data.totalProblems || 250);
+        const completionRate = totalProbs > 0 ? Math.round((totalSolved / totalProbs) * 100) : 0;
+        const streakDays = Number(data.streakDays || 0);
+
+        if (dom.totalSolvedVal) dom.totalSolvedVal.textContent = String(totalSolved);
+        if (dom.completionRateVal) dom.completionRateVal.textContent = `${completionRate}%`;
+        if (dom.currentStreakVal) dom.currentStreakVal.textContent = `${streakDays} ${streakDays === 1 ? 'Day' : 'Days'}`;
+
+        const easySolved = Number(data.easySolved || 0);
+        const medSolved = Number(data.mediumSolved || 0);
+        const hardSolved = Number(data.hardSolved || 0);
+        const totalEasy = Number(data.totalEasy || 0);
+        const totalMed = Number(data.totalMedium || 0);
+        const totalHard = Number(data.totalHard || 0);
+
+        const easyPct = totalEasy > 0 ? Math.round((easySolved / totalEasy) * 100) : 0;
+        const medPct = totalMed > 0 ? Math.round((medSolved / totalMed) * 100) : 0;
+        const hardPct = totalHard > 0 ? Math.round((hardSolved / totalHard) * 100) : 0;
 
         if (dom.easyBarFill) dom.easyBarFill.style.width = `${easyPct}%`;
-        if (dom.easyBarText) dom.easyBarText.textContent = `${state.stats.easySolved} / ${state.stats.totalEasy} (${easyPct}%)`;
+        if (dom.easyBarText) dom.easyBarText.textContent = `${easySolved} / ${totalEasy} (${easyPct}%)`;
 
         if (dom.medBarFill) dom.medBarFill.style.width = `${medPct}%`;
-        if (dom.medBarText) dom.medBarText.textContent = `${state.stats.medSolved} / ${state.stats.totalMed} (${medPct}%)`;
+        if (dom.medBarText) dom.medBarText.textContent = `${medSolved} / ${totalMed} (${medPct}%)`;
 
         if (dom.hardBarFill) dom.hardBarFill.style.width = `${hardPct}%`;
-        if (dom.hardBarText) dom.hardBarText.textContent = `${state.stats.hardSolved} / ${state.stats.totalHard} (${hardPct}%)`;
+        if (dom.hardBarText) dom.hardBarText.textContent = `${hardSolved} / ${totalHard} (${hardPct}%)`;
 
-        renderTopicMastery();
-        renderActivityHeatmap();
-        renderRecentActivity();
+        renderTopicMastery(Array.isArray(data.topicBreakdown) ? data.topicBreakdown : []);
+        renderActivityHeatmap(Array.isArray(data.heatmap) ? data.heatmap : []);
+        renderRecentActivity(Array.isArray(data.recentActivity) ? data.recentActivity : [], true, totalProbs);
     }
 
-    function renderTopicMastery() {
+    function renderTopicMastery(topicBreakdown) {
         if (!dom.topicBarsContainer) return;
 
-        const topicBreakdown = [
-            { name: 'Arrays & Hashing', completed: 1, total: 3, pct: 33 },
-            { name: 'Strings', completed: 0, total: 2, pct: 0 },
-            { name: 'Linked Lists', completed: 0, total: 2, pct: 0 },
-            { name: 'Binary Search', completed: 0, total: 2, pct: 0 },
-            { name: 'Dynamic Programming', completed: 0, total: 2, pct: 0 },
-            { name: 'Trees & Graphs', completed: 0, total: 1, pct: 0 }
-        ];
+        if (!topicBreakdown || topicBreakdown.length === 0) {
+            dom.topicBarsContainer.innerHTML = `
+                <div style="padding: 16px; text-align: center; color: var(--color-text-muted); font-size: 0.84rem;">
+                    ${state.authenticated ? 'No topic mastery data recorded yet.' : 'Log in to view your per-topic problem mastery breakdown.'}
+                </div>
+            `;
+            return;
+        }
 
-        dom.topicBarsContainer.innerHTML = topicBreakdown.map(t => `
-            <div class="progress-bar-wrap">
-                <div class="bar-meta">
-                    <span style="color: var(--color-text-primary); font-weight: 500;">${t.name}</span>
-                    <span style="color: var(--color-text-muted); font-size: 0.76rem;">${t.completed}/${t.total} (${t.pct}%)</span>
+        dom.topicBarsContainer.innerHTML = topicBreakdown.slice(0, 10).map(t => {
+            const name = t.topic || t.name || 'Core Java';
+            const completed = Number(t.solved || 0);
+            const total = Number(t.total || 0);
+            const pct = Number(t.percent !== undefined ? t.percent : (total > 0 ? Math.round((completed / total) * 100) : 0));
+            return `
+                <div class="progress-bar-wrap">
+                    <div class="bar-meta">
+                        <span style="color: var(--color-text-primary); font-weight: 500;">${escapeHtml(name)}</span>
+                        <span style="color: var(--color-text-muted); font-size: 0.76rem;">${completed}/${total} (${pct}%)</span>
+                    </div>
+                    <div class="bar-track">
+                        <div class="bar-fill primary" style="width: ${pct}%;"></div>
+                    </div>
                 </div>
-                <div class="bar-track">
-                    <div class="bar-fill primary" style="width: ${t.pct}%;"></div>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
-    function renderActivityHeatmap() {
+    function renderActivityHeatmap(heatmap) {
         if (!dom.heatmapGrid) return;
 
-        // Generate 64 cells representing past 8-9 weeks of daily activity
-        const cells = [];
-        for (let i = 0; i < 64; i++) {
-            let level = 0;
-            // Seed a few active days in recent weeks
-            if (i === 63 || i === 62 || i === 60 || i === 54 || i === 48 || i === 35 || i === 22) {
-                level = (i % 3) + 1;
+        if (!heatmap || heatmap.length === 0) {
+            const cells = [];
+            for (let i = 0; i < 64; i++) {
+                cells.push(`<div class="heatmap-cell" title="No submissions recorded" aria-label="No activity"></div>`);
             }
-            cells.push(`<div class="heatmap-cell ${level > 0 ? 'level-' + level : ''}" title="Day ${64 - i}: ${level * 2} challenges practiced" aria-label="Day activity level ${level}"></div>`);
+            dom.heatmapGrid.innerHTML = cells.join('');
+            return;
         }
-        dom.heatmapGrid.innerHTML = cells.join('');
+
+        dom.heatmapGrid.innerHTML = heatmap.map(cell => {
+            const level = Number(cell.level || 0);
+            const count = Number(cell.count || 0);
+            const dateStr = cell.date || '';
+            return `<div class="heatmap-cell ${level > 0 ? 'level-' + Math.min(3, level) : ''}" title="${escapeHtml(dateStr)}: ${count} submission${count === 1 ? '' : 's'}" aria-label="${escapeHtml(dateStr)}: ${count} submissions"></div>`;
+        }).join('');
     }
 
-    function renderRecentActivity() {
+    function renderRecentActivity(items, isAuthed) {
         if (!dom.recentActivityList) return;
 
-        if (state.submissions.length === 0) {
+        if (!isAuthed) {
             dom.recentActivityList.innerHTML = `
                 <div style="padding: 16px; text-align: center; color: var(--color-text-muted); font-size: 0.84rem;">
-                    No recent problem submissions recorded in this session.
+                    Log in to inspect your real submission timeline and verified progress.
+                    <div style="margin-top: 10px;">
+                        <a href="login.html?redirect=progress.html" class="prob-btn-solve" style="font-size: 0.78rem; padding: 6px 12px;">Log In →</a>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        if (!items || items.length === 0) {
+            dom.recentActivityList.innerHTML = `
+                <div style="padding: 16px; text-align: center; color: var(--color-text-muted); font-size: 0.84rem;">
+                    No submissions recorded on your account yet.
                     <div style="margin-top: 8px;">
                         <a href="problems.html" class="prob-btn-solve" style="font-size: 0.78rem; padding: 4px 10px;">Solve First Challenge</a>
                     </div>
@@ -196,21 +215,29 @@
             return;
         }
 
-        dom.recentActivityList.innerHTML = state.submissions.slice(0, 5).map(sub => `
-            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--color-border); font-size: 0.82rem;">
-                <div>
-                    <a href="problem.html?id=${encodeURIComponent(sub.problemId)}" style="color: var(--color-text-primary); font-weight: 600; text-decoration: none;">
-                        ${escapeHtml(sub.problemTitle || sub.problemId)}
-                    </a>
-                    <div style="font-size: 0.74rem; color: var(--color-text-muted); margin-top: 2px;">
-                        ${escapeHtml(sub.submittedAt ? new Date(sub.submittedAt).toLocaleTimeString() : 'Just now')} · Java 17
+        dom.recentActivityList.innerHTML = items.slice(0, 6).map(sub => {
+            const verdict = String(sub.verdict || sub.status || 'PENDING').toUpperCase();
+            const isAccepted = verdict === 'ACCEPTED';
+            const targetUrl = sub.track === 'basic'
+                ? `basic-problem.html?id=${encodeURIComponent(sub.problemSlug || sub.problemId)}`
+                : `problem.html?id=${encodeURIComponent(sub.problemSlug || sub.problemId)}`;
+            const timeLabel = sub.submittedAt ? new Date(sub.submittedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent';
+            return `
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--color-border); font-size: 0.82rem;">
+                    <div>
+                        <a href="${targetUrl}" style="color: var(--color-text-primary); font-weight: 600; text-decoration: none;">
+                            ${escapeHtml(sub.problemTitle || ('Problem #' + sub.problemId))}
+                        </a>
+                        <div style="font-size: 0.74rem; color: var(--color-text-muted); margin-top: 2px;">
+                            ${escapeHtml(timeLabel)}${sub.executionTimeMs ? ` · ${sub.executionTimeMs} ms` : ''}
+                        </div>
                     </div>
+                    <span class="verdict-tag ${isAccepted ? 'passed' : 'failed'}">
+                        ${escapeHtml(verdict.replace(/_/g, ' '))}
+                    </span>
                 </div>
-                <span class="verdict-tag ${sub.verdict === 'PREVIEW_PASSED' ? 'passed' : 'failed'}">
-                    ${escapeHtml(sub.verdict || 'PREVIEW_PASSED')}
-                </span>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     function escapeHtml(str) {

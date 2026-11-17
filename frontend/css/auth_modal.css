@@ -1047,6 +1047,160 @@
   }
 }
 
+/* 12b. Email OTP Password Recovery Styles */
+.auth-pane-intro {
+  margin-bottom: 12px;
+}
+
+.auth-step-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: var(--color-primary, #60a5fa);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.auth-step-heading {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-top: 2px;
+}
+
+.auth-pane-subtext {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  margin: 4px 0 0 0;
+  line-height: 1.4;
+}
+
+.auth-pane-subtext strong {
+  color: var(--color-primary, #60a5fa);
+  font-weight: 600;
+}
+
+.auth-info-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  color: var(--color-text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.auth-info-note svg {
+  flex-shrink: 0;
+  color: var(--color-primary, #60a5fa);
+  margin-top: 1px;
+}
+
+.auth-otp-wrapper {
+  justify-content: center;
+}
+
+.auth-otp-input {
+  text-align: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-size: 1.35rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.45em !important;
+  padding-left: 0.45em !important;
+}
+
+.auth-otp-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+  padding: 2px 4px;
+}
+
+.auth-otp-timer strong {
+  color: var(--color-primary, #60a5fa);
+}
+
+.auth-link-btn {
+  background: none;
+  border: none;
+  color: var(--color-primary, #60a5fa);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: color var(--transition-fast);
+}
+
+.auth-link-btn:hover {
+  color: var(--color-primary-hover, #93c5fd);
+}
+
+.auth-link-btn:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.auth-back-link {
+  color: var(--color-text-secondary);
+  font-size: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.auth-back-link:hover {
+  color: var(--color-text-primary);
+}
+
+.auth-success-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 18px 8px;
+  gap: 12px;
+}
+
+.auth-success-icon-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #10b981;
+}
+
+.auth-success-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.auth-success-desc {
+  font-size: 0.84rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+  max-width: 320px;
+}
+
 /* 13. Responsive Breakpoints */
 @media (max-width: 880px) {
   .auth-modal-card {
@@ -1068,12 +1222,14 @@
 @media (max-width: 640px) {
   .auth-modal-overlay {
     padding: 12px;
+    height: 100dvh;
   }
   .auth-modal-card {
     max-width: min(460px, calc(100vw - 24px));
     width: 100%;
     flex-direction: column;
-    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
     border-radius: 18px;
   }
   .auth-modal-brand-panel {
@@ -1095,6 +1251,7 @@
   .auth-modal-card {
     max-width: calc(100vw - 16px);
     width: 100%;
+    max-height: calc(100dvh - 16px);
     border-radius: 14px;
   }
   .auth-modal-form-panel {
@@ -1107,21 +1264,26 @@
     font-size: 0.78rem;
   }
   .auth-glass-input {
-    height: 38px;
-    font-size: 0.84rem;
-    padding: 0 32px 0 32px;
+    min-height: 42px;
+    font-size: 16px;
+    padding: 0 34px 0 34px;
+  }
+  .auth-otp-input {
+    letter-spacing: 0.28em !important;
+    padding-left: 0.28em !important;
   }
   .auth-tab-btn {
+    min-height: 38px;
     padding: 6px 10px;
     font-size: 0.8rem;
   }
   .btn-auth-submit {
-    height: 38px;
-    font-size: 0.86rem;
+    min-height: 44px;
+    font-size: 0.88rem;
   }
   .btn-auth-social {
-    height: 36px;
-    font-size: 0.82rem;
+    min-height: 42px;
+    font-size: 0.84rem;
   }
   .auth-modal-preview-notice {
     font-size: 0.68rem;

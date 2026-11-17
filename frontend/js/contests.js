@@ -7,104 +7,26 @@
 (function () {
     'use strict';
 
-    const REGISTRATION_STORAGE_KEY = 'codearena_registered_contests';
-
-    // Sample Contest Catalog Data
-    const CONTESTS_DATA = [
-        {
-            id: 'weekly-sprint-42',
-            title: 'CodeArena Weekly Sprint #42',
-            status: 'ongoing',
-            startTime: 'Today, 18:00 UTC',
-            duration: '90 Minutes',
-            problemCount: 4,
-            participantsCount: 384,
-            description: 'Fast-paced algorithmic challenge focusing on arrays, two pointers, and greedy approaches. Great for sharpening your competitive problem-solving reflexes.',
-            rules: [
-                'Language: Java (OpenJDK 17)',
-                '4 canonical problems ranging from Easy to Hard',
-                'ICPC-style penalty scoring: 20 minutes added for each failed submission',
-                'Plagiarism detection and automated evaluation apply'
-            ]
-        },
-        {
-            id: 'java-masters-2026',
-            title: 'Java Algorithmic Masters 2026',
-            status: 'upcoming',
-            startTime: 'Saturday, Nov 15, 2026 · 14:00 UTC',
-            duration: '120 Minutes',
-            problemCount: 5,
-            participantsCount: 1240,
-            description: 'Premier national competitive coding tournament. Test your mastery of graph algorithms, dynamic programming, and advanced tree data structures.',
-            rules: [
-                'Language: Java (OpenJDK 17)',
-                'Individual competition; external code libraries prohibited',
-                'Partial scoring enabled on subtasks',
-                'Digital achievement certificates awarded to top 10%'
-            ]
-        },
-        {
-            id: 'biweekly-speed-18',
-            title: 'Biweekly Speed Arena #18',
-            status: 'upcoming',
-            startTime: 'Wednesday, Nov 19, 2026 · 19:30 UTC',
-            duration: '60 Minutes',
-            problemCount: 3,
-            participantsCount: 512,
-            description: 'Speed-focused contest designed for rapid prototyping and clean coding under time pressure. Emphasizes string manipulation and binary search.',
-            rules: [
-                'Language: Java (OpenJDK 17)',
-                '3 problems: 1 Easy, 1 Medium, 1 Hard',
-                'Fastest correct submission wins ties',
-                'Hidden test cases verified on submission'
-            ]
-        },
-        {
-            id: 'freshman-challenge-1',
-            title: 'CodeArena Freshman Invitational',
-            status: 'past',
-            startTime: 'Completed · Oct 28, 2026',
-            duration: '90 Minutes',
-            problemCount: 4,
-            participantsCount: 890,
-            description: 'Introductory contest aimed at students learning core data structures. Practice with these problems in virtual contest mode anytime.',
-            rules: [
-                'Archived for virtual practice',
-                'Problems accessible in problem catalogue',
-                'Solution writeups available for review'
-            ]
-        },
-        {
-            id: 'dp-open-2026',
-            title: 'Dynamic Programming Grand Prix',
-            status: 'past',
-            startTime: 'Completed · Oct 14, 2026',
-            duration: '120 Minutes',
-            problemCount: 4,
-            participantsCount: 710,
-            description: 'Specialized championship concentrating exclusively on 1D/2D memoization, knapsack variants, and interval dynamic programming.',
-            rules: [
-                'Archived for virtual practice',
-                'Standard OpenJDK 17 execution'
-            ]
-        }
-    ];
-
     // State
     const state = {
+        contests: [],
+        loadError: null,
         selectedTab: 'all',
-        searchQuery: '',
-        registeredContests: []
+        searchQuery: ''
     };
 
     // DOM Elements Cache
     let dom = {};
 
-    function init() {
+    async function init() {
         cacheElements();
         bindEvents();
-        loadRegistrations();
+        await loadContests();
         renderContests();
+        document.addEventListener('codearena:auth-changed', async function () {
+            await loadContests();
+            renderContests();
+        });
     }
 
     function cacheElements() {
@@ -114,6 +36,8 @@
             searchInput: document.getElementById('contestSearchInput'),
             clearSearchBtn: document.getElementById('clearContestSearch'),
             tabs: document.querySelectorAll('.contest-tab-btn'),
+            statActive: document.getElementById('statContestsActive'),
+            statUpcoming: document.getElementById('statContestsUpcoming'),
             modalOverlay: document.getElementById('contestModalOverlay'),
             modalTitle: document.getElementById('modalContestTitle'),
             modalDesc: document.getElementById('modalContestDesc'),
@@ -121,8 +45,10 @@
             modalDuration: document.getElementById('modalContestDuration'),
             modalProblems: document.getElementById('modalContestProblems'),
             modalTime: document.getElementById('modalContestTime'),
+            modalExtra: document.getElementById('modalContestDetailsExtra'),
             modalRegisterBtn: document.getElementById('modalRegisterBtn'),
-            closeModalBtn: document.getElementById('closeContestModalBtn')
+            closeModalBtn: document.getElementById('closeContestModalBtn'),
+            closeModalFooterBtn: document.getElementById('closeContestModalFooterBtn')
         };
     }
 
@@ -160,6 +86,9 @@
         if (dom.closeModalBtn) {
             dom.closeModalBtn.addEventListener('click', closeModal);
         }
+        if (dom.closeModalFooterBtn) {
+            dom.closeModalFooterBtn.addEventListener('click', closeModal);
+        }
 
         if (dom.modalOverlay) {
             dom.modalOverlay.addEventListener('click', function (e) {
@@ -174,31 +103,94 @@
         });
     }
 
-    function loadRegistrations() {
+    async function loadContests() {
+        if (!window.CodeArenaAPI || !window.CodeArenaAPI.contestService) {
+            state.loadError = 'Contest service is unavailable.';
+            state.contests = [];
+            return;
+        }
         try {
-            const raw = sessionStorage.getItem(REGISTRATION_STORAGE_KEY);
-            if (raw) state.registeredContests = JSON.parse(raw);
-        } catch (e) {
-            state.registeredContests = [];
+            if (window.CodeArenaAPI.authService && typeof window.CodeArenaAPI.authService.getCurrentUser === 'function') {
+                await window.CodeArenaAPI.authService.getCurrentUser().catch(() => null);
+            }
+            const res = await window.CodeArenaAPI.contestService.list();
+            if (res && res.success && Array.isArray(res.data)) {
+                state.contests = res.data;
+                state.loadError = null;
+            } else {
+                state.contests = [];
+                state.loadError = (res && res.message) || 'Unable to load contests from server.';
+            }
+        } catch (err) {
+            state.contests = [];
+            state.loadError = 'Unable to connect to the contests server.';
+        }
+
+        if (dom.statActive) {
+            dom.statActive.textContent = String(state.contests.filter(c => c.status === 'ongoing').length);
+        }
+        if (dom.statUpcoming) {
+            dom.statUpcoming.textContent = String(state.contests.filter(c => c.status === 'upcoming').length);
         }
     }
 
-    function saveRegistrations() {
+    function formatScheduleTime(raw) {
+        if (!raw) return 'TBD';
+        const d = new Date(String(raw).replace(' ', 'T'));
+        if (isNaN(d.getTime())) return String(raw);
+        return d.toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    async function toggleRegistration(contest) {
+        if (!contest) return;
+        const isAuthed = Boolean(window.CodeArenaAPI && window.CodeArenaAPI.authService && window.CodeArenaAPI.authService.isAuthenticated());
+        if (!isAuthed) {
+            if (window.CodeArenaToast) window.CodeArenaToast.info('Log in to register for CodeArena contests.');
+            if (window.CodeArenaAuthModal && typeof window.CodeArenaAuthModal.open === 'function') {
+                window.CodeArenaAuthModal.open('login');
+            }
+            return;
+        }
+        const slug = contest.slug || contest.id;
         try {
-            sessionStorage.setItem(REGISTRATION_STORAGE_KEY, JSON.stringify(state.registeredContests));
-        } catch (e) {}
+            const res = contest.isRegistered
+                ? await window.CodeArenaAPI.contestService.unregister(slug)
+                : await window.CodeArenaAPI.contestService.register(slug);
+            if (res && res.success) {
+                if (window.CodeArenaToast) {
+                    window.CodeArenaToast.success(contest.isRegistered ? `Unregistered from ${contest.title}` : `Registered for ${contest.title}!`);
+                }
+                await loadContests();
+                renderContests();
+                return true;
+            } else {
+                if (window.CodeArenaToast) window.CodeArenaToast.error((res && res.message) || 'Registration update failed.');
+            }
+        } catch (err) {
+            if (window.CodeArenaToast) window.CodeArenaToast.error('Server error updating registration.');
+        }
+        return false;
     }
 
     function renderContests() {
         if (!dom.container) return;
 
-        let filtered = CONTESTS_DATA.filter(c => {
+        if (state.loadError) {
+            dom.container.style.display = 'none';
+            if (dom.emptyState) {
+                dom.emptyState.style.display = 'block';
+                dom.emptyState.innerHTML = `<h3 class="feature-empty-title">Contests Unavailable</h3><p class="feature-empty-desc">${escapeHtml(state.loadError)}</p>`;
+            }
+            return;
+        }
+
+        let filtered = state.contests.filter(c => {
             if (state.selectedTab !== 'all' && c.status !== state.selectedTab) {
                 return false;
             }
             if (state.searchQuery) {
-                const titleMatch = c.title.toLowerCase().includes(state.searchQuery);
-                const descMatch = c.description.toLowerCase().includes(state.searchQuery);
+                const titleMatch = (c.title || '').toLowerCase().includes(state.searchQuery);
+                const descMatch = (c.description || '').toLowerCase().includes(state.searchQuery);
                 return titleMatch || descMatch;
             }
             return true;
@@ -214,16 +206,19 @@
         if (dom.emptyState) dom.emptyState.style.display = 'none';
 
         dom.container.innerHTML = filtered.map(c => {
-            const isRegistered = state.registeredContests.includes(c.id);
+            const slug = c.slug || c.id;
+            const isRegistered = Boolean(c.isRegistered);
             const statusClass = c.status === 'ongoing' ? 'ongoing' : (c.status === 'upcoming' ? 'upcoming' : 'past');
             const statusLabel = c.status === 'ongoing' ? '● Live Now' : (c.status === 'upcoming' ? 'Upcoming' : 'Past Contest');
+            const firstProblemSlug = Array.isArray(c.problems) && c.problems.length > 0 ? (c.problems[0].slug || c.problems[0].problemId) : null;
+            const arenaHref = firstProblemSlug ? `problem.html?id=${encodeURIComponent(firstProblemSlug)}` : 'problems.html';
 
             return `
-                <div class="contest-card" id="contest-${c.id}">
+                <div class="contest-card" id="contest-${escapeHtml(slug)}">
                     <div>
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                             <span class="contest-status-badge ${statusClass}">${statusLabel}</span>
-                            <span style="font-size: 0.76rem; color: var(--color-text-muted);">${c.participantsCount} participants</span>
+                            <span style="font-size: 0.76rem; color: var(--color-text-muted);">${c.participantsCount || 0} participants</span>
                         </div>
                         <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--color-text-primary); margin: 0 0 6px 0;">
                             ${escapeHtml(c.title)}
@@ -237,28 +232,28 @@
                         <div class="contest-meta-grid">
                             <div class="contest-meta-item">
                                 <span class="meta-label">Schedule</span>
-                                <span class="meta-value">${escapeHtml(c.startTime)}</span>
+                                <span class="meta-value">${escapeHtml(formatScheduleTime(c.startTime))}</span>
                             </div>
                             <div class="contest-meta-item">
                                 <span class="meta-label">Duration</span>
-                                <span class="meta-value">${escapeHtml(c.duration)}</span>
+                                <span class="meta-value">${escapeHtml(c.duration || '90 Minutes')}</span>
                             </div>
                         </div>
 
                         <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px;">
-                            <button type="button" class="secondary-header-btn btn-view-rules" data-id="${c.id}" style="font-size: 0.8rem;">
-                                Rules & Details
+                            <button type="button" class="secondary-header-btn btn-view-rules" data-id="${escapeHtml(slug)}" style="font-size: 0.8rem;">
+                                Details &amp; Leaderboard
                             </button>
                             ${c.status === 'upcoming' ? `
-                                <button type="button" class="prob-btn-solve btn-toggle-reg" data-id="${c.id}" style="background-color: ${isRegistered ? '#16A34A' : 'var(--color-primary)'};">
-                                    ${isRegistered ? '✓ Registered' : 'Register (Preview)'}
+                                <button type="button" class="prob-btn-solve btn-toggle-reg" data-id="${escapeHtml(slug)}" style="background-color: ${isRegistered ? '#16A34A' : 'var(--color-primary)'};">
+                                    ${isRegistered ? '✓ Registered' : 'Register'}
                                 </button>
                             ` : (c.status === 'ongoing' ? `
-                                <a href="problems.html" class="prob-btn-solve" style="background-color: #22C55E;">
+                                <a href="${arenaHref}" class="prob-btn-solve" style="background-color: #22C55E;">
                                     Enter Arena <span aria-hidden="true">→</span>
                                 </a>
                             ` : `
-                                <a href="problems.html" class="secondary-header-btn" style="font-size: 0.8rem;">
+                                <a href="${arenaHref}" class="secondary-header-btn" style="font-size: 0.8rem;">
                                     Virtual Practice
                                 </a>
                             `)}
@@ -268,65 +263,51 @@
             `;
         }).join('');
 
-        // Bind Rules button
+        // Bind Details & Leaderboard button
         dom.container.querySelectorAll('.btn-view-rules').forEach(btn => {
             btn.addEventListener('click', function () {
-                const id = this.getAttribute('data-id');
-                const contest = CONTESTS_DATA.find(c => c.id === id);
+                const slug = this.getAttribute('data-id');
+                const contest = state.contests.find(c => (c.slug || c.id) === slug);
                 if (contest) openModal(contest);
             });
         });
 
         // Bind Register button
         dom.container.querySelectorAll('.btn-toggle-reg').forEach(btn => {
-            btn.addEventListener('click', function () {
-                const id = this.getAttribute('data-id');
-                const contestObj = CONTESTS_DATA.find(item => item.id === id);
-                const title = contestObj ? contestObj.title : 'Contest';
-                if (state.registeredContests.includes(id)) {
-                    state.registeredContests = state.registeredContests.filter(cid => cid !== id);
-                    if (window.CodeArenaToast) {
-                        window.CodeArenaToast.info(`Unregistered from ${title}`);
-                    }
-                } else {
-                    state.registeredContests.push(id);
-                    if (window.CodeArenaToast) {
-                        window.CodeArenaToast.success(`Simulated preview registration confirmed for ${title}!`);
-                    }
-                }
-                saveRegistrations();
-                renderContests();
+            btn.addEventListener('click', async function () {
+                const slug = this.getAttribute('data-id');
+                const contest = state.contests.find(c => (c.slug || c.id) === slug);
+                await toggleRegistration(contest);
             });
         });
     }
 
-    function openModal(contest) {
+    async function openModal(contest) {
         if (!dom.modalOverlay) return;
-        const isRegistered = state.registeredContests.includes(contest.id);
+        const slug = contest.slug || contest.id;
 
         if (dom.modalTitle) dom.modalTitle.textContent = contest.title;
         if (dom.modalDesc) dom.modalDesc.textContent = contest.description;
-        if (dom.modalTime) dom.modalTime.textContent = contest.startTime;
-        if (dom.modalDuration) dom.modalDuration.textContent = contest.duration;
-        if (dom.modalProblems) dom.modalProblems.textContent = `${contest.problemCount} Java Problems`;
+        if (dom.modalTime) dom.modalTime.textContent = formatScheduleTime(contest.startTime);
+        if (dom.modalDuration) dom.modalDuration.textContent = contest.duration || '90 Minutes';
+        if (dom.modalProblems) dom.modalProblems.textContent = `${contest.problemCount || 0} Java Problems`;
+        if (dom.modalExtra) dom.modalExtra.innerHTML = '<div style="font-size: 0.8rem; color: var(--color-text-muted);">Loading contest problems & leaderboard...</div>';
 
+        const rules = Array.isArray(contest.rules) ? contest.rules : [];
         if (dom.modalRules) {
-            dom.modalRules.innerHTML = contest.rules.map(r => `<li>${escapeHtml(r)}</li>`).join('');
+            dom.modalRules.innerHTML = rules.map(r => `<li>${escapeHtml(r)}</li>`).join('');
         }
 
         if (dom.modalRegisterBtn) {
-            if (contest.status === 'upcoming') {
+            if (contest.status === 'upcoming' || contest.status === 'ongoing') {
                 dom.modalRegisterBtn.style.display = 'inline-flex';
-                dom.modalRegisterBtn.textContent = isRegistered ? '✓ Registered (Preview)' : 'Register (Preview)';
-                dom.modalRegisterBtn.onclick = function () {
-                    if (state.registeredContests.includes(contest.id)) {
-                        state.registeredContests = state.registeredContests.filter(cid => cid !== contest.id);
-                    } else {
-                        state.registeredContests.push(contest.id);
+                dom.modalRegisterBtn.textContent = contest.isRegistered ? '✓ Registered' : 'Register';
+                dom.modalRegisterBtn.onclick = async function () {
+                    const updated = await toggleRegistration(contest);
+                    if (updated) {
+                        const fresh = state.contests.find(c => (c.slug || c.id) === slug);
+                        if (fresh) openModal(fresh);
                     }
-                    saveRegistrations();
-                    openModal(contest);
-                    renderContests();
                 };
             } else {
                 dom.modalRegisterBtn.style.display = 'none';
@@ -334,6 +315,42 @@
         }
 
         dom.modalOverlay.style.display = 'flex';
+
+        try {
+            const detailRes = await window.CodeArenaAPI.contestService.getDetail(slug);
+            if (detailRes && detailRes.success && detailRes.data && dom.modalExtra) {
+                const detail = detailRes.data;
+                const probs = Array.isArray(detail.problems) ? detail.problems : [];
+                const lb = Array.isArray(detail.leaderboard) ? detail.leaderboard : [];
+                let extraHtml = '';
+                if (probs.length > 0) {
+                    extraHtml += `<h4 style="font-size: 0.86rem; font-weight: 700; margin: 0 0 6px 0;">Contest Problems</h4>`;
+                    extraHtml += `<div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;">`;
+                    probs.forEach(p => {
+                        const target = p.slug || p.problemId;
+                        extraHtml += `<a href="problem.html?id=${encodeURIComponent(target)}" style="display: flex; justify-content: space-between; font-size: 0.8rem; padding: 6px 10px; border: 1px solid var(--color-border); border-radius: 6px; color: var(--color-text-primary); text-decoration: none;">
+                            <span>${escapeHtml(p.label ? p.label + '. ' : '')}${escapeHtml(p.title || target)}</span>
+                            <span style="color: var(--color-text-muted);">${escapeHtml(p.difficulty || '')}${p.points ? ' · ' + p.points + ' pts' : ''}</span>
+                        </a>`;
+                    });
+                    extraHtml += `</div>`;
+                }
+                extraHtml += `<h4 style="font-size: 0.86rem; font-weight: 700; margin: 0 0 6px 0;">Leaderboard</h4>`;
+                if (lb.length === 0) {
+                    extraHtml += `<p style="font-size: 0.78rem; color: var(--color-text-muted); margin: 0;">No ranked submissions recorded for this contest yet.</p>`;
+                } else {
+                    extraHtml += `<div style="display: flex; flex-direction: column; gap: 4px;">`;
+                    lb.slice(0, 10).forEach((row, i) => {
+                        extraHtml += `<div style="display: flex; justify-content: space-between; font-size: 0.78rem; padding: 4px 8px; background: rgba(255,255,255,0.03); border-radius: 4px;">
+                            <span>#${i + 1} ${escapeHtml(row.username || row.fullName || 'Learner')}</span>
+                            <span>${row.totalScore || 0} pts · ${row.solvedCount || 0} solved</span>
+                        </div>`;
+                    });
+                    extraHtml += `</div>`;
+                }
+                dom.modalExtra.innerHTML = extraHtml;
+            }
+        } catch (e) { }
     }
 
     function closeModal() {

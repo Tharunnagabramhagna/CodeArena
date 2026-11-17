@@ -797,10 +797,29 @@ a.btn-secondary:hover {
 /* Tablet (max-width: 1024px) */
 @media (max-width: 1024px) {
   .hero {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--spacing-xl);
     text-align: center;
     padding: 3.5rem var(--spacing-lg) 2.5rem;
+  }
+
+  .hero-content,
+  .hero-visual {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .code-editor-mock {
+    text-align: left;
+    max-width: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .editor-code {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .hero-content {
@@ -904,9 +923,64 @@ a.btn-secondary:hover {
 
   .code-editor-mock {
     font-size: 0.78rem;
+    max-width: 100%;
+    overflow: hidden;
   }
 
   .editor-code {
     padding: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Mobile Small (max-width: 480px) */
+@media (max-width: 480px) {
+  .hero {
+    padding: 2rem 14px 1.75rem;
+  }
+
+  .hero-title {
+    font-size: clamp(1.65rem, 7vw, 2rem);
+    line-height: 1.18;
+  }
+
+  .hero-description {
+    font-size: 0.94rem;
+  }
+
+  .section-title,
+  .cta-title {
+    font-size: clamp(1.35rem, 6vw, 1.75rem);
+  }
+
+  .cta-content {
+    padding: 24px 16px;
+  }
+
+  .feature-card,
+  .problem-card,
+  .why-card,
+  .step-card {
+    padding: 18px 16px;
+  }
+
+  .hero-actions .btn,
+  .cta-actions .btn {
+    min-height: 44px;
+  }
+}
+
+/* Large Desktops (min-width: 1441px) */
+@media (min-width: 1441px) {
+  .hero,
+  .features-section,
+  .how-it-works-section,
+  .popular-problems-section,
+  .why-section,
+  .cta-section,
+  .footer-container {
+    max-width: 1360px;
+    margin-inline: auto;
   }
 }

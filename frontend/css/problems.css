@@ -492,7 +492,7 @@
 }
 
 .col-title {
-  min-width: 300px;
+  min-width: min(300px, 100%);
 }
 
 .col-diff {
@@ -948,6 +948,36 @@
   color: var(--color-text-muted);
 }
 
+/* Mobile polish for catalogue table, header & footer */
+@media (max-width: 640px) {
+  .col-title {
+    min-width: 140px;
+  }
+
+  .catalogue-footer-nav {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .problems-header {
+    padding: 0 10px;
+    gap: 6px;
+  }
+
+  .problems-breadcrumbs {
+    display: none;
+  }
+
+  .problems-header-btn {
+    min-height: 36px;
+    min-width: 36px;
+  }
+
+  .catalogue-footer {
+    padding-bottom: max(18px, env(safe-area-inset-bottom));
+  }
 }
 
 
@@ -998,7 +1028,7 @@
 
 .recently-viewed-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
   gap: 12px;
 }
 

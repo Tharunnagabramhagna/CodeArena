@@ -227,68 +227,13 @@
          * Structural and preview validation for beginner Java challenges.
          * Explicitly communicates client-side preview execution.
          */
-        validateCodePreview(problem, userCode, customInput = null) {
-            if (!userCode || !userCode.trim()) {
-                return {
-                    success: false,
-                    passed: false,
-                    message: 'Source code cannot be empty. Write your Java solution and click Run.',
-                    isStructuralPreview: true,
-                    results: []
-                };
-            }
-
-            const code = userCode.trim();
-
-            // 1. Basic Java Structural Syntax Checks
-            const hasClass = /class\s+[A-Za-z0-9_]+/.test(code);
-            const hasMainOrMethod = /(public\s+static\s+void\s+main|public\s+[A-Za-z0-9_<>[\]]+\s+[A-Za-z0-9_]+)/.test(code);
-
-            if (!hasClass) {
-                return {
-                    success: false,
-                    passed: false,
-                    message: 'Compilation Preview Warning: Class declaration not detected. Ensure your code defines a public class Main or relevant class.',
-                    isStructuralPreview: true,
-                    results: []
-                };
-            }
-
-            // Balanced brackets check
-            let openCurlies = (code.match(/\{/g) || []).length;
-            let closeCurlies = (code.match(/\}/g) || []).length;
-            if (openCurlies !== closeCurlies) {
-                return {
-                    success: false,
-                    passed: false,
-                    message: `Syntax Warning: Mismatched curly braces detected (${openCurlies} '{' vs ${closeCurlies} '}'). Check your class and method closures.`,
-                    isStructuralPreview: true,
-                    results: []
-                };
-            }
-
-            // 2. Evaluate against preview test cases
-            const testCases = problem.previewTestCases || [
-                { input: problem.sampleInput || '', expectedOutput: problem.sampleOutput || '' }
-            ];
-
-            const results = testCases.map((tc, idx) => {
-                return {
-                    caseIndex: idx + 1,
-                    input: tc.input,
-                    expectedOutput: tc.expectedOutput,
-                    actualOutput: tc.expectedOutput, // Frontend simulation
-                    passed: true,
-                    status: 'Passed (Preview Check)'
-                };
-            });
-
+        validateCodePreview() {
             return {
-                success: true,
-                passed: true,
-                message: 'All sample preview test cases passed (Client-side structural and pattern simulation).',
-                isStructuralPreview: true,
-                results
+                success: false,
+                passed: false,
+                message: 'Client-side preview execution is disabled. Use compilerService.runCode against the backend Java sandbox.',
+                isStructuralPreview: false,
+                results: []
             };
         }
     };

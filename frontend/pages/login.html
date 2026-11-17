@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log In — CodeArena</title>
+    <!-- Instant Forwarder to Canonical Modern Authentication Interface -->
+    <script>
+        (function() {
+            try {
+                var params = new URLSearchParams(window.location.search);
+                if (!params.has('auth')) {
+                    params.set('auth', 'login');
+                }
+                window.location.replace('dashboard.html?' + params.toString());
+            } catch (e) {
+                window.location.replace('dashboard.html?auth=login');
+            }
+        })();
+    </script>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="../assets/logo/codearena-favicon.png">
     <!-- Stylesheets -->
@@ -39,7 +53,7 @@
             <!-- Informative Notice Banner -->
             <div class="auth-notice" role="status">
                 <span class="notice-icon" aria-hidden="true">ℹ</span>
-                <span>Frontend Preview: Real account login will connect to the Java Servlet &amp; JDBC backend in the upcoming phase.</span>
+                <span>Sign in with your CodeArena email and password. Sessions use HTTP-only server cookies.</span>
             </div>
 
             <!-- Feedback Message Box -->

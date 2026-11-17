@@ -26,6 +26,41 @@
         observeThemeChanges();
         initResizeHandler();
         initCompilerSplitter();
+        checkSandboxHealth();
+    }
+
+    async function checkSandboxHealth() {
+        if (!window.CodeArenaAPI || !window.CodeArenaAPI.compilerService || !window.CodeArenaAPI.compilerService.getStatus) {
+            setStatus('error', 'API Client Unavailable');
+            return;
+        }
+        try {
+            const res = await window.CodeArenaAPI.compilerService.getStatus();
+            const tagEl = document.getElementById('compilerRuntimeTag');
+            const textEl = document.getElementById('compilerRuntimeText');
+            if (res && res.success && res.data && res.data.sandboxAvailable) {
+                setStatus('idle', 'OpenJDK Sandbox Ready');
+                if (tagEl) tagEl.textContent = 'OpenJDK Sandbox';
+                if (textEl) textEl.textContent = 'Isolated Docker container runtime ready (' + (res.data.compilerImage || 'OpenJDK') + ').';
+            } else if (res && res.success && res.data) {
+                setStatus('diagnostic', 'Sandbox Offline');
+                if (tagEl) tagEl.textContent = 'Sandbox Unavailable';
+                if (textEl) textEl.textContent = res.data.reason || 'Container sandbox is unavailable on this host. Host fallback is disabled for security.';
+            } else {
+                const apiBase = (window.CodeArenaAPI && window.CodeArenaAPI.config && window.CodeArenaAPI.config.baseURL) || '/api';
+                setStatus('error', 'Backend Offline');
+                if (tagEl) tagEl.textContent = 'Backend Unavailable';
+                if (textEl) textEl.textContent = ((res && res.message) ? res.message + ' ' : '')
+                    + 'Ensure CodeArena backend is running (target API: ' + apiBase + ') or open http://localhost:8080/pages/compiler.html.';
+            }
+        } catch (e) {
+            const apiBase = (window.CodeArenaAPI && window.CodeArenaAPI.config && window.CodeArenaAPI.config.baseURL) || '/api';
+            setStatus('error', 'Backend Offline');
+            const tagEl = document.getElementById('compilerRuntimeTag');
+            const textEl = document.getElementById('compilerRuntimeText');
+            if (tagEl) tagEl.textContent = 'Backend Unavailable';
+            if (textEl) textEl.textContent = 'Cannot reach backend at ' + apiBase + '. Start CodeArenaApplication on port 8080.';
+        }
     }
 
     /**
@@ -90,6 +125,26 @@
             btnConfirmReset: document.getElementById('btnConfirmReset'),
             shortcutsModalOverlay: document.getElementById('shortcutsModalOverlay'),
             btnCloseShortcuts: document.getElementById('btnCloseShortcuts'),
+            btnToolbarShortcuts: document.getElementById('btnToolbarShortcuts'),
+            shortcutsPlatformToggle: document.getElementById('shortcutsPlatformToggle'),
+            btnPlatformWin: document.getElementById('btnPlatformWin'),
+            btnPlatformMac: document.getElementById('btnPlatformMac'),
+            gotoLineModalOverlay: document.getElementById('gotoLineModalOverlay'),
+            gotoLineInput: document.getElementById('gotoLineInput'),
+            gotoLineMax: document.getElementById('gotoLineMax'),
+            btnCancelGotoLine: document.getElementById('btnCancelGotoLine'),
+            btnConfirmGotoLine: document.getElementById('btnConfirmGotoLine'),
+            compilerFindBar: document.getElementById('compilerFindBar'),
+            findInput: document.getElementById('findInput'),
+            findMatchCount: document.getElementById('findMatchCount'),
+            btnFindPrev: document.getElementById('btnFindPrev'),
+            btnFindNext: document.getElementById('btnFindNext'),
+            btnToggleReplace: document.getElementById('btnToggleReplace'),
+            btnCloseFind: document.getElementById('btnCloseFind'),
+            replaceRow: document.getElementById('replaceRow'),
+            replaceInput: document.getElementById('replaceInput'),
+            btnReplaceOne: document.getElementById('btnReplaceOne'),
+            btnReplaceAll: document.getElementById('btnReplaceAll'),
 
             // Toast
             compilerToast: document.getElementById('compilerToast')
@@ -112,7 +167,17 @@
     function initEditor() {
         let initialCode = getDefaultTemplate();
         try {
-            if (typeof window !== 'undefined' && window.sessionStorage) {
+            if (typeof localStorage !== 'undefined') {
+                const saved = localStorage.getItem('codearena_compiler_saved_code');
+                if (saved && saved.trim()) {
+                    initialCode = saved;
+                } else if (typeof window !== 'undefined' && window.sessionStorage) {
+                    const draft = window.sessionStorage.getItem('codearena_compiler_draft');
+                    if (draft && draft.trim()) {
+                        initialCode = draft;
+                    }
+                }
+            } else if (typeof window !== 'undefined' && window.sessionStorage) {
                 const draft = window.sessionStorage.getItem('codearena_compiler_draft');
                 if (draft && draft.trim()) {
                     initialCode = draft;
@@ -155,10 +220,91 @@
                             runCode();
                         },
                         'Ctrl-S': function () {
-                            showToast('Ready to run! Press Ctrl + Enter to execute.', 'info');
+                            saveCodeToLocalStorage();
                         },
                         'Cmd-S': function () {
-                            showToast('Ready to run! Press Cmd + Enter to execute.', 'info');
+                            saveCodeToLocalStorage();
+                        },
+                        'Ctrl-Z': function (cm) {
+                            cm.undo();
+                        },
+                        'Cmd-Z': function (cm) {
+                            cm.undo();
+                        },
+                        'Ctrl-Y': function (cm) {
+                            cm.redo();
+                        },
+                        'Ctrl-Shift-Z': function (cm) {
+                            cm.redo();
+                        },
+                        'Cmd-Shift-Z': function (cm) {
+                            cm.redo();
+                        },
+                        'Ctrl-A': function (cm) {
+                            cm.execCommand('selectAll');
+                        },
+                        'Cmd-A': function (cm) {
+                            cm.execCommand('selectAll');
+                        },
+                        'Ctrl-F': function () {
+                            openFindBar(false);
+                        },
+                        'Cmd-F': function () {
+                            openFindBar(false);
+                        },
+                        'Ctrl-H': function () {
+                            openFindBar(true);
+                        },
+                        'Cmd-H': function () {
+                            openFindBar(true);
+                        },
+                        'Ctrl-G': function () {
+                            openGotoLineModal();
+                        },
+                        'Cmd-G': function () {
+                            openGotoLineModal();
+                        },
+                        'Ctrl-/': function (cm) {
+                            toggleLineComment(cm);
+                        },
+                        'Cmd-/': function (cm) {
+                            toggleLineComment(cm);
+                        },
+                        'Ctrl-Space': function (cm) {
+                            triggerAutocomplete(cm);
+                        },
+                        'Tab': function (cm) {
+                            handleTabIndent(cm);
+                        },
+                        'Shift-Tab': function (cm) {
+                            handleShiftTabOutdent(cm);
+                        },
+                        'Ctrl-]': function (cm) {
+                            handleIndent(cm);
+                        },
+                        'Cmd-]': function (cm) {
+                            handleIndent(cm);
+                        },
+                        'Ctrl-[': function (cm) {
+                            handleOutdent(cm);
+                        },
+                        'Cmd-[': function (cm) {
+                            handleOutdent(cm);
+                        },
+                        'Home': 'goLineStartSmart',
+                        'End': 'goLineEnd',
+                        'Ctrl-Home': 'goDocStart',
+                        'Ctrl-End': 'goDocEnd',
+                        'Cmd-Up': 'goDocStart',
+                        'Cmd-Down': 'goDocEnd',
+                        'Alt-Up': function (cm) {
+                            moveLine(cm, -1);
+                        },
+                        'Alt-Down': function (cm) {
+                            moveLine(cm, 1);
+                        },
+                        'Esc': function () {
+                            closeActivePopups();
                         }
                     }
                 });
@@ -209,6 +355,9 @@
                 } else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                     e.preventDefault();
                     runCode();
+                } else if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+                    e.preventDefault();
+                    saveCodeToLocalStorage();
                 }
             });
         }
@@ -658,32 +807,25 @@
 
         if (btnCopyCode) {
             btnCopyCode.addEventListener('click', function () {
-                const code = codeEditor ? codeEditor.getValue() : '';
+                const code = getEditorCode();
                 if (!code || !code.trim()) {
                     showToast('Source code is empty.', 'warning');
                     return;
                 }
-                navigator.clipboard.writeText(code).then(function () {
-                    showToast('Source code copied to clipboard!', 'success');
-                }).catch(function () {
-                    showToast('Failed to copy to clipboard.', 'error');
-                });
+                copyToClipboard(code, 'Source code copied to clipboard!');
             });
         }
 
-        // Clear draft on confirm reset
         if (dom.btnConfirmReset) {
             dom.btnConfirmReset.addEventListener('click', function () {
                 try {
                     if (typeof window !== 'undefined' && window.sessionStorage) {
                         window.sessionStorage.removeItem('codearena_compiler_draft');
                     }
+                    if (typeof localStorage !== 'undefined') {
+                        localStorage.removeItem('codearena_compiler_saved_code');
+                    }
                 } catch (e) {}
-            });
-        }
-
-        if (dom.btnConfirmReset) {
-            dom.btnConfirmReset.addEventListener('click', function () {
                 setEditorCode(getDefaultTemplate());
                 closeResetModal();
                 showToast('Default Java template restored.', 'success');
@@ -738,7 +880,10 @@
             });
         }
 
-        // Shortcuts Modal
+        // Shortcuts Modals & Platform Toggle
+        if (dom.btnToolbarShortcuts) {
+            dom.btnToolbarShortcuts.addEventListener('click', openShortcutsModal);
+        }
         if (dom.btnShortcutsHelp) {
             dom.btnShortcutsHelp.addEventListener('click', openShortcutsModal);
         }
@@ -750,21 +895,107 @@
                 if (e.target === dom.shortcutsModalOverlay) closeShortcutsModal();
             });
         }
+        initShortcutsPlatformToggle();
+
+        // Go to Line Modal Handlers
+        if (dom.btnConfirmGotoLine) {
+            dom.btnConfirmGotoLine.addEventListener('click', confirmGotoLine);
+        }
+        if (dom.btnCancelGotoLine) {
+            dom.btnCancelGotoLine.addEventListener('click', closeGotoLineModal);
+        }
+        if (dom.gotoLineModalOverlay) {
+            dom.gotoLineModalOverlay.addEventListener('click', function (e) {
+                if (e.target === dom.gotoLineModalOverlay) closeGotoLineModal();
+            });
+        }
+        if (dom.gotoLineInput) {
+            dom.gotoLineInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    confirmGotoLine();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeGotoLineModal();
+                }
+            });
+        }
+
+        // Find & Replace Bar Handlers
+        if (dom.findInput) {
+            dom.findInput.addEventListener('input', function () {
+                executeFind(true);
+            });
+            dom.findInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (e.shiftKey) {
+                        findPrev();
+                    } else {
+                        findNext();
+                    }
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeFindBar();
+                }
+            });
+        }
+        if (dom.btnFindNext) {
+            dom.btnFindNext.addEventListener('click', findNext);
+        }
+        if (dom.btnFindPrev) {
+            dom.btnFindPrev.addEventListener('click', findPrev);
+        }
+        if (dom.btnToggleReplace) {
+            dom.btnToggleReplace.addEventListener('click', toggleReplaceRow);
+        }
+        if (dom.btnCloseFind) {
+            dom.btnCloseFind.addEventListener('click', closeFindBar);
+        }
+        if (dom.replaceInput) {
+            dom.replaceInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    replaceCurrent();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeFindBar();
+                }
+            });
+        }
+        if (dom.btnReplaceOne) {
+            dom.btnReplaceOne.addEventListener('click', replaceCurrent);
+        }
+        if (dom.btnReplaceAll) {
+            dom.btnReplaceAll.addEventListener('click', replaceAll);
+        }
 
         // Window-level Keyboard Shortcuts
         window.addEventListener('keydown', function (e) {
+            if (e.defaultPrevented) return;
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                 e.preventDefault();
                 runCode();
+            } else if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+                e.preventDefault();
+                saveCodeToLocalStorage();
+            } else if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'F')) {
+                e.preventDefault();
+                openFindBar(false);
+            } else if ((e.ctrlKey || e.metaKey) && (e.key === 'h' || e.key === 'H')) {
+                e.preventDefault();
+                openFindBar(true);
+            } else if ((e.ctrlKey || e.metaKey) && (e.key === 'g' || e.key === 'G')) {
+                e.preventDefault();
+                openGotoLineModal();
             } else if (e.key === 'Escape') {
-                closeResetModal();
-                closeShortcutsModal();
+                closeActivePopups();
             }
         });
     }
 
     /**
-     * Executes simulated preview via window.CodeArenaAPI.compilerService.
+     * Executes genuine compilation and container execution via window.CodeArenaAPI.compilerService.
      */
     async function runCode() {
         if (isRunning) return;
@@ -772,25 +1003,22 @@
         const sourceCode = getEditorCode();
         const stdin = dom.stdinTextarea ? dom.stdinTextarea.value : '';
 
-        // Validation: Empty source code
         if (!sourceCode || !sourceCode.trim()) {
             setStatus('diagnostic', 'Empty Code');
             switchTab('stderr');
-            renderStderr('Validation Notice: Source code cannot be empty. Enter Java code before running preview.', [
+            renderStderr('Validation Error: Source code cannot be empty.', [
                 { line: 1, column: 1, message: 'Source code cannot be empty.' }
             ]);
             showToast('Source code cannot be empty.', 'warning');
             return;
         }
 
-        // Begin Running State
         isRunning = true;
         setRunningState(true);
-        setStatus('running', 'Simulating Preview...');
+        setStatus('running', 'Compiling & Running...');
 
-        // Switch to Output Tab by default while simulating
         switchTab('stdout');
-        renderStdout('Compiling Main.java...\nExecuting client-side simulated preview...\n');
+        renderStdout('Compiling and executing inside isolated OpenJDK sandbox...\n');
 
         try {
             let result = null;
@@ -808,13 +1036,13 @@
                 };
             }
 
-            processExecutionResult(result, stdin);
+            processExecutionResult(result);
         } catch (err) {
-            console.error('[CodeArena Compiler] Preview execution failed:', err);
+            console.error('[CodeArena Compiler] Execution request failed:', err);
             setStatus('error', 'Execution Error');
             switchTab('stderr');
-            renderStderr(`An unexpected error occurred during preview: ${err.message || err}`, []);
-            showToast('Preview execution failed.', 'error');
+            renderStderr(`Unexpected request error: ${err.message || err}`, []);
+            showToast('Execution request failed.', 'error');
         } finally {
             isRunning = false;
             setRunningState(false);
@@ -822,49 +1050,74 @@
     }
 
     /**
-     * Processes and renders the execution response honestly as simulated preview.
+     * Processes genuine OpenJDK execution result or honest sandbox/network error.
      */
-    function processExecutionResult(result, stdin) {
+    function processExecutionResult(result) {
         if (!result) return;
 
-        if (result.success && result.data) {
-            const data = result.data;
+        const data = result.data || {};
 
-            // Handle client-side structural / syntactic checks
-            if (data.status === 'COMPILE_ERROR') {
-                setStatus('diagnostic', 'Structural Syntax Notice');
-                switchTab('stderr');
-                renderStderr(data.stderr || 'Structural check notice.', data.compileErrors || []);
-                renderStdoutEmpty();
-                renderStatsBar('diagnostic');
-                showToast('Structural syntax check flagged an issue. View Diagnostics.', 'warning');
-                return;
-            }
-
-            // Successful Preview Execution (Honest labels, no fake runtime/memory/exit code)
-            setStatus('success', 'Preview Completed');
-            switchTab('stdout');
-
-            let stdoutDisplay = data.stdout || '(Program completed with no output to stdout)';
-            // Ensure any stdin in stdout is explicitly identified as simulated
-            if (stdin && stdin.trim() && stdoutDisplay.includes('[Standard Input Received]')) {
-                stdoutDisplay = stdoutDisplay.replace(/\[Standard Input Received\]/g, '[Simulated Standard Input]');
-            }
-
-            renderStdout(stdoutDisplay);
-            renderStatsBar('preview');
-            clearStderr();
-            showToast('Simulated preview finished.', 'success');
-        } else {
-            // Service level error (e.g. 400 Bad Request)
-            setStatus('error', 'Execution Error');
+        if (!result.success) {
+            const isSandboxDown = data.status === 'SANDBOX_UNAVAILABLE' || result.status === 503;
+            setStatus('error', isSandboxDown ? 'Sandbox Unavailable' : 'Execution Error');
             switchTab('stderr');
-            const errMsg = result.message || 'Preview execution request failed.';
-            renderStderr(errMsg, []);
+            const errMsg = data.stderr || result.message || 'Backend code execution failed.';
+            renderStderr(errMsg, data.compileErrors || []);
             renderStdoutEmpty();
-            hideStatsBar();
-            showToast(errMsg, 'error');
+            if (isSandboxDown) {
+                renderStatsBar({ status: 'Sandbox Unavailable', timeMs: 0, exitCode: -1, isError: true });
+            } else {
+                hideStatsBar();
+            }
+            showToast(result.message || 'Execution failed.', 'error');
+            return;
         }
+
+        if (data.status === 'COMPILATION_ERROR' || data.status === 'COMPILE_ERROR') {
+            setStatus('diagnostic', 'Compilation Error');
+            switchTab('stderr');
+            renderStderr(data.stderr || 'javac compilation failed.', data.compileErrors || []);
+            renderStdoutEmpty();
+            renderStatsBar({ status: 'Compilation Error', timeMs: data.executionTimeMs || 0, exitCode: data.exitCode ?? 1, isError: true });
+            showToast('Compilation failed. View Diagnostics.', 'warning');
+            return;
+        }
+
+        if (data.status === 'TIME_LIMIT_EXCEEDED') {
+            setStatus('error', 'Time Limit Exceeded');
+            switchTab('stderr');
+            renderStderr(data.stderr || 'Program exceeded server execution time limit.', []);
+            renderStdout(data.stdout || '(Timed out before producing complete stdout)');
+            renderStatsBar({ status: 'Time Limit Exceeded', timeMs: data.executionTimeMs || 0, exitCode: data.exitCode ?? 124, isError: true });
+            showToast('Execution timed out.', 'error');
+            return;
+        }
+
+        if (data.status === 'RUNTIME_ERROR' || data.status === 'OUTPUT_LIMIT_EXCEEDED' || data.status === 'EXECUTION_ERROR') {
+            setStatus('error', data.status === 'OUTPUT_LIMIT_EXCEEDED' ? 'Output Limit Exceeded' : 'Runtime Error');
+            switchTab('stderr');
+            renderStderr(data.stderr || 'Program terminated with a runtime error.', []);
+            renderStdout(data.stdout || '');
+            renderStatsBar({ status: data.status, timeMs: data.executionTimeMs || 0, exitCode: data.exitCode ?? 1, isError: true });
+            showToast('Runtime error occurred.', 'error');
+            return;
+        }
+
+        setStatus('success', 'Executed Successfully');
+        switchTab('stdout');
+        renderStdout(data.stdout && data.stdout.length > 0 ? data.stdout : '(Program completed with no output to stdout)');
+        renderStatsBar({
+            status: 'Success',
+            timeMs: data.executionTimeMs || 0,
+            exitCode: data.exitCode ?? 0,
+            isError: false
+        });
+        if (data.stderr && data.stderr.trim()) {
+            renderStderr(data.stderr, []);
+        } else {
+            clearStderr();
+        }
+        showToast('Compilation and execution succeeded.', 'success');
     }
 
     /**
@@ -938,17 +1191,18 @@
     /**
      * Renders the honest preview metadata strip (no misleading milliseconds or memory usage).
      */
-    function renderStatsBar(mode) {
+    function renderStatsBar(meta) {
         if (!dom.terminalStatsBar) return;
         dom.terminalStatsBar.style.display = 'flex';
 
-        if (dom.statStatus) {
-            if (mode === 'preview') {
-                dom.statStatus.textContent = 'Preview Completed';
-                dom.statStatus.className = 'stat-badge-preview';
-            } else if (mode === 'diagnostic') {
-                dom.statStatus.textContent = 'Diagnostic Notice';
-                dom.statStatus.className = 'stat-badge-diagnostic';
+        const timeEl = document.getElementById('statTime');
+        const exitEl = document.getElementById('statExitCode');
+        if (typeof meta === 'object' && meta !== null) {
+            if (timeEl) timeEl.textContent = `${meta.timeMs ?? 0} ms`;
+            if (exitEl) exitEl.textContent = String(meta.exitCode ?? 0);
+            if (dom.statStatus) {
+                dom.statStatus.textContent = meta.status || 'Completed';
+                dom.statStatus.className = meta.isError ? 'stat-badge-diagnostic' : 'stat-badge-preview';
             }
         }
     }
@@ -963,7 +1217,7 @@
     }
 
     /**
-     * Renders errors in the stderr panel and diagnostics list clearly labeled as structural checks.
+     * Renders compiler diagnostics or runtime stderr output.
      */
     function renderStderr(stderrText, compileErrors) {
         if (dom.stderrTerminal) {
@@ -979,9 +1233,9 @@
                     card.className = 'compile-error-card';
                     card.innerHTML = `
                         <div class="compile-error-title">
-                            <span>⚠ Structural Syntax Check (Preview) · Line ${err.line || 1}${err.column ? `, Col ${err.column}` : ''}</span>
+                            <span>⚠ javac Diagnostic · Line ${err.line || 1}${err.column ? `, Col ${err.column}` : ''}</span>
                         </div>
-                        <p class="compile-error-message">${escapeHtml(err.message || 'Structural preview diagnostic notice')}</p>
+                        <p class="compile-error-message">${escapeHtml(err.message || 'Compilation error')}</p>
                     `;
                     dom.diagnosticsErrorList.appendChild(card);
                 });
@@ -1005,7 +1259,7 @@
      */
     function clearStderr() {
         if (dom.stderrTerminal) {
-            dom.stderrTerminal.innerHTML = '<span class="terminal-empty">No structural issues detected in client preview. (Full Java compiler checks connect in Phase 4).</span>';
+            dom.stderrTerminal.innerHTML = '<span class="terminal-empty">No compilation or runtime errors.</span>';
         }
         if (dom.diagnosticsErrorList) {
             dom.diagnosticsErrorList.innerHTML = '';
@@ -1016,7 +1270,7 @@
     }
 
     /**
-     * Clears all console terminals, stats, and resets status to Ready.
+     * Clears all console terminals, stats, and resets status.
      */
     function clearConsole() {
         if (dom.stdoutTerminal) {
@@ -1024,7 +1278,7 @@
         }
         clearStderr();
         hideStatsBar();
-        setStatus('idle', 'Ready · Preview Mode');
+        setStatus('idle', 'Ready');
         showToast('Console output cleared.', 'info');
     }
 
@@ -1114,6 +1368,605 @@
         toastTimeout = setTimeout(function () {
             dom.compilerToast.classList.remove('show');
         }, 3000);
+    }
+
+    /**
+     * Persists current editor source code to localStorage.
+     */
+    function saveCodeToLocalStorage() {
+        const code = getEditorCode();
+        try {
+            if (typeof localStorage !== 'undefined') {
+                localStorage.setItem('codearena_compiler_saved_code', code);
+            }
+            if (typeof window !== 'undefined' && window.sessionStorage) {
+                window.sessionStorage.setItem('codearena_compiler_draft', code);
+            }
+            showToast('Code saved to browser storage.', 'success');
+        } catch (e) {
+            console.error('[CodeArena Compiler] Error saving to localStorage:', e);
+            showToast('Failed to save code to local storage.', 'error');
+        }
+    }
+
+    /**
+     * Handles Tab indentation (indents selection or inserts 4 spaces).
+     */
+    function handleTabIndent(cm) {
+        if (!cm) return;
+        if (cm.somethingSelected()) {
+            cm.indentSelection('add');
+        } else {
+            cm.replaceSelection('    ', 'end');
+        }
+    }
+
+    /**
+     * Handles Shift-Tab outdent.
+     */
+    function handleShiftTabOutdent(cm) {
+        if (!cm) return;
+        cm.indentSelection('subtract');
+    }
+
+    /**
+     * Indents current line or selection.
+     */
+    function handleIndent(cm) {
+        if (!cm) return;
+        cm.indentSelection('add');
+    }
+
+    /**
+     * Outdents current line or selection.
+     */
+    function handleOutdent(cm) {
+        if (!cm) return;
+        cm.indentSelection('subtract');
+    }
+
+    /**
+     * Toggles line comments (//) for current line or multi-line selection.
+     */
+    function toggleLineComment(cm) {
+        if (!cm) return;
+        cm.operation(function () {
+            const from = cm.getCursor('from');
+            const to = cm.getCursor('to');
+            let startLine = from.line;
+            let endLine = to.line;
+            if (to.ch === 0 && endLine > startLine) {
+                endLine--;
+            }
+
+            // Check if all non-empty lines are commented
+            let allCommented = true;
+            let hasNonEmpty = false;
+            for (let l = startLine; l <= endLine; l++) {
+                const lineText = cm.getLine(l);
+                if (lineText.trim().length === 0) continue;
+                hasNonEmpty = true;
+                if (!lineText.trim().startsWith('//')) {
+                    allCommented = false;
+                    break;
+                }
+            }
+
+            if (!hasNonEmpty) return;
+
+            for (let l = startLine; l <= endLine; l++) {
+                const lineText = cm.getLine(l);
+                if (lineText.trim().length === 0) continue;
+                if (allCommented) {
+                    const commentIdx = lineText.indexOf('//');
+                    if (commentIdx !== -1) {
+                        const hasSpace = lineText.charAt(commentIdx + 2) === ' ';
+                        const len = hasSpace ? 3 : 2;
+                        cm.replaceRange('', { line: l, ch: commentIdx }, { line: l, ch: commentIdx + len });
+                    }
+                } else {
+                    const match = lineText.match(/^\s*/);
+                    const indentLen = match ? match[0].length : 0;
+                    cm.replaceRange('// ', { line: l, ch: indentLen });
+                }
+            }
+        });
+    }
+
+    /**
+     * Moves the current line or selection up (-1) or down (1).
+     */
+    function moveLine(cm, dir) {
+        if (!cm) return;
+        const from = cm.getCursor('from');
+        const to = cm.getCursor('to');
+        let startLine = from.line;
+        let endLine = to.line;
+        if (to.ch === 0 && endLine > startLine) {
+            endLine--;
+        }
+
+        if (dir === -1) {
+            if (startLine === 0) return;
+            cm.operation(function () {
+                const prevLineText = cm.getLine(startLine - 1);
+                cm.replaceRange('', { line: startLine - 1, ch: 0 }, { line: startLine, ch: 0 });
+                cm.replaceRange('\n' + prevLineText, { line: endLine, ch: cm.getLine(endLine).length });
+                cm.setSelection(
+                    { line: startLine - 1, ch: from.ch },
+                    { line: endLine - 1, ch: to.ch }
+                );
+            });
+        } else if (dir === 1) {
+            if (endLine >= cm.lineCount() - 1) return;
+            cm.operation(function () {
+                const nextLineText = cm.getLine(endLine + 1);
+                cm.replaceRange('', { line: endLine + 1, ch: 0 }, { line: endLine + 2, ch: 0 });
+                cm.replaceRange(nextLineText + '\n', { line: startLine, ch: 0 });
+                cm.setSelection(
+                    { line: startLine + 1, ch: from.ch },
+                    { line: endLine + 1, ch: to.ch }
+                );
+            });
+        }
+    }
+
+    /**
+     * Opens Go to Line dialog.
+     */
+    function openGotoLineModal() {
+        if (!dom.gotoLineModalOverlay) return;
+        const totalLines = codeEditor ? codeEditor.lineCount() : (dom.fallbackEditor ? dom.fallbackEditor.value.split('\n').length : 1);
+        if (dom.gotoLineMax) dom.gotoLineMax.textContent = String(totalLines);
+        if (dom.gotoLineInput) {
+            const curLine = codeEditor ? (codeEditor.getCursor().line + 1) : 1;
+            dom.gotoLineInput.value = String(curLine);
+            dom.gotoLineInput.max = String(totalLines);
+        }
+        dom.gotoLineModalOverlay.classList.add('active');
+        setTimeout(function () {
+            if (dom.gotoLineInput) {
+                dom.gotoLineInput.focus();
+                dom.gotoLineInput.select();
+            }
+        }, 50);
+    }
+
+    /**
+     * Closes Go to Line dialog.
+     */
+    function closeGotoLineModal() {
+        if (dom.gotoLineModalOverlay) {
+            dom.gotoLineModalOverlay.classList.remove('active');
+        }
+        if (codeEditor) codeEditor.focus();
+    }
+
+    /**
+     * Confirms Go to Line action and scrolls editor to line.
+     */
+    function confirmGotoLine() {
+        if (!dom.gotoLineInput) return;
+        const totalLines = codeEditor ? codeEditor.lineCount() : (dom.fallbackEditor ? dom.fallbackEditor.value.split('\n').length : 1);
+        let line = parseInt(dom.gotoLineInput.value, 10);
+        if (isNaN(line) || line < 1) line = 1;
+        if (line > totalLines) line = totalLines;
+
+        if (codeEditor) {
+            codeEditor.setCursor({ line: line - 1, ch: 0 });
+            codeEditor.scrollIntoView({ line: line - 1, ch: 0 }, 100);
+            updateCursorPosition(line, 1);
+        } else if (dom.fallbackEditor) {
+            const lines = dom.fallbackEditor.value.split('\n');
+            let charIndex = 0;
+            for (let i = 0; i < line - 1 && i < lines.length; i++) {
+                charIndex += lines[i].length + 1;
+            }
+            dom.fallbackEditor.focus();
+            dom.fallbackEditor.setSelectionRange(charIndex, charIndex);
+            updateCursorPosition(line, 1);
+        }
+        closeGotoLineModal();
+    }
+
+    let searchMatches = [];
+    let currentSearchIdx = -1;
+    let searchMarks = [];
+
+    /**
+     * Opens floating Find & Replace bar.
+     */
+    function openFindBar(replaceMode) {
+        if (!dom.compilerFindBar) return;
+        dom.compilerFindBar.style.display = 'flex';
+        if (dom.replaceRow) {
+            dom.replaceRow.style.display = replaceMode ? 'flex' : 'none';
+        }
+
+        if (codeEditor && codeEditor.somethingSelected()) {
+            const sel = codeEditor.getSelection();
+            if (sel && !sel.includes('\n') && sel.length <= 80 && dom.findInput) {
+                dom.findInput.value = sel;
+            }
+        }
+
+        setTimeout(function () {
+            if (dom.findInput) {
+                dom.findInput.focus();
+                dom.findInput.select();
+                executeFind();
+            }
+        }, 50);
+    }
+
+    /**
+     * Closes floating Find & Replace bar.
+     */
+    function closeFindBar() {
+        if (!dom.compilerFindBar) return;
+        dom.compilerFindBar.style.display = 'none';
+        clearSearchHighlights();
+        if (codeEditor) codeEditor.focus();
+    }
+
+    /**
+     * Toggles visibility of replace row in find bar.
+     */
+    function toggleReplaceRow() {
+        if (!dom.replaceRow) return;
+        const isVisible = dom.replaceRow.style.display !== 'none';
+        dom.replaceRow.style.display = isVisible ? 'none' : 'flex';
+        if (!isVisible && dom.replaceInput) {
+            dom.replaceInput.focus();
+        }
+    }
+
+    /**
+     * Clears all search match highlights in CodeMirror.
+     */
+    function clearSearchHighlights() {
+        searchMarks.forEach(function (mark) {
+            try { mark.clear(); } catch (e) {}
+        });
+        searchMarks = [];
+        searchMatches = [];
+        currentSearchIdx = -1;
+        if (dom.findMatchCount) {
+            dom.findMatchCount.textContent = 'No matches';
+        }
+    }
+
+    /**
+     * Executes find across editor and marks all matches.
+     */
+    function executeFind(stayOnCurrent) {
+        clearSearchHighlights();
+        if (!codeEditor || !dom.findInput) return;
+        const query = dom.findInput.value;
+        if (!query) return;
+
+        const queryLower = query.toLowerCase();
+        const lineCount = codeEditor.lineCount();
+        for (let l = 0; l < lineCount; l++) {
+            const line = codeEditor.getLine(l);
+            let idx = line.toLowerCase().indexOf(queryLower);
+            while (idx !== -1) {
+                searchMatches.push({
+                    from: { line: l, ch: idx },
+                    to: { line: l, ch: idx + query.length }
+                });
+                idx = line.toLowerCase().indexOf(queryLower, idx + 1);
+            }
+        }
+
+        if (searchMatches.length === 0) {
+            if (dom.findMatchCount) dom.findMatchCount.textContent = '0 of 0';
+            return;
+        }
+
+        const curPos = codeEditor.getCursor();
+        if (!stayOnCurrent || currentSearchIdx === -1) {
+            currentSearchIdx = 0;
+            for (let i = 0; i < searchMatches.length; i++) {
+                const m = searchMatches[i];
+                if (m.from.line > curPos.line || (m.from.line === curPos.line && m.from.ch >= curPos.ch)) {
+                    currentSearchIdx = i;
+                    break;
+                }
+            }
+        }
+
+        highlightSearchMatches();
+        focusCurrentMatch();
+    }
+
+    /**
+     * Applies styling to matches and current match.
+     */
+    function highlightSearchMatches() {
+        searchMarks.forEach(function (mark) {
+            try { mark.clear(); } catch (e) {}
+        });
+        searchMarks = [];
+        if (!codeEditor) return;
+
+        searchMatches.forEach(function (m, idx) {
+            const isCurrent = idx === currentSearchIdx;
+            const mark = codeEditor.markText(m.from, m.to, {
+                className: isCurrent ? 'cm-search-match-active' : 'cm-search-match'
+            });
+            searchMarks.push(mark);
+        });
+
+        if (dom.findMatchCount) {
+            dom.findMatchCount.textContent = `${currentSearchIdx + 1} of ${searchMatches.length}`;
+        }
+    }
+
+    /**
+     * Scrolls active match into view and selects it.
+     */
+    function focusCurrentMatch() {
+        if (currentSearchIdx < 0 || currentSearchIdx >= searchMatches.length || !codeEditor) return;
+        const match = searchMatches[currentSearchIdx];
+        codeEditor.setSelection(match.from, match.to);
+        codeEditor.scrollIntoView({ from: match.from, to: match.to }, 120);
+    }
+
+    /**
+     * Moves to next search match.
+     */
+    function findNext() {
+        if (searchMatches.length === 0) {
+            executeFind();
+            return;
+        }
+        currentSearchIdx = (currentSearchIdx + 1) % searchMatches.length;
+        highlightSearchMatches();
+        focusCurrentMatch();
+    }
+
+    /**
+     * Moves to previous search match.
+     */
+    function findPrev() {
+        if (searchMatches.length === 0) {
+            executeFind();
+            return;
+        }
+        currentSearchIdx = (currentSearchIdx - 1 + searchMatches.length) % searchMatches.length;
+        highlightSearchMatches();
+        focusCurrentMatch();
+    }
+
+    /**
+     * Replaces the currently focused match with replacement text.
+     */
+    function replaceCurrent() {
+        if (!codeEditor || searchMatches.length === 0 || currentSearchIdx === -1) return;
+        const replacement = dom.replaceInput ? dom.replaceInput.value : '';
+        const match = searchMatches[currentSearchIdx];
+        codeEditor.replaceRange(replacement, match.from, match.to);
+        executeFind(false);
+    }
+
+    /**
+     * Replaces all search matches in the document.
+     */
+    function replaceAll() {
+        if (!codeEditor || searchMatches.length === 0) return;
+        const replacement = dom.replaceInput ? dom.replaceInput.value : '';
+        const total = searchMatches.length;
+
+        codeEditor.operation(function () {
+            for (let i = searchMatches.length - 1; i >= 0; i--) {
+                const m = searchMatches[i];
+                codeEditor.replaceRange(replacement, m.from, m.to);
+            }
+        });
+
+        clearSearchHighlights();
+        showToast(`Replaced ${total} occurrence${total === 1 ? '' : 's'}.`, 'success');
+    }
+
+    const JAVA_AUTOCOMPLETE_ITEMS = [
+        { label: 'public', type: 'keyword', insert: 'public ' },
+        { label: 'private', type: 'keyword', insert: 'private ' },
+        { label: 'protected', type: 'keyword', insert: 'protected ' },
+        { label: 'class', type: 'keyword', insert: 'class ' },
+        { label: 'interface', type: 'keyword', insert: 'interface ' },
+        { label: 'static', type: 'keyword', insert: 'static ' },
+        { label: 'final', type: 'keyword', insert: 'final ' },
+        { label: 'void', type: 'type', insert: 'void ' },
+        { label: 'int', type: 'type', insert: 'int ' },
+        { label: 'double', type: 'type', insert: 'double ' },
+        { label: 'boolean', type: 'type', insert: 'boolean ' },
+        { label: 'char', type: 'type', insert: 'char ' },
+        { label: 'long', type: 'type', insert: 'long ' },
+        { label: 'String', type: 'type', insert: 'String ' },
+        { label: 'if', type: 'keyword', insert: 'if () {\n    \n}' },
+        { label: 'else', type: 'keyword', insert: 'else {\n    \n}' },
+        { label: 'for', type: 'keyword', insert: 'for (int i = 0; i < ; i++) {\n    \n}' },
+        { label: 'while', type: 'keyword', insert: 'while () {\n    \n}' },
+        { label: 'return', type: 'keyword', insert: 'return ;' },
+        { label: 'try-catch', type: 'snippet', insert: 'try {\n    \n} catch (Exception e) {\n    e.printStackTrace();\n}' },
+        { label: 'new', type: 'keyword', insert: 'new ' },
+        { label: 'System.out.println()', type: 'snippet', insert: 'System.out.println();' },
+        { label: 'System.out.print()', type: 'snippet', insert: 'System.out.print();' },
+        { label: 'System.err.println()', type: 'snippet', insert: 'System.err.println();' },
+        { label: 'Scanner', type: 'class', insert: 'Scanner scanner = new Scanner(System.in);' },
+        { label: 'main method', type: 'snippet', insert: 'public static void main(String[] args) {\n    \n}' },
+        { label: 'ArrayList', type: 'class', insert: 'List<String> list = new ArrayList<>();' },
+        { label: 'HashMap', type: 'class', insert: 'Map<String, Object> map = new HashMap<>();' },
+        { label: 'HashSet', type: 'class', insert: 'Set<String> set = new HashSet<>();' },
+        { label: 'Arrays.sort()', type: 'snippet', insert: 'Arrays.sort();' },
+        { label: 'Collections.sort()', type: 'snippet', insert: 'Collections.sort();' },
+        { label: 'Math.max()', type: 'snippet', insert: 'Math.max(, );' },
+        { label: 'Math.min()', type: 'snippet', insert: 'Math.min(, );' },
+        { label: 'Math.abs()', type: 'snippet', insert: 'Math.abs();' },
+        { label: 'Integer.parseInt()', type: 'snippet', insert: 'Integer.parseInt();' },
+        { label: 'StringBuilder', type: 'class', insert: 'StringBuilder sb = new StringBuilder();' }
+    ];
+
+    let autocompleteMenu = null;
+    let autocompleteActiveIdx = 0;
+    let currentAutocompleteMatches = [];
+    let autocompleteWordRange = null;
+
+    /**
+     * Triggers Java keyword and library autocomplete menu at cursor.
+     */
+    function triggerAutocomplete(cm) {
+        if (!cm) return;
+        const cur = cm.getCursor();
+        const token = cm.getTokenAt(cur);
+        const line = cm.getLine(cur.line);
+
+        const startCh = token.start;
+        const endCh = cur.ch;
+        const prefix = (token.string || line.substring(startCh, endCh)).trim();
+
+        currentAutocompleteMatches = JAVA_AUTOCOMPLETE_ITEMS.filter(function (item) {
+            if (!prefix) return true;
+            return item.label.toLowerCase().startsWith(prefix.toLowerCase()) ||
+                   (item.insert && item.insert.toLowerCase().startsWith(prefix.toLowerCase()));
+        });
+
+        if (currentAutocompleteMatches.length === 0) {
+            closeAutocomplete();
+            return;
+        }
+
+        autocompleteWordRange = {
+            from: { line: cur.line, ch: startCh },
+            to: { line: cur.line, ch: endCh }
+        };
+        autocompleteActiveIdx = 0;
+        renderAutocompleteMenu(cm);
+    }
+
+    const autocompleteKeyMap = {
+        'Up': function () { navigateAutocomplete(-1); },
+        'Down': function () { navigateAutocomplete(1); },
+        'Enter': function () { selectActiveAutocomplete(); },
+        'Tab': function () { selectActiveAutocomplete(); },
+        'Esc': function () { closeAutocomplete(); }
+    };
+
+    /**
+     * Renders floating autocomplete dropdown menu.
+     */
+    function renderAutocompleteMenu(cm) {
+        closeAutocomplete();
+
+        autocompleteMenu = document.createElement('ul');
+        autocompleteMenu.id = 'codearenaAutocompleteMenu';
+        autocompleteMenu.className = 'codearena-autocomplete-menu';
+
+        currentAutocompleteMatches.forEach(function (item, idx) {
+            const li = document.createElement('li');
+            li.className = 'codearena-autocomplete-item' + (idx === autocompleteActiveIdx ? ' selected' : '');
+            li.innerHTML = `<span>${escapeHtml(item.label)}</span><span class="codearena-autocomplete-kind">${item.type}</span>`;
+            li.addEventListener('mousedown', function (e) {
+                e.preventDefault();
+                insertAutocompleteItem(item);
+            });
+            autocompleteMenu.appendChild(li);
+        });
+
+        const coords = cm.cursorCoords(true, 'local');
+        const wrapper = cm.getWrapperElement();
+        autocompleteMenu.style.top = (coords.bottom + 4) + 'px';
+        autocompleteMenu.style.left = coords.left + 'px';
+        wrapper.appendChild(autocompleteMenu);
+
+        cm.addKeyMap(autocompleteKeyMap);
+    }
+
+    function navigateAutocomplete(dir) {
+        if (!autocompleteMenu || currentAutocompleteMatches.length === 0) return;
+        autocompleteActiveIdx = (autocompleteActiveIdx + dir + currentAutocompleteMatches.length) % currentAutocompleteMatches.length;
+        const items = autocompleteMenu.querySelectorAll('.codearena-autocomplete-item');
+        items.forEach(function (item, idx) {
+            item.classList.toggle('selected', idx === autocompleteActiveIdx);
+        });
+        const activeEl = items[autocompleteActiveIdx];
+        if (activeEl) activeEl.scrollIntoView({ block: 'nearest' });
+    }
+
+    function selectActiveAutocomplete() {
+        if (currentAutocompleteMatches[autocompleteActiveIdx]) {
+            insertAutocompleteItem(currentAutocompleteMatches[autocompleteActiveIdx]);
+        } else {
+            closeAutocomplete();
+        }
+    }
+
+    function insertAutocompleteItem(item) {
+        if (!codeEditor || !autocompleteWordRange) return;
+        codeEditor.replaceRange(item.insert, autocompleteWordRange.from, autocompleteWordRange.to);
+        closeAutocomplete();
+        codeEditor.focus();
+    }
+
+    function closeAutocomplete() {
+        if (autocompleteMenu && autocompleteMenu.parentNode) {
+            autocompleteMenu.parentNode.removeChild(autocompleteMenu);
+        }
+        autocompleteMenu = null;
+        if (codeEditor) {
+            codeEditor.removeKeyMap(autocompleteKeyMap);
+        }
+    }
+
+    /**
+     * Initializes shortcuts platform toggle button handlers and autodetects OS.
+     */
+    function initShortcutsPlatformToggle() {
+        const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+        setShortcutsPlatform(isMac ? 'mac' : 'win');
+
+        if (dom.btnPlatformWin) {
+            dom.btnPlatformWin.addEventListener('click', function () {
+                setShortcutsPlatform('win');
+            });
+        }
+        if (dom.btnPlatformMac) {
+            dom.btnPlatformMac.addEventListener('click', function () {
+                setShortcutsPlatform('mac');
+            });
+        }
+    }
+
+    /**
+     * Sets display of shortcuts platform variant (Windows/Linux vs macOS).
+     */
+    function setShortcutsPlatform(platform) {
+        const isMac = platform === 'mac';
+        if (dom.btnPlatformWin) {
+            dom.btnPlatformWin.classList.toggle('active', !isMac);
+            dom.btnPlatformWin.setAttribute('aria-selected', !isMac ? 'true' : 'false');
+        }
+        if (dom.btnPlatformMac) {
+            dom.btnPlatformMac.classList.toggle('active', isMac);
+            dom.btnPlatformMac.setAttribute('aria-selected', isMac ? 'true' : 'false');
+        }
+
+        const winElements = document.querySelectorAll('.shortcut-win');
+        const macElements = document.querySelectorAll('.shortcut-mac');
+        winElements.forEach(function (el) { el.style.display = isMac ? 'none' : 'inline'; });
+        macElements.forEach(function (el) { el.style.display = isMac ? 'inline' : 'none'; });
+    }
+
+    /**
+     * Closes all active dialogs, modals, find bars, and popup menus.
+     */
+    function closeActivePopups() {
+        closeAutocomplete();
+        closeFindBar();
+        closeGotoLineModal();
+        closeShortcutsModal();
+        closeResetModal();
     }
 
     /**

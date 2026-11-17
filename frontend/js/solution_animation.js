@@ -1073,6 +1073,7 @@
     let isPlaying = false;
     let playIntervalId = null;
     let playbackSpeed = 1.0;
+    let isAnimationLocked = true;
 
     // DOM Cache
     const dom = {};
@@ -1135,6 +1136,12 @@
         dom.comingSoonTitle = document.getElementById('comingSoonTitle');
         dom.comingSoonDesc = document.getElementById('comingSoonDesc');
         dom.btnComingSoonBack = document.getElementById('btnComingSoonBack');
+
+        // Animation Locked Gate DOM Elements
+        dom.viewAnimationLocked = document.getElementById('viewAnimationLocked');
+        dom.lockedGateTitle = document.getElementById('lockedGateTitle');
+        dom.lockedGateDesc = document.getElementById('lockedGateDesc');
+        dom.btnLockedGateBack = document.getElementById('btnLockedGateBack');
     }
 
     /**
@@ -1195,18 +1202,56 @@
         }
 
         // Back to problem links
-        const backUrl = `problem.html?id=${encodeURIComponent(prob.id)}`;
+        const isBasic = (prob && (prob.track === 'basic' || prob.trackId === 1 || (Number(prob.id) >= 1 && Number(prob.id) <= 50)));
+        const backUrl = isBasic
+            ? `basic-problem.html?id=${encodeURIComponent(prob.id || prob.slug || problemId)}`
+            : `problem.html?id=${encodeURIComponent(prob.id || prob.slug || problemId)}`;
         if (dom.btnBackToProblem) dom.btnBackToProblem.href = backUrl;
         if (dom.btnSidebarBack) dom.btnSidebarBack.href = backUrl;
         if (dom.btnComingSoonBack) dom.btnComingSoonBack.href = backUrl;
+        if (dom.btnLockedGateBack) dom.btnLockedGateBack.href = backUrl;
 
-        // Check if animation exists in Universal Animation Engine or bespoke registry
+        // Authoritative server-side animation unlock verification
+        let isUnlocked = false;
+        try {
+            if (window.CodeArenaAPI && window.CodeArenaAPI.problemService && typeof window.CodeArenaAPI.problemService.getAnimationUnlockStatus === 'function') {
+                const statusRes = await window.CodeArenaAPI.problemService.getAnimationUnlockStatus(prob.id || prob.slug || problemId);
+                if (statusRes && (statusRes.unlocked === true || (statusRes.data && statusRes.data.unlocked === true))) {
+                    isUnlocked = true;
+                }
+            }
+        } catch (e) {
+            console.warn('[Animate Solution] Unlock check error:', e);
+            isUnlocked = false;
+        }
+
+        if (!isUnlocked) {
+            isAnimationLocked = true;
+            showLockedGateView(prob);
+            return;
+        }
+
+        isAnimationLocked = false;
+        if (dom.viewAnimationLocked) dom.viewAnimationLocked.style.display = 'none';
+
+        // Check for dedicated Basic Track Animation, then Universal Animation Engine, then bespoke registry
         let animDef = null;
-        if (window.CodeArenaAnimationEngine && typeof window.CodeArenaAnimationEngine.getAnimation === 'function') {
-            animDef = window.CodeArenaAnimationEngine.getAnimation(prob.id, prob);
+        if (window.CodeArenaBasicAnimations && typeof window.CodeArenaBasicAnimations.getAnimation === 'function') {
+            try {
+                animDef = window.CodeArenaBasicAnimations.getAnimation(prob.id, prob.slug, prob);
+            } catch (e) {
+                console.warn('[Animate Solution] BasicAnimations lookup error:', e);
+            }
+        }
+        if (!animDef && window.CodeArenaAnimationEngine && typeof window.CodeArenaAnimationEngine.getAnimation === 'function') {
+            try {
+                animDef = window.CodeArenaAnimationEngine.getAnimation(prob.id, prob);
+            } catch (e) {
+                console.warn('[Animate Solution] AnimationEngine lookup error:', e);
+            }
         }
         if (!animDef) {
-            animDef = ANIMATIONS_REGISTRY[prob.id];
+            animDef = ANIMATIONS_REGISTRY[prob.id] || (prob.slug ? ANIMATIONS_REGISTRY[prob.slug] : null);
         }
 
         if (animDef && Array.isArray(animDef.approaches) && animDef.approaches.length > 0) {
@@ -1436,7 +1481,7 @@
      * Advances to the next step.
      */
     function nextStep() {
-        if (!activeApproach) return;
+        if (isAnimationLocked || !activeApproach) return;
         if (currentStepIndex < activeApproach.steps.length - 1) {
             currentStepIndex++;
             renderCurrentStep();
@@ -1449,7 +1494,7 @@
      * Returns to the previous step.
      */
     function prevStep() {
-        if (!activeApproach) return;
+        if (isAnimationLocked || !activeApproach) return;
         if (currentStepIndex > 0) {
             currentStepIndex--;
             renderCurrentStep();
@@ -1461,6 +1506,7 @@
      */
     function restart() {
         pause();
+        if (isAnimationLocked) return;
         currentStepIndex = 0;
         renderCurrentStep();
     }
@@ -1469,6 +1515,7 @@
      * Toggles playback between playing and paused.
      */
     function togglePlay() {
+        if (isAnimationLocked) return;
         if (isPlaying) {
             pause();
         } else {
@@ -1477,7 +1524,7 @@
     }
 
     function play() {
-        if (!activeApproach) return;
+        if (isAnimationLocked || !activeApproach) return;
         if (currentStepIndex >= activeApproach.steps.length - 1) {
             currentStepIndex = 0;
         }
@@ -1526,6 +1573,7 @@
      * Displays the active animation stage and hides the coming soon view.
      */
     function showActiveAnimationView() {
+        if (dom.viewAnimationLocked) dom.viewAnimationLocked.style.display = 'none';
         if (dom.viewActiveAnimation) dom.viewActiveAnimation.style.display = 'grid';
         if (dom.viewComingSoon) dom.viewComingSoon.style.display = 'none';
     }
@@ -1534,6 +1582,7 @@
      * Displays the honest coming soon view for problems awaiting animations.
      */
     function showComingSoonView(prob) {
+        if (dom.viewAnimationLocked) dom.viewAnimationLocked.style.display = 'none';
         if (dom.viewActiveAnimation) dom.viewActiveAnimation.style.display = 'none';
         if (dom.viewComingSoon) dom.viewComingSoon.style.display = 'flex';
 
@@ -1545,6 +1594,28 @@
                 The CodeArena educational curriculum team is currently developing an interactive, step-by-step visual animation for <strong>${escapeHtml(prob.title)}</strong> (${escapeHtml(prob.pattern || prob.topic || 'DSA')}).
             `;
         }
+    }
+
+    /**
+     * Displays the locked gate view for unverified / unsolved challenges.
+     */
+    function showLockedGateView(prob) {
+        pause();
+        if (dom.viewActiveAnimation) dom.viewActiveAnimation.style.display = 'none';
+        if (dom.viewComingSoon) dom.viewComingSoon.style.display = 'none';
+        if (dom.viewAnimationLocked) dom.viewAnimationLocked.style.display = 'flex';
+
+        if (dom.stageApproachHeading) dom.stageApproachHeading.textContent = 'Animation Locked';
+        if (dom.stageStepTagline) dom.stageStepTagline.textContent = 'Solve this problem successfully to unlock its interactive algorithm walkthrough.';
+
+        const isBasic = (prob && (prob.track === 'basic' || prob.trackId === 1 || (Number(prob.id) >= 1 && Number(prob.id) <= 50)));
+        const backUrl = isBasic
+            ? `basic-problem.html?id=${encodeURIComponent(prob.id || prob.slug || '')}`
+            : `problem.html?id=${encodeURIComponent(prob.id || prob.slug || '')}`;
+
+        if (dom.btnLockedGateBack) dom.btnLockedGateBack.href = backUrl;
+        if (dom.btnBackToProblem) dom.btnBackToProblem.href = backUrl;
+        if (dom.btnSidebarBack) dom.btnSidebarBack.href = backUrl;
     }
 
     /**
@@ -1632,8 +1703,8 @@
 
         // Keyboard navigation shortcuts
         document.addEventListener('keydown', (e) => {
-            // Ignore when typing in select or inputs or navigating custom dropdown
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA' || isCustomDropdownOpen()) {
+            // Ignore when locked or typing in select or inputs or navigating custom dropdown
+            if (isAnimationLocked || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA' || isCustomDropdownOpen()) {
                 return;
             }
 
@@ -1676,6 +1747,7 @@
         getCurrentApproach: () => activeApproach,
         getStepIndex: () => currentStepIndex,
         getTotalSteps: () => activeApproach ? activeApproach.steps.length : 0,
+        isLocked: () => isAnimationLocked,
         nextStep: nextStep,
         prevStep: prevStep,
         togglePlay: togglePlay,
@@ -1689,10 +1761,13 @@
         },
         isComingSoon: () => currentAnimation === null,
         getRegistry: () => {
-            if (window.CodeArenaAnimationEngine && typeof window.CodeArenaAnimationEngine.getBespokeRegistry === 'function') {
-                return Object.assign({}, ANIMATIONS_REGISTRY, window.CodeArenaAnimationEngine.getBespokeRegistry());
-            }
-            return ANIMATIONS_REGISTRY;
+            const basicReg = (window.CodeArenaBasicAnimations && typeof window.CodeArenaBasicAnimations.getRegistry === 'function')
+                ? window.CodeArenaBasicAnimations.getRegistry()
+                : {};
+            const engineReg = (window.CodeArenaAnimationEngine && typeof window.CodeArenaAnimationEngine.getBespokeRegistry === 'function')
+                ? window.CodeArenaAnimationEngine.getBespokeRegistry()
+                : {};
+            return Object.assign({}, ANIMATIONS_REGISTRY, engineReg, basicReg);
         }
     };
 

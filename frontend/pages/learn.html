@@ -151,13 +151,21 @@
                             <span class="preview-badge-pill" id="animCategoryBadge">Core JVM</span>
                             <h2 class="anim-player-title" id="animTitle">Java Program Execution Lifecycle</h2>
                         </div>
-                        <div class="anim-player-actions">
-                            <a href="problem.html?id=two-sum" class="btn-anim-practice" id="btnAnimPracticeProblem">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                </svg>
-                                <span>Practice This Concept</span>
-                            </a>
+                        <div class="anim-player-actions" id="animPlayerActions">
+                            <div class="anim-practice-btn-group" id="animPracticeBtnGroup" style="display: none; position: relative;">
+                                <a href="#" class="btn-anim-practice" id="btnAnimPracticeProblem">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span id="btnAnimPracticeLabel">Practice This Concept</span>
+                                </a>
+                                <button type="button" class="btn-anim-practice-dropdown-toggle" id="btnAnimPracticeDropdownToggle" title="View matching practice problems" aria-label="View matching practice problems" style="display: none;">
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </button>
+                                <div class="anim-practice-menu" id="animPracticeMenu" role="menu" style="display: none;"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -259,6 +267,7 @@
     </footer>
 
     <!-- Scripts -->
+    <script src="../js/api.js"></script>
     <script src="../js/toast.js"></script>
     <script src="../js/learn.js"></script>
     <script src="../js/auth_modal.js" defer></script>

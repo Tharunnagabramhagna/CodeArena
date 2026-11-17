@@ -18,7 +18,7 @@
             category: 'Basics',
             level: 'Beginner',
             readTime: '6 min',
-            practiceProblem: { problemId: 'two-sum', title: 'Two Sum' },
+            practiceProblem: { problemId: 'hello-world', title: 'Hello World' },
             animationId: 'java-execution',
             summary: 'Learn how Java source code is compiled into bytecode and executed by the Java Virtual Machine across any platform.',
             content: `
@@ -50,7 +50,7 @@
             category: 'Basics',
             level: 'Beginner',
             readTime: '5 min',
-            practiceProblem: { problemId: 'reverse-integer', title: 'Reverse Integer' },
+            practiceProblem: { problemId: 'swap-two-numbers', title: 'Swap Two Numbers' },
             animationId: 'variables-memory',
             summary: 'Understand the 8 primitive data types in Java, type casting rules, and variable scoping.',
             content: `
@@ -76,7 +76,7 @@
             category: 'Basics',
             level: 'Beginner',
             readTime: '7 min',
-            practiceProblem: { problemId: 'fizz-buzz', title: 'Fizz Buzz' },
+            practiceProblem: { problemId: 'multiplication-table', title: 'Multiplication Table' },
             animationId: 'loops-iteration',
             summary: 'Master conditional branching (if/else, switch expressions) and iterative loops (for, while, do-while).',
             content: `
@@ -103,7 +103,7 @@
             category: 'Data Structures',
             level: 'Beginner',
             readTime: '7 min',
-            practiceProblem: { problemId: 'valid-anagram', title: 'Valid Anagram' },
+            practiceProblem: { problemId: 'array-sum-and-average', title: 'Array Sum and Average' },
             animationId: 'arrays-traversal',
             summary: 'Examine fixed-size primitive arrays, String immutability, and efficient mutations using StringBuilder.',
             content: `
@@ -130,7 +130,7 @@
             category: 'Algorithms',
             level: 'Intermediate',
             readTime: '8 min',
-            practiceProblem: { problemId: 'fibonacci-number', title: 'Fibonacci Number' },
+            practiceProblem: { problemId: 'recursive-factorial', title: 'Recursive Factorial' },
             animationId: 'recursion-stack',
             summary: 'Structure reusable logic using parameter passing by value, method overloading, and recursive algorithms.',
             content: `
@@ -150,7 +150,7 @@
             category: 'OOP',
             level: 'Beginner',
             readTime: '8 min',
-            practiceProblem: { problemId: 'lru-cache', title: 'LRU Cache' },
+            practiceProblem: { problemId: 'class-and-object-creation', title: 'Student Record Class' },
             animationId: 'stack-heap',
             summary: 'Understand classes as blueprints, object instances on the heap, encapsulation, and constructors.',
             content: `
@@ -170,7 +170,7 @@
             category: 'OOP',
             level: 'Intermediate',
             readTime: '9 min',
-            practiceProblem: { problemId: 'valid-parentheses', title: 'Valid Parentheses' },
+            practiceProblem: { problemId: 'inheritance-example', title: 'Vehicle and Car Inheritance' },
             animationId: 'inheritance-hierarchy',
             summary: 'Extend classes with the extends keyword, override methods with @Override, and achieve runtime polymorphism.',
             content: `
@@ -190,7 +190,7 @@
             category: 'OOP',
             level: 'Intermediate',
             readTime: '8 min',
-            practiceProblem: { problemId: 'merge-k-sorted-lists', title: 'Merge k Sorted Lists' },
+            practiceProblem: null,
             animationId: 'polymorphism-dispatch',
             summary: 'Design loose contracts with interfaces, abstract classes, default methods, and multiple interface implementation.',
             content: `
@@ -215,7 +215,7 @@
             category: 'Core Java',
             level: 'Intermediate',
             readTime: '8 min',
-            practiceProblem: { problemId: 'string-to-integer-atoi', title: 'String to Integer (atoi)' },
+            practiceProblem: { problemId: 'divide-by-zero-handling', title: 'Safe Integer Division' },
             summary: 'Handle runtime anomalies gracefully using checked and unchecked exceptions, try-with-resources, and custom exceptions.',
             content: `
                 <p>Exceptions disrupt the normal flow of instructions. Java distinguishes between <strong>Checked Exceptions</strong> (subclasses of <code>Exception</code> verified at compile-time) and <strong>Unchecked Exceptions</strong> (subclasses of <code>RuntimeException</code>).</p>
@@ -239,7 +239,7 @@
             category: 'Collections',
             level: 'Intermediate',
             readTime: '10 min',
-            practiceProblem: { problemId: 'group-anagrams', title: 'Group Anagrams' },
+            practiceProblem: { problemId: 'arraylist-basic-operations', title: 'ArrayList CRUD Operations' },
             summary: 'Navigate java.util data structures: ArrayList, LinkedList, HashSet, TreeSet, HashMap, and PriorityQueue.',
             content: `
                 <p>The Java Collections Framework provides standardized, high-performance data structure architectures.</p>
@@ -263,7 +263,7 @@
             category: 'Core Java',
             level: 'Intermediate',
             readTime: '8 min',
-            practiceProblem: { problemId: 'implement-queue-using-stacks', title: 'Implement Queue using Stacks' },
+            practiceProblem: null,
             summary: 'Eliminate runtime ClassCastExceptions and write flexible, reusable algorithms using type parameters and wildcards.',
             content: `
                 <p>Generics enable types (classes and interfaces) to be parameters when defining classes, interfaces, and methods. Type erasure removes generic metadata at compile-time for backward compatibility.</p>
@@ -287,7 +287,7 @@
             category: 'Advanced',
             level: 'Advanced',
             readTime: '10 min',
-            practiceProblem: { problemId: 'print-in-order', title: 'Print in Order' },
+            practiceProblem: null,
             summary: 'Coordinate parallel tasks using the Thread class, Runnable, synchronized blocks, and ExecutorService.',
             content: `
                 <p>Multithreading allows multiple instruction streams to execute concurrently inside a single JVM process, maximizing multi-core CPU utilization.</p>
@@ -306,7 +306,7 @@
             category: 'Enterprise',
             level: 'Advanced',
             readTime: '9 min',
-            practiceProblem: { problemId: 'department-top-three-salaries', title: 'Top Salaries' },
+            practiceProblem: null,
             summary: 'Connect Java to relational databases (MySQL, PostgreSQL) using DriverManager, PreparedStatement, and ResultSet.',
             content: `
                 <p>Java Database Connectivity (JDBC) is the industry standard API connecting Java code to relational SQL databases.</p>
@@ -332,7 +332,7 @@
             category: 'Enterprise',
             level: 'Advanced',
             readTime: '9 min',
-            practiceProblem: { problemId: 'design-hit-counter', title: 'Design Hit Counter' },
+            practiceProblem: null,
             summary: 'Understand HTTP request handling in Java EE/Jakarta EE using HttpServlet, doGet/doPost, and web application lifecycle.',
             content: `
                 <p>Java Servlets form the foundation of enterprise Java web frameworks (such as Spring MVC and Jakarta EE). Servlets intercept HTTP requests, process business logic, and construct HTTP responses.</p>
@@ -353,7 +353,10 @@
             animId: 'java-execution',
             title: '1. Java Program Execution Lifecycle',
             category: 'Core JVM Architecture',
-            practiceProblem: { problemId: 'two-sum', title: 'Two Sum' },
+            practiceProblem: { problemId: 'hello-world', slug: 'hello-world', title: 'Hello World' },
+            practiceProblems: [
+                { problemId: 'hello-world', slug: 'hello-world', title: 'Hello World', badge: 'Problem 1 · Easy', subtitle: 'Basic Java class, main method, compilation & stdout execution' }
+            ],
             steps: [
                 {
                     title: '1. Source Code Creation (Main.java)',
@@ -417,7 +420,11 @@
             animId: 'variables-memory',
             title: '2. Primitive Variables & Memory Allocation',
             category: 'Memory & Data Types',
-            practiceProblem: { problemId: 'reverse-integer', title: 'Reverse Integer' },
+            practiceProblem: { problemId: 'swap-two-numbers', slug: 'swap-two-numbers', title: 'Swap Two Numbers' },
+            practiceProblems: [
+                { problemId: 'swap-two-numbers', slug: 'swap-two-numbers', title: 'Swap Two Numbers', badge: 'Problem 2 · Easy', subtitle: 'Variable declaration, memory allocation & swapping' },
+                { problemId: 'celsius-to-fahrenheit', slug: 'celsius-to-fahrenheit', title: 'Celsius to Fahrenheit', badge: 'Problem 3 · Easy', subtitle: 'Primitive data types & arithmetic type conversion' }
+            ],
             steps: [
                 {
                     title: '1. Declaration: int count',
@@ -488,7 +495,11 @@
             animId: 'loops-iteration',
             title: '3. Loop Iterations & State Changes',
             category: 'Control Flow Execution',
-            practiceProblem: { problemId: 'fizz-buzz', title: 'Fizz Buzz' },
+            practiceProblem: { problemId: 'multiplication-table', slug: 'multiplication-table', title: 'Multiplication Table' },
+            practiceProblems: [
+                { problemId: 'multiplication-table', slug: 'multiplication-table', title: 'Multiplication Table', badge: 'Problem 15 · Easy', subtitle: 'Loop iterations, condition checking & counter state changes' },
+                { problemId: 'sum-of-first-n-numbers', slug: 'sum-of-first-n-numbers', title: 'Sum of First N Natural Numbers', badge: 'Problem 16 · Easy', subtitle: 'Loop accumulator and iteration summation' }
+            ],
             steps: [
                 {
                     title: '1. Loop Initialization: int i = 0',
@@ -562,7 +573,11 @@
             animId: 'arrays-traversal',
             title: '4. Array Contiguous Indexing & Linear Search',
             category: 'Data Structures',
-            practiceProblem: { problemId: 'binary-search', title: 'Binary Search' },
+            practiceProblem: { problemId: 'find-maximum-and-minimum', slug: 'find-maximum-and-minimum', title: 'Find Maximum and Minimum in Array' },
+            practiceProblems: [
+                { problemId: 'find-maximum-and-minimum', slug: 'find-maximum-and-minimum', title: 'Find Maximum and Minimum in Array', badge: 'Problem 30 · Easy', subtitle: 'Contiguous array indexing & linear scan traversal' },
+                { problemId: 'array-sum-and-average', slug: 'array-sum-and-average', title: 'Array Sum and Average', badge: 'Problem 29 · Easy', subtitle: 'Array allocation, index access & sum computation' }
+            ],
             steps: [
                 {
                     title: '1. Array Allocation & Search Target',
@@ -621,7 +636,8 @@
             animId: 'stack-heap',
             title: '5. Stack Frames & Heap Memory Architecture',
             category: 'JVM Memory Model',
-            practiceProblem: { problemId: 'lru-cache', title: 'LRU Cache' },
+            practiceProblem: null,
+            practiceProblems: [],
             steps: [
                 {
                     title: '1. Main Thread Stack Frame',
@@ -692,7 +708,10 @@
             animId: 'inheritance-hierarchy',
             title: '6. Inheritance Hierarchy & Code Reuse',
             category: 'Object-Oriented Design',
-            practiceProblem: { problemId: 'valid-parentheses', title: 'Valid Parentheses' },
+            practiceProblem: { problemId: 'inheritance-example', slug: 'inheritance-example', title: 'Vehicle and Car Inheritance' },
+            practiceProblems: [
+                { problemId: 'inheritance-example', slug: 'inheritance-example', title: 'Vehicle and Car Inheritance', badge: 'Problem 43 · Easy', subtitle: 'Superclass Vehicle, subclass Car, extends & member reuse' }
+            ],
             steps: [
                 {
                     title: '1. Superclass Definition: Animal',
@@ -745,7 +764,8 @@
             animId: 'polymorphism-dispatch',
             title: '7. Runtime Polymorphism & Dynamic Method Dispatch',
             category: 'OOP Architecture',
-            practiceProblem: { problemId: 'merge-k-sorted-lists', title: 'Merge k Sorted Lists' },
+            practiceProblem: null,
+            practiceProblems: [],
             steps: [
                 {
                     title: '1. Declare Reference: Animal a',
@@ -811,7 +831,12 @@
             animId: 'recursion-stack',
             title: '8. Recursive Call Stack & Base Case Unwinding',
             category: 'Algorithmic Recursion',
-            practiceProblem: { problemId: 'climbing-stairs', title: 'Climbing Stairs' },
+            practiceProblem: { problemId: 'recursive-factorial', slug: 'recursive-factorial', title: 'Recursive Factorial' },
+            practiceProblems: [
+                { problemId: 'recursive-factorial', slug: 'recursive-factorial', title: 'Recursive Factorial', badge: 'Problem 38 · Easy', subtitle: 'Factorial computation matching animation step-by-step' },
+                { problemId: 'recursive-fibonacci', slug: 'recursive-fibonacci', title: 'Recursive N-th Fibonacci', badge: 'Problem 39 · Easy', subtitle: 'Call tree recursion and base case unwinding' },
+                { problemId: 'sum-of-digits-recursion', slug: 'sum-of-digits-recursion', title: 'Recursive Sum of Digits', badge: 'Problem 40 · Easy', subtitle: 'Recursive call stack decomposition' }
+            ],
             steps: [
                 {
                     title: '1. Initial Call: factorial(3)',
@@ -916,7 +941,11 @@
             animPillsBar: document.getElementById('animPillsBar'),
             animCategoryBadge: document.getElementById('animCategoryBadge'),
             animTitle: document.getElementById('animTitle'),
+            animPracticeBtnGroup: document.getElementById('animPracticeBtnGroup'),
             btnAnimPracticeProblem: document.getElementById('btnAnimPracticeProblem'),
+            btnAnimPracticeLabel: document.getElementById('btnAnimPracticeLabel'),
+            btnAnimPracticeDropdownToggle: document.getElementById('btnAnimPracticeDropdownToggle'),
+            animPracticeMenu: document.getElementById('animPracticeMenu'),
             animStage: document.getElementById('animStage'),
             btnAnimPrev: document.getElementById('btnAnimPrev'),
             btnAnimPlayPause: document.getElementById('btnAnimPlayPause'),
@@ -999,6 +1028,22 @@
             } else if (e.key === ' ' || e.code === 'Space') {
                 e.preventDefault();
                 togglePlay();
+            }
+        });
+
+        // Concept practice dropdown toggle
+        if (dom.btnAnimPracticeDropdownToggle) {
+            dom.btnAnimPracticeDropdownToggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (dom.animPracticeMenu) {
+                    const isVisible = dom.animPracticeMenu.style.display !== 'none';
+                    dom.animPracticeMenu.style.display = isVisible ? 'none' : 'flex';
+                }
+            });
+        }
+        document.addEventListener('click', function (e) {
+            if (dom.animPracticeMenu && !e.target.closest('#animPracticeBtnGroup')) {
+                dom.animPracticeMenu.style.display = 'none';
             }
         });
     }
@@ -1123,7 +1168,7 @@
                     <span class="concept-practice-desc">Solve canonical algorithmic challenge in the competitive problem-solving workspace</span>
                 </div>
                 <div class="concept-practice-actions">
-                    <a href="problem.html?id=${encodeURIComponent(lesson.practiceProblem.id)}" class="btn-concept-practice">
+                    <a href="problem.html?id=${encodeURIComponent(lesson.practiceProblem.problemId || lesson.practiceProblem.id)}" class="btn-concept-practice">
                         <span>Practice This Concept &rarr;</span>
                     </a>
                     ${lesson.animationId ? `
@@ -1260,12 +1305,19 @@
         // Bind Lesson Completion Toggle
         const toggleBtn = document.getElementById('btnToggleLessonComplete');
         if (toggleBtn) {
-            toggleBtn.addEventListener('click', function () {
+            toggleBtn.addEventListener('click', async function () {
                 const nowCompleted = toggleLessonCompletion(lesson.id);
                 renderTopicsSidebar();
                 renderCurrentLesson();
                 if (window.CodeArenaToast) {
                     window.CodeArenaToast.info(nowCompleted ? 'Lesson marked as complete' : 'Lesson marked as incomplete');
+                }
+                // Sync matching milestone with server roadmap when authenticated
+                if (window.CodeArenaAPI && window.CodeArenaAPI.authService && window.CodeArenaAPI.authService.isAuthenticated() && window.CodeArenaAPI.roadmapService) {
+                    window.CodeArenaAPI.roadmapService.updateTopicProgress(
+                        lesson.id,
+                        nowCompleted ? 'COMPLETED' : 'NOT_STARTED'
+                    ).catch(() => { });
                 }
             });
         }
@@ -1321,6 +1373,184 @@
         });
     }
 
+    // Baseline catalogue of verified problems in CodeArena
+    const CANONICAL_BASELINE = [
+        { id: 1, problemNumber: 1, slug: 'hello-world', title: 'Hello World', difficulty: 'Easy', category: 'Core Java', isActive: true },
+        { id: 2, problemNumber: 2, slug: 'swap-two-numbers', title: 'Swap Two Numbers', difficulty: 'Easy', category: 'Variables', isActive: true },
+        { id: 3, problemNumber: 3, slug: 'celsius-to-fahrenheit', title: 'Celsius to Fahrenheit', difficulty: 'Easy', category: 'Variables', isActive: true },
+        { id: 15, problemNumber: 15, slug: 'multiplication-table', title: 'Multiplication Table', difficulty: 'Easy', category: 'Loops', isActive: true },
+        { id: 16, problemNumber: 16, slug: 'sum-of-first-n-numbers', title: 'Sum of First N Natural Numbers', difficulty: 'Easy', category: 'Loops', isActive: true },
+        { id: 29, problemNumber: 29, slug: 'array-sum-and-average', title: 'Array Sum and Average', difficulty: 'Easy', category: 'Arrays', isActive: true },
+        { id: 30, problemNumber: 30, slug: 'find-maximum-and-minimum', title: 'Find Maximum and Minimum in Array', difficulty: 'Easy', category: 'Arrays', isActive: true },
+        { id: 38, problemNumber: 38, slug: 'recursive-factorial', title: 'Recursive Factorial', difficulty: 'Easy', category: 'Recursion', isActive: true },
+        { id: 39, problemNumber: 39, slug: 'recursive-fibonacci', title: 'Recursive N-th Fibonacci', difficulty: 'Easy', category: 'Recursion', isActive: true },
+        { id: 40, problemNumber: 40, slug: 'sum-of-digits-recursion', title: 'Recursive Sum of Digits', difficulty: 'Easy', category: 'Recursion', isActive: true },
+        { id: 41, problemNumber: 41, slug: 'class-and-object-creation', title: 'Student Record Class', difficulty: 'Easy', category: 'OOP', isActive: true },
+        { id: 43, problemNumber: 43, slug: 'inheritance-example', title: 'Vehicle and Car Inheritance', difficulty: 'Easy', category: 'OOP', isActive: true },
+        { id: 44, problemNumber: 44, slug: 'encapsulation-example', title: 'Bank Account Encapsulation', difficulty: 'Easy', category: 'OOP', isActive: true },
+        { id: 45, problemNumber: 45, slug: 'divide-by-zero-handling', title: 'Safe Integer Division', difficulty: 'Easy', category: 'Exceptions', isActive: true },
+        { id: 48, problemNumber: 48, slug: 'arraylist-basic-operations', title: 'ArrayList CRUD Operations', difficulty: 'Easy', category: 'Collections', isActive: true }
+    ];
+
+    let catalogCache = CANONICAL_BASELINE.slice();
+    let catalogFetchPromise = null;
+
+    async function fetchCatalogOnce() {
+        if (catalogFetchPromise) return catalogFetchPromise;
+
+        catalogFetchPromise = (async () => {
+            try {
+                if (window.CodeArenaAPI && window.CodeArenaAPI.problemService && typeof window.CodeArenaAPI.problemService.getProblems === 'function') {
+                    const res = await window.CodeArenaAPI.problemService.getProblems({ track: 'all', limit: 300 });
+                    if (res && res.data && Array.isArray(res.data.problems)) {
+                        catalogCache = res.data.problems;
+                    } else if (res && res.success && Array.isArray(res.data)) {
+                        catalogCache = res.data;
+                    } else if (res && res.problems && Array.isArray(res.problems)) {
+                        catalogCache = res.problems;
+                    }
+                } else {
+                    const resp = await fetch('/api/problems?track=all&limit=300');
+                    if (resp.ok) {
+                        const json = await resp.json();
+                        if (json && json.data && Array.isArray(json.data.problems)) {
+                            catalogCache = json.data.problems;
+                        } else if (json && json.problems) {
+                            catalogCache = json.problems;
+                        } else if (json && json.data) {
+                            catalogCache = json.data;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('[Learn] Catalogue lookup failed:', err);
+            }
+            return catalogCache || CANONICAL_BASELINE;
+        })();
+
+        return catalogFetchPromise;
+    }
+
+    function findInCatalog(catalog, identifier) {
+        if (!catalog || !Array.isArray(catalog) || !identifier) return null;
+        const clean = String(identifier).trim().toLowerCase();
+        return catalog.find(p => {
+            const idMatch = String(p.id).trim().toLowerCase() === clean;
+            const slugMatch = p.slug && p.slug.trim().toLowerCase() === clean;
+            const canonicalMatch = p.canonicalId && p.canonicalId.trim().toLowerCase() === clean;
+            const numberMatch = p.problemNumber && String(p.problemNumber).trim().toLowerCase() === clean;
+            const titleMatch = p.title && p.title.trim().toLowerCase() === clean;
+            return idMatch || slugMatch || canonicalMatch || numberMatch || titleMatch;
+        }) || null;
+    }
+
+    function applyAnimationPracticeUI(anim, catalog) {
+        if (!dom.btnAnimPracticeProblem) return;
+
+        // If no practice problem is configured for this concept, hide button completely
+        const primaryRef = anim && anim.practiceProblem;
+        const allRefs = (anim && Array.isArray(anim.practiceProblems) && anim.practiceProblems.length > 0)
+            ? anim.practiceProblems
+            : (primaryRef ? [primaryRef] : []);
+
+        if (!primaryRef || allRefs.length === 0) {
+            if (dom.animPracticeBtnGroup) dom.animPracticeBtnGroup.style.display = 'none';
+            dom.btnAnimPracticeProblem.style.display = 'none';
+            dom.btnAnimPracticeProblem.removeAttribute('href');
+            if (dom.btnAnimPracticeDropdownToggle) dom.btnAnimPracticeDropdownToggle.style.display = 'none';
+            if (dom.animPracticeMenu) dom.animPracticeMenu.style.display = 'none';
+            return;
+        }
+
+        // Validate against problem catalog
+        const currentCatalog = catalog || catalogCache || CANONICAL_BASELINE;
+        const validProblems = [];
+        for (const ref of allRefs) {
+            const probId = ref.problemId || ref.id || ref.slug;
+            const catalogItem = findInCatalog(currentCatalog, probId);
+            if (catalogItem) {
+                const isActive = catalogItem.isActive !== false && catalogItem.active !== false && catalogItem.is_active !== 0;
+                if (isActive) {
+                    validProblems.push({
+                        id: catalogItem.id,
+                        slug: catalogItem.slug || probId,
+                        title: catalogItem.title || ref.title || 'Practice Problem',
+                        difficulty: catalogItem.difficulty || 'Easy',
+                        badge: ref.badge || `Problem #${catalogItem.id || catalogItem.problemNumber || ''}`,
+                        subtitle: ref.subtitle || catalogItem.category || ''
+                    });
+                }
+            }
+        }
+
+        if (validProblems.length === 0) {
+            // No valid or active problem exists for this concept
+            if (dom.animPracticeBtnGroup) dom.animPracticeBtnGroup.style.display = 'none';
+            dom.btnAnimPracticeProblem.style.display = 'none';
+            dom.btnAnimPracticeProblem.removeAttribute('href');
+            if (dom.btnAnimPracticeDropdownToggle) dom.btnAnimPracticeDropdownToggle.style.display = 'none';
+            if (dom.animPracticeMenu) dom.animPracticeMenu.style.display = 'none';
+            return;
+        }
+
+        const primary = validProblems[0];
+        const targetHref = `problem.html?id=${encodeURIComponent(primary.slug || primary.id)}`;
+
+        dom.btnAnimPracticeProblem.href = targetHref;
+        dom.btnAnimPracticeProblem.style.display = 'inline-flex';
+        dom.btnAnimPracticeProblem.title = `Practice ${primary.title} on CodeArena`;
+        if (dom.btnAnimPracticeLabel) {
+            dom.btnAnimPracticeLabel.textContent = `Practice: ${primary.title}`;
+        }
+
+        if (dom.animPracticeBtnGroup) {
+            dom.animPracticeBtnGroup.style.display = 'inline-flex';
+            if (validProblems.length > 1) {
+                dom.animPracticeBtnGroup.classList.add('has-multiple');
+            } else {
+                dom.animPracticeBtnGroup.classList.remove('has-multiple');
+            }
+        }
+
+        // Render multiple matching problems dropdown if applicable
+        if (dom.btnAnimPracticeDropdownToggle && dom.animPracticeMenu) {
+            if (validProblems.length > 1) {
+                dom.btnAnimPracticeDropdownToggle.style.display = 'inline-flex';
+                let menuHtml = `<div class="anim-practice-menu-header">Matching Practice Problems (${validProblems.length})</div>`;
+                validProblems.forEach((p, idx) => {
+                    const isPrimary = idx === 0;
+                    menuHtml += `
+                        <a href="problem.html?id=${encodeURIComponent(p.slug || p.id)}" class="anim-practice-menu-item" role="menuitem">
+                            <div class="anim-practice-menu-title-row">
+                                <span>${isPrimary ? '★ ' : ''}${escapeHtml(p.title)}</span>
+                                <span class="anim-practice-menu-badge">${escapeHtml(p.difficulty)}</span>
+                            </div>
+                            ${p.subtitle ? `<span class="anim-practice-menu-desc">${escapeHtml(p.subtitle)}</span>` : ''}
+                        </a>
+                    `;
+                });
+                dom.animPracticeMenu.innerHTML = menuHtml;
+                dom.animPracticeMenu.style.display = 'none';
+            } else {
+                dom.btnAnimPracticeDropdownToggle.style.display = 'none';
+                dom.animPracticeMenu.style.display = 'none';
+            }
+        }
+    }
+
+    function updateAnimationPracticeUI(anim) {
+        // 1. Immediately apply synchronous update using cached catalog or baseline
+        applyAnimationPracticeUI(anim, catalogCache || CANONICAL_BASELINE);
+
+        // 2. Refresh asynchronously if catalog fetch completes with fresh backend data
+        fetchCatalogOnce().then(catalog => {
+            const currentActive = ANIMATIONS[state.activeAnimationIndex];
+            if (currentActive && anim && (currentActive.animId === anim.animId || currentActive.id === anim.id)) {
+                applyAnimationPracticeUI(anim, catalog);
+            }
+        }).catch(() => {});
+    }
+
     function loadAnimationByIndex(animIndex, stepIndex) {
         pause();
         state.activeAnimationIndex = animIndex;
@@ -1343,16 +1573,7 @@
         if (dom.animTitle) dom.animTitle.textContent = anim.title;
 
         // Practice button
-        if (dom.btnAnimPracticeProblem) {
-            if (anim.practiceProblem) {
-                const probId = anim.practiceProblem.problemId || anim.practiceProblem.id;
-                dom.btnAnimPracticeProblem.href = `problem.html?id=${encodeURIComponent(probId)}`;
-                dom.btnAnimPracticeProblem.style.display = 'inline-flex';
-                dom.btnAnimPracticeProblem.title = `Practice ${anim.practiceProblem.title} on CodeArena`;
-            } else {
-                dom.btnAnimPracticeProblem.style.display = 'none';
-            }
-        }
+        updateAnimationPracticeUI(anim);
 
         renderAnimationStage();
     }
@@ -1525,7 +1746,8 @@
         pause: pause,
         togglePlay: togglePlay,
         setPlaySpeed: setPlaySpeed,
-        isPlaying: () => state.isPlaying
+        isPlaying: () => state.isPlaying,
+        updateAnimationPracticeUI: updateAnimationPracticeUI
     };
 
     if (document.readyState === 'loading') {

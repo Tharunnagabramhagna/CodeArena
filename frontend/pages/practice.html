@@ -246,8 +246,13 @@
     <!-- CodeArena Pro Subscription Upgrade Modal -->
     <div class="subscription-modal-overlay" id="subscriptionModalOverlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="subModalTitle">
         <div class="subscription-modal">
+            <button type="button" class="sub-modal-close-btn" id="btnCloseSubModal" aria-label="Close modal" title="Close modal">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
             <div class="sub-modal-header">
-                <button type="button" class="sub-modal-close-btn" id="btnCloseSubModal" aria-label="Close modal">✕</button>
                 <span class="sub-modal-tag">⭐ CodeArena Pro Membership</span>
                 <h2 id="subModalTitle" class="sub-modal-title">Unlock Premium Challenges</h2>
                 <p class="sub-modal-subtitle">
@@ -283,10 +288,10 @@
                         <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> 50 Curated Premium DSA Problems</li>
                         <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> Advanced Graph, DP & Tree Challenges</li>
                         <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> Progressive 3-Level Problem Hints</li>
-                        <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> Priority Test Case Execution Preview</li>
+                        <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> Priority Server Judging Queue</li>
                     </ul>
                     <button type="button" class="pricing-action-btn btn-plan-select" data-plan="monthly" id="btnSelectMonthly">
-                        Activate Monthly ($5/mo)
+                        Request Monthly ($5/mo)
                     </button>
                 </div>
 
@@ -305,24 +310,22 @@
                         <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> 50 Curated Premium DSA Problems</li>
                         <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> Advanced Graph, DP & Tree Challenges</li>
                         <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> Progressive 3-Level Problem Hints</li>
-                        <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> 12-Month Pro Preview Membership</li>
+                        <li class="pricing-benefit-item"><span class="pricing-benefit-check">✓</span> 12-Month Full Pro Access</li>
                     </ul>
                     <button type="button" class="pricing-action-btn btn-plan-select" data-plan="annual" id="btnSelectAnnual">
-                        Activate Annual ($199/yr)
+                        Request Annual ($199/yr)
                     </button>
                 </div>
             </div>
 
             <div class="sub-modal-footer-disclaimer">
-                <span>ℹ️ Client-side preview membership. No real credit card or payment processing is executed. Clicking an activation button toggles your local session state to Pro preview.</span>
+                <span>ℹ️ CodeArena Pro access is verified server-side on your account. Self-service payment checkout is not connected in this deployment.</span>
             </div>
         </div>
     </div>
 
     <!-- Scripts: Services & Practice Controller -->
     <script src="../js/api.js"></script>
-    <script src="../js/basic_problems_data.js"></script>
-    <script src="../js/basic_practice_service.js"></script>
     <script src="../js/toast.js"></script>
     <script src="../js/practice_hub.js"></script>
     <script src="../js/auth_modal.js" defer></script>

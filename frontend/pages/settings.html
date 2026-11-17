@@ -53,12 +53,12 @@
             <section class="feature-hero" aria-labelledby="settings-heading">
                 <div class="feature-hero-text">
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                        <span class="preview-badge-pill">Local Preferences</span>
+                        <span class="preview-badge-pill" id="settingsSyncPill">Account Sync Ready</span>
                     </div>
                     <h1 id="settings-heading">Platform Preferences</h1>
                     <p>
-                        Customise your coding environment, CodeMirror editor behaviors, theme appearance, and interface layouts.
-                        Settings are safely saved to your local browser storage.
+                        Customise your coding environment, CodeMirror editor behaviors, theme appearance, and account profile.
+                        Preferences and profile details persist to your CodeArena account when logged in.
                     </p>
                 </div>
             </section>
@@ -164,7 +164,6 @@
                 <h2 id="sec-interface" class="settings-card-title">
                     <span>⚡</span>
                     <span>Interface & Practice Workflow</span>
-                    <span class="preview-badge-pill warning" style="margin-left: auto; font-size: 0.68rem;">Demonstration Preview</span>
                 </h2>
 
                 <div class="settings-row">
@@ -223,12 +222,11 @@
                 </div>
             </section>
 
-            <!-- Notification Preview -->
+            <!-- Notifications -->
             <section class="settings-card" aria-labelledby="sec-notifications">
                 <h2 id="sec-notifications" class="settings-card-title">
                     <span>🔔</span>
-                    <span>Notification Previews</span>
-                    <span class="preview-badge-pill warning" style="margin-left: auto; font-size: 0.68rem;">Demonstration Preview</span>
+                    <span>Notifications</span>
                 </h2>
 
                 <div class="settings-row">
@@ -254,26 +252,80 @@
                 </div>
             </section>
 
-            <!-- Account Profile (Honest Preview) -->
+            <!-- Account Profile & Security -->
             <section class="settings-card" aria-labelledby="sec-profile">
                 <h2 id="sec-profile" class="settings-card-title">
                     <span>👤</span>
-                    <span>Student Profile & Security</span>
+                    <span>Student Profile &amp; Security</span>
                 </h2>
 
-                <div style="background-color: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 16px;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="width: 44px; height: 44px; border-radius: 50%; background-color: var(--color-primary); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">
-                            GL
+                <div id="settingsGuestNotice" style="background-color: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background-color: var(--color-primary); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">
+                                ?
+                            </div>
+                            <div>
+                                <div style="font-weight: 600; color: var(--color-text-primary);">Not Logged In</div>
+                                <div style="font-size: 0.78rem; color: var(--color-text-muted);">Sign in to edit your profile, sync editor preferences, or change your password.</div>
+                            </div>
                         </div>
+                        <a href="login.html?redirect=settings.html" class="prob-btn-solve" style="text-decoration: none;">Log In →</a>
+                    </div>
+                </div>
+
+                <div id="settingsAccountFormWrap" style="display: none;">
+                    <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-bottom: 16px;">
+                        <div id="profileAvatarInitial" style="width: 44px; height: 44px; border-radius: 50%; background-color: var(--color-primary); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;">U</div>
                         <div>
-                            <div style="font-weight: 600; color: var(--color-text-primary);">Guest Learner (Session Profile)</div>
-                            <div style="font-size: 0.78rem; color: var(--color-text-muted);">Unauthenticated Browser Session · Phase 4 Preview</div>
+                            <div id="profileHeaderName" style="font-weight: 600; color: var(--color-text-primary);">Student</div>
+                            <div id="profileHeaderEmail" style="font-size: 0.78rem; color: var(--color-text-muted);">—</div>
                         </div>
                     </div>
-                    <p style="font-size: 0.82rem; color: var(--color-text-muted); margin: 10px 0 0 0; line-height: 1.45;">
-                        Full account profiles, password updates, multi-factor authentication, and verified progress syncing will connect through Spring Boot and MySQL in Phase 5.
-                    </p>
+
+                    <div class="settings-row">
+                        <div class="settings-row-info"><h4>Full Name</h4><p>Display name shown on your dashboard and profile.</p></div>
+                        <input type="text" id="profileFullName" class="feature-select" style="min-width: 240px;" placeholder="Your full name">
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-row-info"><h4>Preferred Practice Track</h4><p>Default learning track emphasis.</p></div>
+                        <select id="profilePreferredTrack" class="feature-select" style="min-width: 240px;">
+                            <option value="basic">Basic Java Track</option>
+                            <option value="dsa">DSA Track</option>
+                        </select>
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-row-info"><h4>Bio</h4><p>Short introduction or learning goal.</p></div>
+                        <input type="text" id="profileBio" class="feature-select" style="min-width: 240px;" placeholder="Java & Algorithms learner">
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-row-info"><h4>GitHub URL</h4><p>Optional GitHub profile link.</p></div>
+                        <input type="url" id="profileGithubUrl" class="feature-select" style="min-width: 240px;" placeholder="https://github.com/username">
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-row-info"><h4>LinkedIn URL</h4><p>Optional LinkedIn profile link.</p></div>
+                        <input type="url" id="profileLinkedinUrl" class="feature-select" style="min-width: 240px;" placeholder="https://linkedin.com/in/username">
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; margin: 12px 0 20px;">
+                        <button type="button" class="prob-btn-solve" id="btnSaveProfile" style="height: 36px; padding: 0 18px;">Save Profile</button>
+                    </div>
+
+                    <h3 style="font-size: 0.95rem; font-weight: 700; margin: 16px 0 10px; color: var(--color-text-primary); border-top: 1px solid var(--color-border); padding-top: 16px;">Change Password</h3>
+                    <div class="settings-row">
+                        <div class="settings-row-info"><h4>Current Password</h4><p>Enter your existing password.</p></div>
+                        <input type="password" id="pwdCurrent" class="feature-select" style="min-width: 240px;" autocomplete="current-password">
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-row-info"><h4>New Password</h4><p>At least 8 characters with uppercase, lowercase, digit, and symbol.</p></div>
+                        <input type="password" id="pwdNew" class="feature-select" style="min-width: 240px;" autocomplete="new-password">
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-row-info"><h4>Confirm New Password</h4><p>Re-enter your new password.</p></div>
+                        <input type="password" id="pwdConfirm" class="feature-select" style="min-width: 240px;" autocomplete="new-password">
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
+                        <button type="button" class="secondary-header-btn" id="btnChangePassword" style="height: 36px; padding: 0 18px;">Update Password</button>
+                    </div>
                 </div>
             </section>
 
@@ -317,6 +369,7 @@
     </footer>
 
     <!-- Scripts -->
+    <script src="../js/api.js"></script>
     <script src="../js/toast.js"></script>
     <script src="../js/settings.js"></script>
     <script src="../js/auth_modal.js" defer></script>

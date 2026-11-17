@@ -168,6 +168,17 @@
                             <span class="nav-label">Settings</span>
                         </a>
                     </li>
+                    <li class="sidebar-item" id="sidebarAdminPayments" style="display: none;">
+                        <a href="admin-payments.html" class="sidebar-link" data-tooltip="Payment Approvals">
+                            <span class="nav-icon" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="5" width="20" height="14" rx="2"/>
+                                    <line x1="2" y1="10" x2="22" y2="10"/>
+                                </svg>
+                            </span>
+                            <span class="nav-label">Payment Approvals</span>
+                        </a>
+                    </li>
                 </ul>
             </nav>
 
@@ -202,7 +213,7 @@
                         <input type="search" class="dash-search-input" id="dashSearchInput" placeholder="Search problems, topics, or anything..." aria-label="Search problems, topics, or anything" autocomplete="off">
                         <div class="dash-search-suggestions" id="dashSearchSuggestions" role="listbox" aria-label="Search suggestions" style="display: none;"></div>
                         <div class="search-feedback-popover" id="searchFeedbackPopover" style="display: none;" role="status">
-                            <p class="search-popover-text">Search index: Full-text search across 150+ Java challenges will be activated with the Java compiler integration in Phase 3.</p>
+                            <p class="search-popover-text">Type to search problems, roadmap milestones, or platform tools.</p>
                         </div>
                     </div>
                 </div>
@@ -225,7 +236,7 @@
                         <div class="notification-popover" id="notificationPopover" role="dialog" aria-label="Notifications" style="display: none;">
                             <div class="notif-popover-header">
                                 <h4 class="notif-popover-title">Notifications</h4>
-                                <span class="notif-popover-tag" id="notifHeaderTag">Sample (2 new)</span>
+                                <span class="notif-popover-tag" id="notifHeaderTag">2 Updates</span>
                             </div>
                             <div class="notif-preview-disclaimer" style="padding: 8px 14px; background: rgba(59, 130, 246, 0.08); border-bottom: 1px solid var(--border-color, #1e293b); font-size: 0.72rem; color: var(--color-text-muted, #94a3b8); display: flex; align-items: center; gap: 8px;">
                                 <span class="notif-disclaimer-icon" aria-hidden="true" style="display: inline-flex; align-items: center; color: var(--color-secondary-hover, #60a5fa); flex-shrink: 0;">
@@ -235,7 +246,7 @@
                                         <line x1="12" y1="8" x2="12.01" y2="8"></line>
                                     </svg>
                                 </span>
-                                <span>Sample platform announcements &mdash; live user alerts activate with backend integration.</span>
+                                <span>Platform announcements and active contest updates.</span>
                             </div>
                             <div class="notif-tabs" role="tablist">
                                 <button type="button" class="notif-tab-btn active" data-tab="all" role="tab">All</button>
@@ -245,27 +256,27 @@
                             <div class="notif-popover-body" id="notifListContainer">
                                 <div class="notif-item unread" data-category="system">
                                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
-                                        <div class="notif-item-title">Platform Update: Phase 6 Refinements Active</div>
-                                        <span class="sample-data-badge" style="font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; background: rgba(59, 130, 246, 0.15); color: var(--color-primary, #60a5fa); font-weight: 500;">Sample</span>
+                                        <div class="notif-item-title">Isolated OpenJDK Sandbox Active</div>
+                                        <span class="sample-data-badge" style="font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; background: rgba(59, 130, 246, 0.15); color: var(--color-primary, #60a5fa); font-weight: 500;">System</span>
                                     </div>
-                                    <div class="notif-item-desc">Advanced search suggestions, CodeMirror live preferences, and recently viewed problems are now live.</div>
-                                    <div class="notif-item-time">Platform Announcement</div>
+                                    <div class="notif-item-desc">Compile &amp; run Basic Track and DSA solutions in the online compiler or problem workspaces.</div>
+                                    <div class="notif-item-time">Platform</div>
                                 </div>
                                 <div class="notif-item unread" data-category="contests">
                                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
-                                        <div class="notif-item-title">Weekly Java Contest #42 Open</div>
-                                        <span class="sample-data-badge" style="font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; background: rgba(59, 130, 246, 0.15); color: var(--color-primary, #60a5fa); font-weight: 500;">Sample</span>
+                                        <div class="notif-item-title">Contest Registration Open</div>
+                                        <span class="sample-data-badge" style="font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; background: rgba(59, 130, 246, 0.15); color: var(--color-primary, #60a5fa); font-weight: 500;">Contest</span>
                                     </div>
-                                    <div class="notif-item-desc">Registration preview is open for the upcoming weekend tournament. Test your algorithmic speed!</div>
-                                    <div class="notif-item-time">Platform Announcement</div>
+                                    <div class="notif-item-desc">Visit the Coding Contests page to register for upcoming Java algorithmic tournaments.</div>
+                                    <div class="notif-item-time">Contests</div>
                                 </div>
                                 <div class="notif-item" data-category="system">
                                     <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
-                                        <div class="notif-item-title">Java 17 Curriculum Update</div>
-                                        <span class="sample-data-badge" style="font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; background: rgba(59, 130, 246, 0.15); color: var(--color-primary, #60a5fa); font-weight: 500;">Sample</span>
+                                        <div class="notif-item-title">Guided Java Roadmap Synced</div>
+                                        <span class="sample-data-badge" style="font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; background: rgba(59, 130, 246, 0.15); color: var(--color-primary, #60a5fa); font-weight: 500;">Curriculum</span>
                                     </div>
-                                    <div class="notif-item-desc">New interactive lessons on Java Lambdas and Streams are ready in the Learning Centre.</div>
-                                    <div class="notif-item-time">Platform Announcement</div>
+                                    <div class="notif-item-desc">Complete DSA challenges or lessons to advance your 30-milestone Java prerequisite path.</div>
+                                    <div class="notif-item-time">Learning</div>
                                 </div>
                             </div>
                             <div class="notif-footer-actions">
@@ -296,6 +307,7 @@
                                 <div class="menu-user-name" id="menuUserName">Student</div>
                                 <div class="menu-user-email" id="menuUserEmail">student@codearena.dev</div>
                                 <span class="menu-user-tier" id="menuUserTier">Free Tier</span>
+                                <div class="menu-user-expiry" id="menuUserExpiry" style="display: none; font-size: 0.74rem; color: #10b981; margin-top: 3px; font-weight: 500;"></div>
                             </div>
                             <div class="menu-divider"></div>
                             <a href="progress.html" class="menu-item" role="menuitem">
@@ -305,6 +317,10 @@
                             <a href="submissions.html" class="menu-item" role="menuitem">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                                 <span>Submissions</span>
+                            </a>
+                            <a href="upgrade.html" class="menu-item" role="menuitem" id="menuItemUpgrade">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                <span id="menuUpgradeText">Upgrade to Pro</span>
                             </a>
                             <a href="settings.html" class="menu-item" role="menuitem">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -322,6 +338,9 @@
 
             <!-- Dashboard Content Canvas -->
             <main class="dashboard-content" id="dashboardContent">
+                <!-- Subscription / Payment Status Banner -->
+                <div id="dashSubscriptionBannerContainer" style="margin-bottom: 20px;"></div>
+
                 <!-- Row 1: Welcome Banner -->
                 <section class="welcome-banner" aria-labelledby="welcomeHeading">
                     <div class="welcome-content">
@@ -497,7 +516,7 @@
                             <div class="stat-details">
                                 <span class="stat-label">Tournaments &amp; Contests</span>
                                 <span class="stat-value" id="dashStatContests">4</span>
-                                <span class="stat-desc">Preview tournaments</span>
+                                <span class="stat-desc">Scheduled tournaments</span>
                             </div>
                         </div>
                     </div>
@@ -685,14 +704,14 @@
                                 <span class="problem-arrow" aria-hidden="true">&rarr;</span>
                             </article>
 
-                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Fibonacci Number" data-id="fibonacci-number" data-track="basic">
+                            <article class="problem-item" tabindex="0" role="link" aria-label="Solve Fibonacci Series" data-id="fibonacci-series" data-track="basic">
                                 <div class="problem-item-badges">
                                     <span class="track-badge-tag track-badge-basic">Basic Track</span>
                                     <span class="diff-badge diff-easy">Easy</span>
                                 </div>
                                 <div class="problem-info">
-                                    <h3 class="problem-name">Fibonacci Number</h3>
-                                    <p class="problem-snippet">Compute the n-th Fibonacci number through iterative state updates.</p>
+                                    <h3 class="problem-name">Fibonacci Series</h3>
+                                    <p class="problem-snippet">Print the Fibonacci sequence up to N terms iteratively.</p>
                                 </div>
                                 <span class="problem-arrow" aria-hidden="true">&rarr;</span>
                             </article>
@@ -717,7 +736,7 @@
                                     </div>
                                     <div class="action-text-box">
                                         <h3 class="action-title">Open Compiler</h3>
-                                        <p class="action-subtitle">OpenJDK 17 preview execution</p>
+                                        <p class="action-subtitle">Isolated OpenJDK 17 execution</p>
                                     </div>
                                     <span class="action-arrow" aria-hidden="true">&rarr;</span>
                                 </a>
@@ -766,27 +785,29 @@
                             </div>
                         </section>
 
-                        <!-- Recent Activity Panel (Personal Progress - Empty State until real backend data) -->
+                        <!-- Recent Activity Panel -->
                         <section class="dash-panel recent-activity-panel" aria-labelledby="activityHeading">
                             <div class="panel-header">
                                 <h2 id="activityHeading" class="panel-title">Recent Activity</h2>
                                 <a href="submissions.html" class="panel-link">View Submissions →</a>
                             </div>
 
-                            <div class="panel-empty-state">
-                                <div class="empty-state-icon" aria-hidden="true">
-                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="10"/>
-                                        <polyline points="12 6 12 12 16 14"/>
-                                    </svg>
+                            <div id="dashRecentActivityBody">
+                                <div class="panel-empty-state">
+                                    <div class="empty-state-icon" aria-hidden="true">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <polyline points="12 6 12 12 16 14"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="empty-state-title">No activity yet</h3>
+                                    <p class="empty-state-description">
+                                        Your problem submissions, evaluation results, and practice history will appear here once you start coding.
+                                    </p>
+                                    <a href="practice.html" class="btn btn-primary btn-sm empty-state-btn">
+                                        Start Your First Challenge <span aria-hidden="true">→</span>
+                                    </a>
                                 </div>
-                                <h3 class="empty-state-title">No activity yet</h3>
-                                <p class="empty-state-description">
-                                    Your problem submissions, evaluation results, and practice history will appear here once you start coding.
-                                </p>
-                                <a href="practice.html" class="btn btn-primary btn-sm empty-state-btn">
-                                    Start Your First Challenge <span aria-hidden="true">→</span>
-                                </a>
                             </div>
                         </section>
                     </div>
@@ -797,8 +818,8 @@
                     <div class="panel-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
                         <div>
                             <h2 id="upcomingActivitiesHeading" class="panel-title" style="display: flex; align-items: center; gap: 8px;">
-                                <span>Upcoming Activities & Schedules</span>
-                                <span class="section-badge-tag" style="font-size: 0.68rem; text-transform: uppercase;">Sample Preview Schedule</span>
+                                <span>Upcoming Activities &amp; Schedules</span>
+                                <span class="section-badge-tag" style="font-size: 0.68rem; text-transform: uppercase;">Platform Schedule</span>
                             </h2>
                             <p style="font-size: 0.8rem; color: var(--color-text-muted); margin: 4px 0 0 0;">
                                 Upcoming tournaments, curated problem sprints, and interactive learning modules scheduled for November 2026.

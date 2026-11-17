@@ -28,8 +28,85 @@
     let activeConsoleTab = 'cases';
     let isEvaluating = false;
     let lastEvaluationResult = null;
+    let lastSampleResults = [];
     let toastTimer = null;
     let cachedProblemsList = [];
+    let isAnimationUnlocked = false;
+
+    function isSubmissionPending(sub) {
+        if (!sub) return false;
+        const status = String(sub.status || '').toUpperCase();
+        const verdict = String(sub.verdict || '').toUpperCase();
+        // SYSTEM_ERROR is strictly terminal regardless of PENDING verdict
+        if (status === 'SYSTEM_ERROR' || verdict === 'SYSTEM_ERROR') {
+            return false;
+        }
+        return status === 'QUEUED' || status === 'RUNNING' || verdict === 'PENDING';
+    }
+
+    function getSubmissionVerdictKey(sub) {
+        if (!sub) return 'PENDING';
+        if (typeof sub === 'string') {
+            return sub.toUpperCase();
+        }
+        const status = String(sub.status || '').toUpperCase();
+        const verdict = String(sub.verdict || '').toUpperCase();
+        if (status === 'SYSTEM_ERROR' || verdict === 'SYSTEM_ERROR') {
+            return 'SYSTEM_ERROR';
+        }
+        if (verdict && verdict !== 'PENDING') {
+            return verdict;
+        }
+        if (status && status !== 'PENDING' && status !== 'COMPLETED') {
+            return status;
+        }
+        return verdict || status || 'PENDING';
+    }
+
+    function formatVerdictBadge(rawVerdict, rawStatus) {
+        let key;
+        if (rawVerdict && typeof rawVerdict === 'object') {
+            key = getSubmissionVerdictKey(rawVerdict);
+        } else {
+            const s = String(rawStatus || '').toUpperCase();
+            const v = String(rawVerdict || '').toUpperCase();
+            if (s === 'SYSTEM_ERROR' || v === 'SYSTEM_ERROR') {
+                key = 'SYSTEM_ERROR';
+            } else if (v && v !== 'PENDING') {
+                key = v;
+            } else if (s && s !== 'PENDING') {
+                key = s;
+            } else {
+                key = v || s || 'PENDING';
+            }
+        }
+        key = String(key || 'PENDING').toUpperCase();
+        if (key === 'ACCEPTED' || key === 'PASSED') {
+            return { label: 'Accepted', badgeClass: 'diff-easy', verdictClass: 'verdict-preview-passed', isAccepted: true };
+        }
+        if (key === 'WRONG_ANSWER') {
+            return { label: 'Wrong Answer', badgeClass: 'diff-hard', verdictClass: 'verdict-failed', isAccepted: false };
+        }
+        if (key === 'COMPILATION_ERROR' || key === 'COMPILE_ERROR') {
+            return { label: 'Compilation Error', badgeClass: 'diff-hard', verdictClass: 'verdict-failed', isAccepted: false };
+        }
+        if (key === 'TIME_LIMIT_EXCEEDED') {
+            return { label: 'Time Limit Exceeded', badgeClass: 'diff-medium', verdictClass: 'verdict-warning', isAccepted: false };
+        }
+        if (key === 'MEMORY_LIMIT_EXCEEDED') {
+            return { label: 'Memory Limit Exceeded', badgeClass: 'diff-medium', verdictClass: 'verdict-warning', isAccepted: false };
+        }
+        if (key === 'RUNTIME_ERROR') {
+            return { label: 'Runtime Error', badgeClass: 'diff-hard', verdictClass: 'verdict-failed', isAccepted: false };
+        }
+        if (key === 'SYSTEM_ERROR') {
+            return { label: 'System Error', badgeClass: 'diff-medium', verdictClass: 'verdict-warning', isAccepted: false };
+        }
+        if (key === 'QUEUED' || key === 'RUNNING' || key === 'PENDING') {
+            return { label: key === 'RUNNING' ? 'Judging...' : (key === 'QUEUED' ? 'Queued' : 'Pending'), badgeClass: 'diff-medium', verdictClass: 'verdict-warning', isAccepted: false };
+        }
+        return { label: key.replace(/_/g, ' '), badgeClass: 'diff-medium', verdictClass: 'verdict-warning', isAccepted: false };
+    }
 
     // Stage 3.4.6 Flexible Layout State & Constants
     const LAYOUT_STORAGE_KEY = 'codearena_workspace_layout';
@@ -62,6 +139,17 @@
         loadReturnPreference();
         initSplittersAndLayout();
         bindGlobalEvents();
+        if (window.CodeArenaAPI && window.CodeArenaAPI.authService && typeof window.CodeArenaAPI.authService.getCurrentUser === 'function') {
+            await window.CodeArenaAPI.authService.getCurrentUser().catch(() => null);
+        }
+        document.addEventListener('codearena:auth-changed', function () {
+            if (currentProblem) {
+                loadSubmissions(currentProblem.id);
+                renderConsoleSubmissions(currentProblem.id);
+                initBookmarkButton();
+                checkAnimationUnlockStatus(currentProblem.id);
+            }
+        });
         await loadProblemFromUrl();
     }
 
@@ -102,6 +190,12 @@
             hintsSummaryBtnText: document.getElementById('hintsSummaryBtnText'),
             relatedConceptsGrid: document.getElementById('relatedConceptsGrid'),
             linkAnimateSolutionConcepts: document.getElementById('linkAnimateSolutionConcepts'),
+            workspaceAnimateEntry: document.getElementById('workspaceAnimateEntry'),
+            animateEntryIcon: document.getElementById('animateEntryIcon'),
+            animateEntryTag: document.getElementById('animateEntryTag'),
+            animateEntryHeadline: document.getElementById('animateEntryHeadline'),
+            animateEntryDesc: document.getElementById('animateEntryDesc'),
+            animateEntryActionText: document.getElementById('animateEntryActionText'),
             submissionAnimateBanner: document.getElementById('submissionAnimateBanner'),
             btnLaunchAnimateFromSubmissions: document.getElementById('btnLaunchAnimateFromSubmissions'),
             consoleSubmissionAnimateBanner: document.getElementById('consoleSubmissionAnimateBanner'),
@@ -251,7 +345,7 @@
                 currentProblem = res.data;
 
                 // Check Pro Access
-                const isProProblem = Boolean(currentProblem.isPremium);
+                const isProProblem = Boolean(currentProblem.isPremium || currentProblem.premium);
                 const userIsPro = Boolean(
                     window.CodeArenaAPI &&
                     window.CodeArenaAPI.subscriptionService &&
@@ -281,6 +375,7 @@
                 }
 
                 renderProblemData(currentProblem);
+                initBookmarkButton();
                 updateReturnToggleUI();
 
                 // URL tab and hint deep-linking support
@@ -349,22 +444,8 @@
         dom.premiumLockView.style.display = 'flex';
 
         function handleUpgrade(planId) {
-            if (window.CodeArenaAPI && window.CodeArenaAPI.subscriptionService) {
-                window.CodeArenaAPI.subscriptionService.upgradePlan(planId);
-                if (window.CodeArenaAPI.authService && !window.CodeArenaAPI.authService.isAuthenticated()) {
-                    window.CodeArenaAPI.authService.demoLogin(planId);
-                }
-                if (window.CodeArenaToast) {
-                    window.CodeArenaToast.success(`Activated ${planId === 'annual' ? 'Pro Annual ($199/yr)' : 'Pro Monthly ($5/mo)'} preview membership! Challenge unlocked.`);
-                }
-                dom.premiumLockView.style.display = 'none';
-                if (dom.problemReferencePane) dom.problemReferencePane.style.display = 'flex';
-                if (dom.codingWorkspacePane) dom.codingWorkspacePane.style.display = 'flex';
-                renderProblemData(problem);
-                updateRecentlyViewed(problem);
-                if (codeEditor && typeof codeEditor.refresh === 'function') {
-                    setTimeout(() => codeEditor.refresh(), 100);
-                }
+            if (window.CodeArenaToast) {
+                window.CodeArenaToast.info('CodeArena Pro membership must be granted by your server account. Client-side preview unlock is disabled.');
             }
         }
 
@@ -444,7 +525,7 @@
 
         // Access Badge (Free vs Pro)
         if (dom.problemAccessBadge) {
-            if (p.isPremium) {
+            if (p.isPremium || p.premium) {
                 dom.problemAccessBadge.textContent = '⭐ Pro';
                 dom.problemAccessBadge.className = 'access-badge access-pro';
             } else {
@@ -520,17 +601,8 @@
         // Render Related Concepts grid
         renderRelatedConcepts(p);
 
-        // Update Animate the Solution links with canonical problem ID
-        const animUrl = `solution-animation.html?id=${encodeURIComponent(p.id)}`;
-        if (dom.linkAnimateSolutionConcepts) {
-            dom.linkAnimateSolutionConcepts.href = animUrl;
-        }
-        if (dom.btnLaunchAnimateFromSubmissions) {
-            dom.btnLaunchAnimateFromSubmissions.href = animUrl;
-        }
-        if (dom.btnLaunchAnimateFromConsole) {
-            dom.btnLaunchAnimateFromConsole.href = animUrl;
-        }
+        // Authoritative server-side animation unlock verification
+        checkAnimationUnlockStatus(p.id);
 
         // Update hints summary button text
         if (dom.hintsSummaryBtnText) {
@@ -544,6 +616,106 @@
 
         // Reset any prior results
         clearResults();
+    }
+
+    /**
+     * Updates UI elements across problem workspace to reflect authoritative animation unlock state.
+     */
+    function updateAnimationUnlockState(isUnlocked, problemId) {
+        isAnimationUnlocked = !!isUnlocked;
+        const targetId = problemId || (currentProblem ? (currentProblem.id || currentProblem.slug) : '');
+        const animUrl = `solution-animation.html?id=${encodeURIComponent(targetId)}`;
+
+        if (dom.workspaceAnimateEntry) {
+            if (isUnlocked) {
+                dom.workspaceAnimateEntry.classList.remove('animate-entry-locked');
+                dom.workspaceAnimateEntry.classList.add('animate-entry-unlocked');
+            } else {
+                dom.workspaceAnimateEntry.classList.remove('animate-entry-unlocked');
+                dom.workspaceAnimateEntry.classList.add('animate-entry-locked');
+            }
+        }
+
+        if (dom.linkAnimateSolutionConcepts) {
+            if (isUnlocked) {
+                dom.linkAnimateSolutionConcepts.classList.remove('link-disabled');
+                dom.linkAnimateSolutionConcepts.setAttribute('aria-disabled', 'false');
+                dom.linkAnimateSolutionConcepts.title = 'Explore interactive algorithm walkthrough';
+                dom.linkAnimateSolutionConcepts.href = animUrl;
+            } else {
+                dom.linkAnimateSolutionConcepts.classList.add('link-disabled');
+                dom.linkAnimateSolutionConcepts.setAttribute('aria-disabled', 'true');
+                dom.linkAnimateSolutionConcepts.title = 'Solve this problem successfully to unlock its interactive algorithm walkthrough.';
+                dom.linkAnimateSolutionConcepts.href = '#';
+            }
+        }
+
+        if (dom.animateEntryIcon) {
+            if (isUnlocked) {
+                dom.animateEntryIcon.className = 'animate-entry-icon animate-entry-icon-unlocked';
+                dom.animateEntryIcon.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
+            } else {
+                dom.animateEntryIcon.className = 'animate-entry-icon animate-entry-icon-locked';
+                dom.animateEntryIcon.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
+            }
+        }
+
+        if (dom.animateEntryTag) {
+            if (isUnlocked) {
+                dom.animateEntryTag.className = 'animate-entry-tag animate-tag-unlocked';
+                dom.animateEntryTag.textContent = 'Visual Algorithm Walkthrough';
+            } else {
+                dom.animateEntryTag.className = 'animate-entry-tag animate-tag-locked';
+                dom.animateEntryTag.textContent = 'Animation Locked';
+            }
+        }
+
+        if (dom.animateEntryHeadline) {
+            dom.animateEntryHeadline.textContent = isUnlocked ? 'Animate the Solution →' : 'Animation Locked';
+        }
+
+        if (dom.animateEntryDesc) {
+            dom.animateEntryDesc.textContent = isUnlocked
+                ? 'Explore step-by-step interactive algorithm execution, pointer states & complexity analysis on a dedicated stage.'
+                : 'Solve this problem successfully to unlock its interactive algorithm walkthrough.';
+        }
+
+        if (dom.animateEntryActionText) {
+            dom.animateEntryActionText.textContent = isUnlocked ? 'Launch Animation →' : 'Locked 🔒';
+        }
+
+        if (dom.submissionAnimateBanner) {
+            dom.submissionAnimateBanner.style.display = isUnlocked ? 'flex' : 'none';
+            if (dom.btnLaunchAnimateFromSubmissions) {
+                dom.btnLaunchAnimateFromSubmissions.href = isUnlocked ? animUrl : '#';
+            }
+        }
+
+        if (dom.consoleSubmissionAnimateBanner) {
+            dom.consoleSubmissionAnimateBanner.style.display = isUnlocked ? 'flex' : 'none';
+            if (dom.btnLaunchAnimateFromConsole) {
+                dom.btnLaunchAnimateFromConsole.href = isUnlocked ? animUrl : '#';
+            }
+        }
+    }
+
+    /**
+     * Verifies server-side animation unlock status against database authoritative submissions.
+     */
+    async function checkAnimationUnlockStatus(problemId) {
+        updateAnimationUnlockState(false, problemId);
+        if (!problemId) return;
+
+        try {
+            if (window.CodeArenaAPI && window.CodeArenaAPI.problemService && typeof window.CodeArenaAPI.problemService.getAnimationUnlockStatus === 'function') {
+                const res = await window.CodeArenaAPI.problemService.getAnimationUnlockStatus(problemId);
+                const isUnlocked = !!(res && (res.unlocked === true || (res.data && res.data.unlocked === true)));
+                updateAnimationUnlockState(isUnlocked, problemId);
+            }
+        } catch (err) {
+            console.warn('[Workspace] Could not verify animation unlock status:', err);
+            updateAnimationUnlockState(false, problemId);
+        }
     }
 
     /**
@@ -612,24 +784,25 @@
      * Renders submission history inside the bottom test console panel.
      */
     async function renderConsoleSubmissions(problemId) {
-        if (!dom.consoleSubmissionsListContainer) return;
+        const container = (dom && dom.consoleSubmissionsListContainer) || (typeof document !== 'undefined' && document.getElementById('consoleSubmissionsListContainer'));
+        if (!container) return;
         if (!window.CodeArenaAPI || !window.CodeArenaAPI.submissionService || typeof window.CodeArenaAPI.submissionService.getSubmissions !== 'function') {
             return;
         }
         try {
             const res = await window.CodeArenaAPI.submissionService.getSubmissions(problemId);
             const subs = (res && res.success && res.data && Array.isArray(res.data.submissions)) ? res.data.submissions : [];
-            if (dom.consoleSubmissionsCountBadge) {
+            if (dom && dom.consoleSubmissionsCountBadge) {
                 dom.consoleSubmissionsCountBadge.textContent = `${subs.length} recorded`;
             }
-            if (dom.consoleSubmissionAnimateBanner) {
-                dom.consoleSubmissionAnimateBanner.style.display = (subs.length > 0) ? 'flex' : 'none';
+            if (dom && dom.consoleSubmissionAnimateBanner) {
+                dom.consoleSubmissionAnimateBanner.style.display = isAnimationUnlocked ? 'flex' : 'none';
             }
             if (subs.length === 0) {
-                dom.consoleSubmissionsListContainer.innerHTML = `
+                container.innerHTML = `
                     <div class="submissions-empty-state" style="padding: 1.5rem 1rem; text-align: center;">
                         <p class="submissions-empty-title" style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.35rem;">No Submissions Yet</p>
-                        <p class="submissions-empty-desc" style="font-size: 0.78rem; color: var(--color-text-muted);">Click &quot;Submit Solution&quot; to test your code and record simulated submissions.</p>
+                        <p class="submissions-empty-desc" style="font-size: 0.78rem; color: var(--color-text-muted);">Click &quot;Submit Solution&quot; to compile and judge your solution on the server.</p>
                     </div>
                 `;
                 return;
@@ -638,10 +811,10 @@
                 <table class="console-submissions-table">
                     <thead>
                         <tr>
-                            <th>Status</th>
+                            <th>Verdict</th>
                             <th>Runtime</th>
                             <th>Memory</th>
-                            <th>Language</th>
+                            <th>Test Cases</th>
                             <th>Submitted</th>
                         </tr>
                     </thead>
@@ -649,18 +822,30 @@
             `;
             subs.forEach(sub => {
                 const timeStr = formatSubmissionTime(sub.submittedAt);
+                const isPending = isSubmissionPending(sub);
+                const isSysErr = String(sub.status || '').toUpperCase() === 'SYSTEM_ERROR' || String(sub.verdict || '').toUpperCase() === 'SYSTEM_ERROR';
+                const vInfo = formatVerdictBadge(sub);
+                const runtimeVal = isPending ? 'Evaluating...'
+                    : ((sub.executionTime !== undefined && sub.executionTime !== null && sub.executionTime > 0) ? `${sub.executionTime} ms`
+                        : ((sub.executionTimeMs !== undefined && sub.executionTimeMs !== null && sub.executionTimeMs > 0) ? `${sub.executionTimeMs} ms` : '--'));
+                const memKb = sub.memoryUsed !== undefined && sub.memoryUsed !== null ? sub.memoryUsed : sub.memoryUsedKb;
+                const memVal = isPending ? '--' : (memKb > 0 ? `${memKb} KB` : '--');
+                const totalCases = sub.testCasesTotal || sub.totalCount || 0;
+                const passedCases = sub.testCasesPassed || sub.passedCount || 0;
+                const casesLabel = isPending ? 'Judging...' : (totalCases > 0 ? `${passedCases}/${totalCases}` : '--');
+                const diagExcerpt = sub.compilerOutput || sub.runtimeErrorLog || (isSysErr ? 'System error encountered during submission processing.' : '');
                 html += `
                     <tr>
-                        <td><span class="diff-badge diff-easy">Passed (Preview)</span></td>
-                        <td>${sub.runtimeMs || 14} ms</td>
-                        <td>${sub.memoryMb || 38.4} MB</td>
-                        <td>Java (OpenJDK 17)</td>
+                        <td><span class="diff-badge ${vInfo.badgeClass}"${diagExcerpt ? ` title="${escapeHtml(diagExcerpt)}"` : ''}>${escapeHtml(vInfo.label)}</span></td>
+                        <td>${escapeHtml(runtimeVal)}</td>
+                        <td>${escapeHtml(memVal)}</td>
+                        <td>${escapeHtml(casesLabel)}</td>
                         <td>${escapeHtml(timeStr)}</td>
                     </tr>
                 `;
             });
             html += `</tbody></table>`;
-            dom.consoleSubmissionsListContainer.innerHTML = html;
+            container.innerHTML = html;
         } catch (e) {
             console.warn('[CodeArena Workspace] Failed to render console submissions:', e);
         }
@@ -749,8 +934,23 @@
         if (dom.resultsCaseNumText) dom.resultsCaseNumText.textContent = `Case ${idx + 1}`;
         if (dom.resultsInputDisplay) dom.resultsInputDisplay.textContent = testCase.input || '';
         if (dom.resultsExpectedDisplay) dom.resultsExpectedDisplay.textContent = testCase.expectedOutput || '';
-        if (dom.resultsActualDisplay) {
-            dom.resultsActualDisplay.textContent = 'Execution unavailable — frontend preview only.';
+        const sampleRes = Array.isArray(lastSampleResults) ? lastSampleResults[idx] : null;
+        if (sampleRes) {
+            if (dom.resultsActualDisplay) {
+                dom.resultsActualDisplay.textContent = sampleRes.actualOutput !== undefined && sampleRes.actualOutput !== ''
+                    ? sampleRes.actualOutput
+                    : (sampleRes.stderr || '(No stdout)');
+            }
+            if (dom.resultsStatusBadge) {
+                dom.resultsStatusBadge.textContent = sampleRes.passed ? 'Passed' : (sampleRes.status || 'Failed');
+                dom.resultsStatusBadge.className = 'results-status-badge ' + (sampleRes.passed ? 'status-passed' : 'status-issue');
+            }
+        } else if (dom.resultsActualDisplay) {
+            dom.resultsActualDisplay.textContent = 'Not run yet — click "Run Sample Tests" to execute.';
+            if (dom.resultsStatusBadge) {
+                dom.resultsStatusBadge.textContent = 'Not Executed';
+                dom.resultsStatusBadge.className = 'results-status-badge';
+            }
         }
     }
 
@@ -2017,6 +2217,17 @@
                 handleSubmitSolution();
             });
         }
+
+        // Guard animation entry link when locked
+        if (dom.linkAnimateSolutionConcepts) {
+            dom.linkAnimateSolutionConcepts.addEventListener('click', function (e) {
+                if (!isAnimationUnlocked || dom.linkAnimateSolutionConcepts.classList.contains('link-disabled') || dom.linkAnimateSolutionConcepts.getAttribute('aria-disabled') === 'true') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showToast('Animation Locked: Solve this problem successfully to unlock its interactive algorithm walkthrough.', 'warning');
+                }
+            });
+        }
     }
 
     /**
@@ -2053,7 +2264,7 @@
 
         if (dom.verdictTitleText) dom.verdictTitleText.textContent = title;
         if (dom.verdictNoticeText) dom.verdictNoticeText.textContent = notice;
-        if (dom.verdictBadgeHonest) dom.verdictBadgeHonest.textContent = badge || 'Preview Only';
+        if (dom.verdictBadgeHonest) dom.verdictBadgeHonest.textContent = badge || 'Java 17';
     }
 
     /**
@@ -2061,26 +2272,27 @@
      */
     function clearResults() {
         lastEvaluationResult = null;
+        lastSampleResults = [];
 
-        setVerdictBanner('info', 'Ready for Sample Preview', 'Click "Run Sample Tests" (Ctrl+Enter)', 'Preview Only');
+        setVerdictBanner('info', 'Ready to Run Sample Tests', 'Click "Run Sample Tests" (Ctrl+Enter)', 'OpenJDK 17');
 
         if (dom.btnClearResults) dom.btnClearResults.style.display = 'none';
 
         if (dom.resultsStatusBadge) {
-            dom.resultsStatusBadge.textContent = 'Not Executed — Preview Only';
+            dom.resultsStatusBadge.textContent = 'Not Executed';
             dom.resultsStatusBadge.className = 'results-status-badge';
         }
 
         if (dom.resultsActualDisplay) {
-            dom.resultsActualDisplay.textContent = 'Execution unavailable — frontend preview only.';
+            dom.resultsActualDisplay.textContent = 'Not run yet — click "Run Sample Tests" to execute.';
         }
 
         if (dom.diagnosticsTerminalBox) {
-            dom.diagnosticsTerminalBox.textContent = 'No syntax or structural issues detected.\nClient-side structural checks assist with brace matching and class declarations before submission.';
+            dom.diagnosticsTerminalBox.textContent = 'Compiler & runtime diagnostics will appear here after running or submitting.';
         }
 
         if (dom.workspaceStatusText) {
-            dom.workspaceStatusText.textContent = 'Ready · Preview Mode';
+            dom.workspaceStatusText.textContent = 'Ready · Java (OpenJDK 17)';
         }
     }
 
@@ -2115,13 +2327,9 @@
      */
     function isGuestUser() {
         if (typeof window !== 'undefined' && window.__BYPASS_GUEST_GATE__) return false;
-        try {
-            const user = localStorage.getItem('codearena_auth_user') || sessionStorage.getItem('codearena_auth_user');
-            if (user) {
-                const parsed = JSON.parse(user);
-                if (parsed && (parsed.token || parsed.isLoggedIn)) return false;
-            }
-        } catch (e) { }
+        if (window.CodeArenaAPI && window.CodeArenaAPI.authService && typeof window.CodeArenaAPI.authService.isAuthenticated === 'function') {
+            return !window.CodeArenaAPI.authService.isAuthenticated();
+        }
         return true;
     }
 
@@ -2150,6 +2358,11 @@
     async function runSampleTests() {
         if (isEvaluating) return;
 
+        // Refresh live session before gating so freshly logged-in tabs don't bounce
+        if (window.CodeArenaAPI && window.CodeArenaAPI.authService && typeof window.CodeArenaAPI.authService.getCurrentUser === 'function' && !window.CodeArenaAPI.authService.isAuthenticated()) {
+            await window.CodeArenaAPI.authService.getCurrentUser().catch(() => null);
+        }
+
         // Guest Access Restriction: Require login to execute practice solutions
         if (isGuestUser()) {
             showGuestAuthPrompt('run');
@@ -2174,38 +2387,36 @@
                     <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
                     <path d="M12 2a10 10 0 0 1 10 10"></path>
                 </svg>
-                <span>Validating...</span>
+                <span>Running...</span>
             `;
         }
 
         if (dom.workspaceStatusText) {
-            dom.workspaceStatusText.textContent = 'Validating Java Structure...';
+            dom.workspaceStatusText.textContent = 'Compiling & Executing in Sandbox...';
         }
 
         switchConsoleTab('results');
-        setVerdictBanner('info', 'Validating Java Structure...', 'Analyzing curly braces and class declarations...', 'Validating');
+        setVerdictBanner('info', 'Compiling & Running...', 'Executing Java code in isolated OpenJDK sandbox...', 'Running');
 
         // 2. Handle Empty Source Code
         if (!sourceCode || !sourceCode.trim()) {
-            await new Promise(r => setTimeout(r, 260));
-
             setVerdictBanner('error', 'Empty Source Code', 'Source code cannot be empty · Please write Java code', 'Empty Source');
 
             if (dom.resultsStatusBadge) {
-                dom.resultsStatusBadge.textContent = 'Empty Source — Cannot Execute';
+                dom.resultsStatusBadge.textContent = 'Empty Source';
                 dom.resultsStatusBadge.className = 'results-status-badge status-issue';
             }
 
             if (dom.resultsActualDisplay) {
-                dom.resultsActualDisplay.textContent = 'Execution unavailable — source code is empty.';
+                dom.resultsActualDisplay.textContent = 'Source code is empty.';
             }
 
             if (dom.diagnosticsTerminalBox) {
-                dom.diagnosticsTerminalBox.textContent = '[Client-Side Structural Check: Empty Source]\nError: Source code cannot be empty.\nPlease provide a Java class declaration (e.g. class Solution) to validate structure.';
+                dom.diagnosticsTerminalBox.textContent = 'Error: Source code cannot be empty.';
             }
 
             if (dom.workspaceStatusText) {
-                dom.workspaceStatusText.textContent = 'Empty Source · Preview Mode';
+                dom.workspaceStatusText.textContent = 'Empty Source';
             }
 
             if (dom.btnClearResults) dom.btnClearResults.style.display = 'inline-block';
@@ -2215,92 +2426,171 @@
             return;
         }
 
-        // 3. Run Structural Diagnostics via compilerService.runCode
+        // 3. Execute on Backend via compilerService.runCode
         try {
             if (!window.CodeArenaAPI || !window.CodeArenaAPI.compilerService) {
                 throw new Error('compilerService not available');
             }
 
+            const customInputRaw = dom.customInputText ? dom.customInputText.value : '';
+            const hasCustomInput = Boolean(customInputRaw && customInputRaw.trim());
+
             const res = await window.CodeArenaAPI.compilerService.runCode({
+                problemId: currentProblem.id,
                 sourceCode: sourceCode,
-                language: 'java'
+                language: 'java',
+                stdin: hasCustomInput ? customInputRaw : undefined,
+                runSamples: !hasCustomInput
             });
+
+            if (res && (res.status === 401 || res.status === 403)) {
+                showGuestAuthPrompt('run');
+                setVerdictBanner('warning', 'Authentication Required', 'Please log in to execute sample test cases.', 'Auth Required');
+                return;
+            }
 
             const data = (res && res.data) ? res.data : null;
 
-            if (data && (data.status === 'COMPILE_ERROR' || (data.compileErrors && data.compileErrors.length > 0))) {
-                // Structural issue detected (unmatched curly braces or missing class)
-                const errorMsg = (data.compileErrors && data.compileErrors.length > 0)
-                    ? data.compileErrors[0].message
-                    : (data.stderr || 'Structural notice detected.');
+            if (res && (res.status === 503 || res.isUnavailable || (data && data.sandboxAvailable === false))) {
+                const reason = (res && res.message) || 'Isolated Docker Java execution runtime is unavailable on this server.';
+                lastSampleResults = [];
+                setVerdictBanner('warning', 'Execution Sandbox Unavailable (503)', reason, 'Sandbox Offline');
+                if (dom.resultsStatusBadge) {
+                    dom.resultsStatusBadge.textContent = 'Sandbox Unavailable';
+                    dom.resultsStatusBadge.className = 'results-status-badge status-issue';
+                }
+                if (dom.resultsActualDisplay) {
+                    dom.resultsActualDisplay.textContent = reason;
+                }
+                if (dom.diagnosticsTerminalBox) {
+                    dom.diagnosticsTerminalBox.textContent = '[503 Execution Sandbox Unavailable]\n' + reason;
+                }
+                if (dom.workspaceStatusText) {
+                    dom.workspaceStatusText.textContent = 'Sandbox Unavailable (Docker offline)';
+                }
+                if (dom.btnClearResults) dom.btnClearResults.style.display = 'inline-block';
+                showToast('Java execution sandbox unavailable (503)', 'warning');
+                return;
+            }
 
-                const lineNum = (data.compileErrors && data.compileErrors.length > 0) ? data.compileErrors[0].line : 1;
-                const colNum = (data.compileErrors && data.compileErrors.length > 0) ? data.compileErrors[0].column : 1;
+            if (!res || !res.success || !data) {
+                const errMsg = (res && res.message) || 'Could not execute code on the server.';
+                lastSampleResults = [];
+                setVerdictBanner('error', 'Execution Request Failed', errMsg, 'Error');
+                if (dom.resultsActualDisplay) dom.resultsActualDisplay.textContent = errMsg;
+                if (dom.diagnosticsTerminalBox) dom.diagnosticsTerminalBox.textContent = errMsg;
+                if (dom.workspaceStatusText) dom.workspaceStatusText.textContent = 'Execution Request Failed';
+                if (dom.btnClearResults) dom.btnClearResults.style.display = 'inline-block';
+                showToast(errMsg, 'error');
+                return;
+            }
 
-                setVerdictBanner('error', 'Structural Issue Detected', 'Client-side check: check curly braces or class declaration', 'Issue Detected');
+            if (data.status === 'COMPILATION_ERROR' || (data.compileErrors && data.compileErrors.length > 0)) {
+                lastSampleResults = [];
+                const firstErr = (data.compileErrors && data.compileErrors.length > 0)
+                    ? `Line ${data.compileErrors[0].line || 1}: ${data.compileErrors[0].message}`
+                    : (data.stderr || 'Compilation failed.');
+
+                setVerdictBanner('error', 'Compilation Error', firstErr, 'Compile Error');
 
                 if (dom.resultsStatusBadge) {
-                    dom.resultsStatusBadge.textContent = 'Structural Issue Detected — Preview Only';
+                    dom.resultsStatusBadge.textContent = 'Compilation Error';
                     dom.resultsStatusBadge.className = 'results-status-badge status-issue';
                 }
 
                 if (dom.resultsActualDisplay) {
-                    dom.resultsActualDisplay.textContent = 'Execution unavailable — frontend preview only.';
+                    dom.resultsActualDisplay.textContent = data.stderr || firstErr;
                 }
 
                 if (dom.diagnosticsTerminalBox) {
-                    dom.diagnosticsTerminalBox.textContent = `[Client-Side Structural Check: Issue Detected]\n${data.stderr || 'Syntax or structure error detected.'}\n\nLine ${lineNum}, Col ${colNum}: ${errorMsg}\n\nNote: Client-side structural checks assist with brace matching and class declarations before submission. Real remote Java compilation requires Phase 4 backend integration.`;
+                    const errLines = (data.compileErrors || [])
+                        .map(e => `Line ${e.line || 1}, Col ${e.column || 1}: ${e.message}`)
+                        .join('\n');
+                    dom.diagnosticsTerminalBox.textContent = `[javac Compilation Error]\n${data.stderr || ''}${errLines ? '\n\n' + errLines : ''}`.trim();
                 }
 
                 if (dom.workspaceStatusText) {
-                    dom.workspaceStatusText.textContent = 'Structural Issue Detected · Preview Mode';
+                    dom.workspaceStatusText.textContent = 'Compilation Error';
                 }
 
                 if (dom.btnClearResults) dom.btnClearResults.style.display = 'inline-block';
-
-                lastEvaluationResult = { status: 'issue', details: data };
-                showToast('Structural notice: please check braces or class declaration', 'error');
-
-            } else {
-                // Structural checks passed!
-                const hasCustomInput = Boolean(dom.customInputText && dom.customInputText.value.trim());
-                const customInputStr = hasCustomInput ? dom.customInputText.value.trim() : null;
-
-                setVerdictBanner('success', 'Structural Check Passed', hasCustomInput ? 'Custom input registered · Execution engine connects in Phase 4' : 'Code structure is valid · Java execution engine connects in Phase 4', 'Preview Only');
-
-                if (dom.resultsStatusBadge) {
-                    dom.resultsStatusBadge.textContent = 'Not Executed — Preview Only';
-                    dom.resultsStatusBadge.className = 'results-status-badge status-passed';
-                }
-
-                if (dom.resultsActualDisplay) {
-                    dom.resultsActualDisplay.textContent = 'Execution unavailable — frontend preview only.';
-                }
-
-                if (hasCustomInput && dom.resultsInputDisplay) {
-                    dom.resultsInputDisplay.textContent = customInputStr;
-                }
-
-                if (dom.diagnosticsTerminalBox) {
-                    const customNote = hasCustomInput ? `\n• Custom Stdin Stream: Provided (${customInputStr.length} chars)` : '';
-                    dom.diagnosticsTerminalBox.textContent = `[Client-Side Structural Check: Passed]\nNo syntax or structural issues detected in editor source.\n• Class declaration verified (class Solution)\n• Curly braces balanced ({ ... })\n• Syntax mode: Java (OpenJDK 17)${customNote}\n\nPreview Notice: Client-side structural checks assist with brace matching and class declarations before submission. Arbitrary Java compilation, System.in streaming, and test-case execution connect in Phase 4.`;
-                }
-
-                if (dom.workspaceStatusText) {
-                    dom.workspaceStatusText.textContent = 'Structural Check Passed · Preview Only';
-                }
-
-                if (dom.btnClearResults) dom.btnClearResults.style.display = 'inline-block';
-
-                lastEvaluationResult = { status: 'passed', details: data };
-                showToast('Structural check passed (Preview Only)', 'success');
+                lastEvaluationResult = { status: 'COMPILATION_ERROR', details: data };
+                showToast('Compilation error — check Diagnostics', 'error');
+                return;
             }
 
+            if (Array.isArray(data.sampleResults) && data.sampleResults.length > 0) {
+                lastSampleResults = data.sampleResults;
+                const passedCount = Number(data.passedCount || 0);
+                const totalCount = Number(data.totalCount || data.sampleResults.length);
+                const allPassed = passedCount === totalCount && data.status === 'SUCCESS';
+                const firstFailedIdx = data.sampleResults.findIndex(r => !r.passed);
+                selectTestCase(firstFailedIdx >= 0 ? firstFailedIdx : activeCaseIndex);
+
+                setVerdictBanner(
+                    allPassed ? 'success' : 'error',
+                    allPassed ? `Sample Tests Passed (${passedCount}/${totalCount})` : `Sample Output Mismatch (${passedCount}/${totalCount} Passed)`,
+                    `Runtime: ${data.executionTimeMs || 0} ms · OpenJDK Sandbox`,
+                    allPassed ? 'Passed' : (data.status || 'Wrong Answer')
+                );
+
+                if (dom.diagnosticsTerminalBox) {
+                    const diagLines = data.sampleResults.map(r =>
+                        `Case ${r.caseNumber}: ${r.passed ? 'PASSED' : r.status} (${r.executionTimeMs || 0} ms)${r.stderr ? '\n  stderr: ' + r.stderr : ''}`
+                    ).join('\n');
+                    dom.diagnosticsTerminalBox.textContent = diagLines || 'Sample execution finished.';
+                }
+
+                if (dom.workspaceStatusText) {
+                    dom.workspaceStatusText.textContent = allPassed
+                        ? `Samples Passed (${passedCount}/${totalCount}) · ${data.executionTimeMs || 0} ms`
+                        : `${passedCount}/${totalCount} Samples Passed`;
+                }
+
+                if (dom.btnClearResults) dom.btnClearResults.style.display = 'inline-block';
+                lastEvaluationResult = { status: data.status, details: data };
+                showToast(allPassed ? 'All sample tests passed!' : `${passedCount}/${totalCount} sample test cases passed`, allPassed ? 'success' : 'warning');
+            } else {
+                // Custom stdin run or single run
+                lastSampleResults = [];
+                const isSuccess = data.status === 'SUCCESS';
+                setVerdictBanner(
+                    isSuccess ? 'success' : 'error',
+                    isSuccess ? (hasCustomInput ? 'Custom Input Executed' : 'Execution Completed') : (data.status || 'Runtime Error'),
+                    `Runtime: ${data.executionTimeMs || 0} ms · Exit code: ${data.exitCode ?? 0}`,
+                    data.status || 'Done'
+                );
+
+                if (dom.resultsStatusBadge) {
+                    dom.resultsStatusBadge.textContent = data.status || 'Executed';
+                    dom.resultsStatusBadge.className = 'results-status-badge ' + (isSuccess ? 'status-passed' : 'status-issue');
+                }
+                if (dom.resultsInputDisplay && hasCustomInput) {
+                    dom.resultsInputDisplay.textContent = customInputRaw;
+                }
+                if (hasCustomInput && dom.resultsExpectedDisplay) {
+                    dom.resultsExpectedDisplay.textContent = '(Custom Input Run)';
+                }
+                if (dom.resultsActualDisplay) {
+                    dom.resultsActualDisplay.textContent = data.stdout ? data.stdout : (data.stderr ? data.stderr : '(No output)');
+                }
+                if (dom.diagnosticsTerminalBox) {
+                    dom.diagnosticsTerminalBox.textContent = data.stderr
+                        ? `[stderr]\n${data.stderr}`
+                        : `Program exited cleanly with code ${data.exitCode ?? 0} in ${data.executionTimeMs || 0} ms.`;
+                }
+                if (dom.workspaceStatusText) {
+                    dom.workspaceStatusText.textContent = `${data.status || 'Executed'} · ${data.executionTimeMs || 0} ms`;
+                }
+                if (dom.btnClearResults) dom.btnClearResults.style.display = 'inline-block';
+                lastEvaluationResult = { status: data.status, details: data };
+                showToast(isSuccess ? 'Code executed cleanly' : `Finished with ${data.status}`, isSuccess ? 'success' : 'warning');
+            }
         } catch (err) {
-            console.error('[CodeArena Workspace] Structural validation failed:', err);
-            setVerdictBanner('warning', 'Validation Offline', 'Could not run client-side structural validation', 'Offline');
+            console.error('[CodeArena Workspace] Sample execution failed:', err);
+            setVerdictBanner('error', 'Server Execution Error', err && err.message ? err.message : 'Unable to reach execution server.', 'Error');
             if (dom.workspaceStatusText) {
-                dom.workspaceStatusText.textContent = 'Ready · Preview Mode';
+                dom.workspaceStatusText.textContent = 'Execution Error';
             }
         } finally {
             finishEvaluating();
@@ -2329,8 +2619,107 @@
         isEvaluating = false;
     }
 
+    let activePollSubmissionId = null;
+    let pollAbortController = null;
+
+    /**
+     * Resilient polling loop for in-flight submissions:
+     * - Continues dynamically while QUEUED or RUNNING without artificial iteration limits.
+     * - Stops only on genuine terminal status (COMPLETED, SYSTEM_ERROR, or final verdict).
+     * - Adapts polling delay with backoff (1000ms -> 1500ms -> 2000ms).
+     * - Handles temporary network glitches without declaring false failures.
+     * - Prevents duplicate concurrent polling loops for the same submission.
+     */
+    async function pollSubmissionUntilTerminal(submissionId, problemId) {
+        if (!submissionId || submissionId <= 0) return null;
+        if (activePollSubmissionId === submissionId) {
+            return null; // Deduplication: already actively polling this submission
+        }
+
+        if (pollAbortController) {
+            pollAbortController.abort();
+        }
+        pollAbortController = new AbortController();
+        const signal = pollAbortController.signal;
+        activePollSubmissionId = submissionId;
+
+        let delayMs = 1000;
+        let consecutiveErrors = 0;
+        const pollStart = Date.now();
+        let finalSub = null;
+
+        try {
+            while (!signal.aborted) {
+                await new Promise(r => setTimeout(r, delayMs));
+                if (signal.aborted) break;
+
+                const elapsedSec = Math.round((Date.now() - pollStart) / 1000);
+                const timerBadge = document.getElementById('evaluatingTimerBadge');
+                if (timerBadge) timerBadge.textContent = `${elapsedSec}s elapsed`;
+
+                try {
+                    const pollRes = await window.CodeArenaAPI.submissionService.getSubmissionById(submissionId);
+                    if (signal.aborted) break;
+
+                    if (pollRes && pollRes.success && pollRes.data) {
+                        consecutiveErrors = 0;
+                        finalSub = pollRes.data;
+
+                        const noticeEl = document.getElementById('evaluatingNoticeText');
+                        if (noticeEl && finalSub.status === 'RUNNING') {
+                            noticeEl.textContent = 'Executing solution against public and confidential test cases in Docker container...';
+                        }
+
+                        const isTerminal = finalSub.status === 'COMPLETED' ||
+                            finalSub.status === 'SYSTEM_ERROR' ||
+                            finalSub.verdict === 'SYSTEM_ERROR' ||
+                            !isSubmissionPending(finalSub);
+
+                        if (isTerminal) {
+                            break;
+                        }
+
+                        // Adaptive backoff: gently slow polling interval after prolonged runtime
+                        if (elapsedSec > 25) {
+                            delayMs = 2000;
+                        } else if (elapsedSec > 10) {
+                            delayMs = 1500;
+                        } else {
+                            delayMs = 1000;
+                        }
+
+                        if (elapsedSec > 90 && noticeEl) {
+                            noticeEl.textContent = 'Judging is taking longer than usual on server. Processing continues in background...';
+                        }
+                    } else if (pollRes && (pollRes.status === 401 || pollRes.status === 403)) {
+                        console.warn('[CodeArena Workspace] Polling stopped: unauthenticated session.');
+                        break;
+                    } else {
+                        // Temporary server/network glitch: do NOT abort or declare failure
+                        consecutiveErrors++;
+                        console.warn(`[CodeArena Workspace] Polling encountered temporary non-success (#${consecutiveErrors}). Retrying...`);
+                        delayMs = Math.min(3000, delayMs + 500);
+                    }
+                } catch (netErr) {
+                    if (signal.aborted) break;
+                    consecutiveErrors++;
+                    console.warn(`[CodeArena Workspace] Polling network glitch (#${consecutiveErrors}). Retrying...`);
+                    delayMs = Math.min(3000, delayMs + 500);
+                }
+            }
+        } finally {
+            if (activePollSubmissionId === submissionId) {
+                activePollSubmissionId = null;
+            }
+        }
+
+        return finalSub;
+    }
+
     /**
      * Loads session-scoped submission history for the problem.
+     * If the most recent submission is still QUEUED or RUNNING on page load/revisit,
+     * automatically connects to background polling so the user never loses progress.
      */
     async function loadSubmissions(problemId) {
         if (!problemId) return;
@@ -2343,9 +2732,44 @@
             const res = await window.CodeArenaAPI.submissionService.getSubmissions(problemId);
             if (res && res.success && res.data && Array.isArray(res.data.submissions)) {
                 renderSubmissionsList(res.data.submissions);
+
+                // Reconnection: automatically resume polling if latest submission is still in-flight
+                if (res.data.submissions.length > 0) {
+                    const latest = res.data.submissions[0];
+                    const isPending = isSubmissionPending(latest);
+                    if (isPending && activePollSubmissionId !== latest.id && !isEvaluating) {
+                        resumeBackgroundPolling(latest.id, problemId);
+                    }
+                }
             }
         } catch (err) {
             console.warn('[CodeArena Workspace] Failed to load session submissions:', err);
+        }
+    }
+
+    async function resumeBackgroundPolling(submissionId, problemId) {
+        if (dom.workspaceStatusText) {
+            dom.workspaceStatusText.textContent = 'Judging in progress on Server...';
+        }
+        const finalSub = await pollSubmissionUntilTerminal(submissionId, problemId);
+        if (finalSub && currentProblem && (currentProblem.id === problemId || currentProblem.slug === problemId)) {
+            const res = await window.CodeArenaAPI.submissionService.getSubmissions(problemId);
+            if (res && res.success && res.data && Array.isArray(res.data.submissions)) {
+                renderSubmissionsList(res.data.submissions);
+            }
+            await renderConsoleSubmissions(problemId);
+            const vInfo = formatVerdictBadge(finalSub);
+            if (dom.workspaceStatusText) {
+                const passedCases = finalSub.testCasesPassed !== undefined ? finalSub.testCasesPassed : (finalSub.passedCount || 0);
+                const totalCases = finalSub.testCasesTotal !== undefined ? finalSub.testCasesTotal : (finalSub.totalCount || 0);
+                const runtimeVal = (finalSub.executionTime !== undefined && finalSub.executionTime !== null && finalSub.executionTime > 0) ? `${finalSub.executionTime} ms`
+                    : ((finalSub.executionTimeMs !== undefined && finalSub.executionTimeMs !== null && finalSub.executionTimeMs > 0) ? `${finalSub.executionTimeMs} ms` : '--');
+                dom.workspaceStatusText.textContent = `Last Verdict: ${vInfo.label} (${passedCases}/${totalCases || 4} passed · ${runtimeVal})`;
+            }
+            if (vInfo.isAccepted) {
+                updateAnimationUnlockState(true, currentProblem.id);
+            }
+            showToast(`Submission Verdict: ${vInfo.label}`, vInfo.isAccepted ? 'success' : 'warning');
         }
     }
 
@@ -2353,20 +2777,21 @@
      * Renders the list of guest session submissions into the submissions panel.
      */
     function renderSubmissionsList(submissions) {
-        if (dom.submissionsTabTag) {
+        if (dom && dom.submissionsTabTag) {
             dom.submissionsTabTag.textContent = (submissions && submissions.length > 0)
-                ? `Preview (${submissions.length})`
-                : 'Preview';
+                ? `${submissions.length}`
+                : '0';
         }
 
-        if (!dom.submissionsListContainer) return;
+        const container = (dom && dom.submissionsListContainer) || (typeof document !== 'undefined' && document.getElementById('submissionsListContainer'));
+        if (!container) return;
 
-        if (dom.submissionAnimateBanner) {
-            dom.submissionAnimateBanner.style.display = (submissions && submissions.length > 0) ? 'flex' : 'none';
+        if (dom && dom.submissionAnimateBanner) {
+            dom.submissionAnimateBanner.style.display = isAnimationUnlocked ? 'flex' : 'none';
         }
 
         if (!submissions || submissions.length === 0) {
-            dom.submissionsListContainer.innerHTML = `
+            container.innerHTML = `
                 <div class="submissions-empty-state">
                     <div class="submissions-empty-icon">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -2375,39 +2800,121 @@
                         </svg>
                     </div>
                     <p class="submissions-empty-title">No submissions yet for this problem</p>
-                    <p class="submissions-empty-desc">Click &quot;Submit Solution&quot; to demonstrate simulated guest submission evaluation.</p>
+                    <p class="submissions-empty-desc">Click &quot;Submit Solution&quot; to evaluate your code against the server judge suite.</p>
                 </div>
             `;
             return;
         }
 
-        dom.submissionsListContainer.innerHTML = '';
+        container.innerHTML = '';
         submissions.forEach(function (sub) {
             const card = document.createElement('div');
-            card.className = 'submission-card-item';
+            const isPending = isSubmissionPending(sub);
+            const isSysErr = String(sub.status || '').toUpperCase() === 'SYSTEM_ERROR' || String(sub.verdict || '').toUpperCase() === 'SYSTEM_ERROR';
+            card.className = isPending ? 'submission-card-item submission-card-evaluating' : 'submission-card-item';
+            card.style.cursor = 'pointer';
+            card.setAttribute('title', 'Click to inspect submitted code and execution details');
+            card.addEventListener('click', function () {
+                openSubmissionCodeModal(sub);
+            });
             const timeStr = formatSubmissionTime(sub.submittedAt);
-            const passedCases = sub.sampleTestCasesPassed || 0;
-            const totalCases = sub.totalSampleTestCases || 0;
+            const vInfo = formatVerdictBadge(sub);
+            const passedCases = sub.testCasesPassed !== undefined ? sub.testCasesPassed : (sub.passedCount || 0);
+            const totalCases = sub.testCasesTotal !== undefined ? sub.testCasesTotal : (sub.totalCount || 0);
+            const runtimeVal = isPending ? 'Evaluating...'
+                : ((sub.executionTime !== undefined && sub.executionTime !== null && sub.executionTime > 0) ? `${sub.executionTime} ms`
+                    : ((sub.executionTimeMs !== undefined && sub.executionTimeMs !== null && sub.executionTimeMs > 0) ? `${sub.executionTimeMs} ms` : '--'));
+            const memKb = sub.memoryUsed !== undefined && sub.memoryUsed !== null ? sub.memoryUsed : sub.memoryUsedKb;
+            const memVal = isPending ? '--' : (memKb > 0 ? `${memKb} KB` : '--');
+            const diagExcerpt = sub.compilerOutput || sub.runtimeErrorLog || (isSysErr ? 'System error encountered during submission processing.' : '');
 
             card.innerHTML = `
                 <div class="submission-card-header">
-                    <div class="submission-verdict-tag verdict-preview-passed">
-                        <span class="status-dot"></span>
-                        <span>PREVIEW PASSED</span>
+                    <div class="submission-verdict-tag ${vInfo.verdictClass}">
+                        <span class="status-dot"${isPending ? ' style="animation: pulse-dot 1s infinite alternate;"' : ''}></span>
+                        <span>${escapeHtml(vInfo.label)}</span>
                     </div>
                     <span class="submission-time-label">${escapeHtml(timeStr)}</span>
                 </div>
                 <div class="submission-card-meta">
-                    <span class="submission-meta-badge">Target: Java (OpenJDK 17)</span>
-                    <span class="submission-meta-badge">Sample Cases: ${passedCases}/${totalCases} Preview</span>
-                    <span class="submission-meta-pill session-pill">Temporary Session Record</span>
+                    <span class="submission-meta-badge">Java (OpenJDK 17)</span>
+                    ${totalCases > 0 ? `<span class="submission-meta-badge">Cases: ${passedCases}/${totalCases}</span>` : ''}
+                    <span class="submission-meta-badge">Runtime: ${escapeHtml(runtimeVal)}</span>
+                    <span class="submission-meta-badge">Memory: ${escapeHtml(memVal)}</span>
                 </div>
-                <div class="submission-card-notice">
-                    <strong>Frontend Demonstration:</strong> Public sample cases demonstrated. Hidden backend test suite evaluation and persistent account history connect in Phase 4.
-                </div>
+                ${isPending ? `
+                    <div class="submission-card-notice" style="display: flex; align-items: center; gap: 8px; color: #F59E0B;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-icon" style="animation: spin 1s linear infinite;" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg>
+                        <span>Evaluating solution against complete test suite in Docker OpenJDK sandbox...</span>
+                    </div>
+                ` : (diagExcerpt ? `<div class="submission-card-notice"><code>${escapeHtml(diagExcerpt.slice(0, 260))}</code></div>` : '')}
             `;
-            dom.submissionsListContainer.appendChild(card);
+            container.appendChild(card);
         });
+    }
+
+    function openSubmissionCodeModal(sub) {
+        let modal = document.getElementById('submissionCodeModalOverlay');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'submissionCodeModalOverlay';
+            modal.className = 'workspace-modal-overlay';
+            modal.style.cssText = 'display: flex; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 9999; padding: 20px;';
+            document.body.appendChild(modal);
+        }
+        const isSysErr = String(sub.status || '').toUpperCase() === 'SYSTEM_ERROR' || String(sub.verdict || '').toUpperCase() === 'SYSTEM_ERROR';
+        const vInfo = formatVerdictBadge(sub);
+        const code = sub.sourceCode || sub.code || '// No source code recorded';
+        const passedCases = sub.testCasesPassed !== undefined ? sub.testCasesPassed : (sub.passedCount || 0);
+        const totalCases = sub.testCasesTotal !== undefined ? sub.testCasesTotal : (sub.totalCount || 0);
+        const runtimeVal = (sub.executionTime !== undefined && sub.executionTime !== null && sub.executionTime > 0) ? `${sub.executionTime} ms`
+            : ((sub.executionTimeMs !== undefined && sub.executionTimeMs !== null && sub.executionTimeMs > 0) ? `${sub.executionTimeMs} ms` : '--');
+        const timeStr = formatSubmissionTime(sub.submittedAt);
+        const diagExcerpt = sub.compilerOutput || sub.runtimeErrorLog || (isSysErr ? 'System error encountered during submission processing.' : '');
+
+        modal.innerHTML = `
+            <div class="workspace-modal" style="max-width: 720px; width: 100%; padding: 22px; border-radius: 12px; display: flex; flex-direction: column; gap: 14px; background: var(--color-bg-surface, #0F172A); border: 1px solid var(--color-border, #1E293B);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <h2 class="workspace-modal-title" style="margin: 0; font-size: 1.15rem;">Submission Details</h2>
+                        <span class="submission-verdict-tag ${vInfo.verdictClass}">${escapeHtml(vInfo.label)}</span>
+                    </div>
+                    <button type="button" id="btnCloseSubCodeModal" style="background: none; border: none; color: #94A3B8; font-size: 24px; cursor: pointer; line-height: 1;">&times;</button>
+                </div>
+                <div style="display: flex; gap: 12px; font-size: 0.82rem; color: #94A3B8; flex-wrap: wrap;">
+                    <span><strong>Submitted:</strong> ${escapeHtml(timeStr)}</span>
+                    ${totalCases > 0 ? `<span><strong>Cases:</strong> ${passedCases}/${totalCases}</span>` : ''}
+                    <span><strong>Runtime:</strong> ${escapeHtml(runtimeVal)}</span>
+                    <span><strong>Language:</strong> Java 17 (OpenJDK)</span>
+                </div>
+                ${diagExcerpt ? `
+                    <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 8px; padding: 10px 14px; font-family: monospace; font-size: 0.82rem; color: #FCD34D; max-height: 120px; overflow-y: auto;">
+                        <strong>Diagnostic Message:</strong> ${escapeHtml(diagExcerpt)}
+                    </div>
+                ` : ''}
+                <div style="position: relative;">
+                    <pre style="background: #020617; border: 1px solid #1E293B; border-radius: 8px; padding: 14px; max-height: 340px; overflow-y: auto; color: #E2E8F0; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; margin: 0;"><code>${escapeHtml(code)}</code></pre>
+                </div>
+                <div class="workspace-modal-actions" style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn-workspace-secondary" id="btnCopySubCodeModal" style="padding: 8px 16px; border-radius: 6px; cursor: pointer;">Copy Code</button>
+                    <button type="button" class="btn-workspace-primary" id="btnLoadSubCodeModal" style="padding: 8px 16px; border-radius: 6px; cursor: pointer;">Load into Editor</button>
+                </div>
+            </div>
+        `;
+        modal.style.display = 'flex';
+
+        document.getElementById('btnCloseSubCodeModal').onclick = () => { modal.style.display = 'none'; };
+        modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+        document.getElementById('btnCopySubCodeModal').onclick = () => {
+            navigator.clipboard.writeText(code).then(() => showToast('Code copied to clipboard', 'success'));
+        };
+        document.getElementById('btnLoadSubCodeModal').onclick = () => {
+            if (codeMirrorInstance) {
+                codeMirrorInstance.setValue(code);
+            }
+            modal.style.display = 'none';
+            showToast('Loaded submission into editor', 'info');
+        };
     }
 
     /**
@@ -2436,6 +2943,10 @@
     async function handleSubmitSolution() {
         if (isEvaluating) return;
 
+        if (window.CodeArenaAPI && window.CodeArenaAPI.authService && typeof window.CodeArenaAPI.authService.getCurrentUser === 'function' && !window.CodeArenaAPI.authService.isAuthenticated()) {
+            await window.CodeArenaAPI.authService.getCurrentUser().catch(() => null);
+        }
+
         // Guest Access Restriction: Require login to submit practice solutions
         if (isGuestUser()) {
             showGuestAuthPrompt('submit');
@@ -2461,13 +2972,68 @@
                     <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
                     <path d="M12 2a10 10 0 0 1 10 10"></path>
                 </svg>
-                <span>Submitting...</span>
+                <span>Judging...</span>
             `;
         }
         if (dom.btnRunSampleTests) dom.btnRunSampleTests.disabled = true;
 
         if (dom.workspaceStatusText) {
-            dom.workspaceStatusText.textContent = 'Submitting Preview...';
+            dom.workspaceStatusText.textContent = 'Submitting & Evaluating in Docker Sandbox...';
+        }
+
+        // Switch to Submissions tab in left panel immediately
+        if (dom.tabBtnSubmissions && dom.tabBtnDescription) {
+            dom.tabBtnSubmissions.classList.add('active');
+            dom.tabBtnDescription.classList.remove('active');
+            if (dom.tabBtnHints) dom.tabBtnHints.classList.remove('active');
+            if (dom.descriptionScrollContainer) dom.descriptionScrollContainer.style.display = 'none';
+            if (dom.hintsScrollView) dom.hintsScrollView.style.display = 'none';
+            if (dom.submissionsScrollView) dom.submissionsScrollView.style.display = 'flex';
+        }
+
+        // Reset stale sample test output in the bottom console panel
+        setVerdictBanner('info', 'Evaluating Full Solution...', 'Evaluating solution against all public and confidential hidden test cases in OpenJDK 17 Docker sandbox...', 'Judging');
+        if (dom.resultsStatusBadge) {
+            dom.resultsStatusBadge.textContent = 'Evaluating...';
+            dom.resultsStatusBadge.className = 'results-status-badge status-issue';
+        }
+        if (dom.resultsActualDisplay) {
+            dom.resultsActualDisplay.textContent = 'Judging in progress... Output will update automatically when evaluation completes.';
+        }
+
+        // Immediately show an active evaluation placeholder card at the top of the submissions list
+        const evaluatingCardId = 'activeEvaluatingPlaceholderCard';
+        const existingPlaceholder = document.getElementById(evaluatingCardId);
+        if (existingPlaceholder) existingPlaceholder.remove();
+
+        const evaluatingCardHtml = `
+            <div class="submission-card-item submission-card-evaluating" id="${evaluatingCardId}">
+                <div class="submission-card-header">
+                    <div class="submission-verdict-tag verdict-warning">
+                        <span class="status-dot" style="animation: pulse-dot 1s infinite alternate;"></span>
+                        <span id="activeEvaluatingVerdictLabel">Evaluating...</span>
+                    </div>
+                    <span class="submission-time-label">Just now</span>
+                </div>
+                <div class="submission-card-meta">
+                    <span class="submission-meta-badge">Java (OpenJDK 17)</span>
+                    <span class="submission-meta-badge" id="evaluatingStepBadge">Docker Sandbox</span>
+                    <span class="submission-meta-badge" id="evaluatingTimerBadge">0s elapsed</span>
+                </div>
+                <div class="submission-card-notice" style="display: flex; align-items: center; gap: 8px; color: #F59E0B;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-icon" style="animation: spin 1s linear infinite; flex-shrink: 0;" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg>
+                    <span id="evaluatingNoticeText">Your solution is being evaluated against the complete test suite (public &amp; hidden cases)...</span>
+                </div>
+            </div>
+        `;
+
+        if (dom.submissionsListContainer) {
+            const emptyState = dom.submissionsListContainer.querySelector('.submissions-empty-state');
+            if (emptyState) {
+                dom.submissionsListContainer.innerHTML = evaluatingCardHtml;
+            } else {
+                dom.submissionsListContainer.insertAdjacentHTML('afterbegin', evaluatingCardHtml);
+            }
         }
 
         try {
@@ -2475,39 +3041,90 @@
                 throw new Error('submissionService not available');
             }
 
-            await window.CodeArenaAPI.submissionService.submitSolution({
+            const res = await window.CodeArenaAPI.submissionService.submitSolution({
                 problemId: currentProblem.id,
+                problemSlug: currentProblem.slug,
                 sourceCode: sourceCode,
                 language: 'java'
             });
 
-            // Switch to Submissions tab in left panel to display updated record
-            if (dom.tabBtnSubmissions && dom.tabBtnDescription) {
-                dom.tabBtnSubmissions.classList.add('active');
-                dom.tabBtnDescription.classList.remove('active');
-                if (dom.descriptionScrollContainer) dom.descriptionScrollContainer.style.display = 'none';
-                if (dom.submissionsScrollView) dom.submissionsScrollView.style.display = 'flex';
+            if (res && (res.status === 401 || res.status === 403)) {
+                const placeholder = document.getElementById(evaluatingCardId);
+                if (placeholder) placeholder.remove();
+                await loadSubmissions(currentProblem.id);
+                showGuestAuthPrompt('submit');
+                return;
             }
+
+            if (!res || !res.success || !res.data) {
+                const placeholder = document.getElementById(evaluatingCardId);
+                if (placeholder) placeholder.remove();
+                await loadSubmissions(currentProblem.id);
+                const msg = (res && res.message) || 'Submission error — please retry';
+                showToast(msg, 'error');
+                if (dom.workspaceStatusText) dom.workspaceStatusText.textContent = 'Submission Failed';
+                return;
+            }
+
+            // Dynamic resilient polling without arbitrary attempt limits
+            let finalSub = await pollSubmissionUntilTerminal(res.data.id, currentProblem.id);
+            if (!finalSub) {
+                finalSub = res.data;
+            }
+
+            const placeholder = document.getElementById(evaluatingCardId);
+            if (placeholder) placeholder.remove();
 
             await loadSubmissions(currentProblem.id);
             await renderConsoleSubmissions(currentProblem.id);
 
-            // Show prominent Animate the Solution action after submission
-            if (dom.submissionAnimateBanner) {
-                dom.submissionAnimateBanner.style.display = 'flex';
-            }
-            if (dom.consoleSubmissionAnimateBanner) {
-                dom.consoleSubmissionAnimateBanner.style.display = 'flex';
-            }
+            const isSysErr = String(finalSub.status || '').toUpperCase() === 'SYSTEM_ERROR' || String(finalSub.verdict || '').toUpperCase() === 'SYSTEM_ERROR';
+            const vInfo = formatVerdictBadge(finalSub);
+            const passedCases = finalSub.testCasesPassed !== undefined ? finalSub.testCasesPassed : (finalSub.passedCount || 0);
+            const totalCases = finalSub.testCasesTotal !== undefined ? finalSub.testCasesTotal : (finalSub.totalCount || 0);
+            const runtimeVal = (finalSub.executionTime !== undefined && finalSub.executionTime !== null && finalSub.executionTime > 0) ? `${finalSub.executionTime} ms`
+                : ((finalSub.executionTimeMs !== undefined && finalSub.executionTimeMs !== null && finalSub.executionTimeMs > 0) ? `${finalSub.executionTimeMs} ms` : '--');
 
             if (dom.workspaceStatusText) {
-                dom.workspaceStatusText.textContent = 'Preview Submission Recorded · Session Scope';
+                dom.workspaceStatusText.textContent = `Last Verdict: ${vInfo.label} (${passedCases}/${totalCases || 4} passed · ${runtimeVal})`;
             }
 
-            showToast('Solution submitted (Session Preview Recorded)', 'success');
+            if (finalSub.verdict === 'COMPILATION_ERROR' || finalSub.verdict === 'RUNTIME_ERROR' || isSysErr) {
+                const diagText = finalSub.compilerOutput || finalSub.runtimeErrorLog || (isSysErr ? 'System execution error encountered during judging.' : 'Execution error encountered.');
+                if (dom.diagnosticsTerminalBox) {
+                    dom.diagnosticsTerminalBox.textContent = `[${vInfo.label}]\n${diagText}`;
+                }
+                switchConsoleTab('diagnostics');
+                setVerdictBanner('error', vInfo.label, `${vInfo.label} (${passedCases}/${totalCases || 4} passed) · See Diagnostics`, vInfo.label);
+            } else if (vInfo.isAccepted) {
+                setVerdictBanner('success', 'Accepted', `Passed all ${totalCases || 4} test cases (public + hidden) · Runtime: ${runtimeVal} · OpenJDK 17 Sandbox`, 'Accepted');
+                if (dom.resultsStatusBadge) {
+                    dom.resultsStatusBadge.textContent = 'Accepted';
+                    dom.resultsStatusBadge.className = 'results-status-badge status-passed';
+                }
+                updateAnimationUnlockState(true, currentProblem.id);
+            } else {
+                setVerdictBanner('error', vInfo.label, `${vInfo.label} (${passedCases}/${totalCases || 4} test cases passed) · Runtime: ${runtimeVal}`, vInfo.label);
+                if (dom.resultsStatusBadge) {
+                    dom.resultsStatusBadge.textContent = vInfo.label;
+                    dom.resultsStatusBadge.className = 'results-status-badge status-issue';
+                }
+            }
+
+            if (dom.submissionAnimateBanner) {
+                dom.submissionAnimateBanner.style.display = isAnimationUnlocked ? 'flex' : 'none';
+            }
+            if (dom.consoleSubmissionAnimateBanner) {
+                dom.consoleSubmissionAnimateBanner.style.display = isAnimationUnlocked ? 'flex' : 'none';
+            }
+
+            showToast(`Submission Verdict: ${vInfo.label} (${passedCases}/${totalCases || 4} passed)`, vInfo.isAccepted ? 'success' : 'warning');
 
         } catch (err) {
             console.error('[CodeArena Workspace] Submission failed:', err);
+            const placeholder = document.getElementById(evaluatingCardId);
+            if (placeholder) placeholder.remove();
+            await loadSubmissions(currentProblem.id);
             showToast('Submission error — please retry', 'error');
         } finally {
             if (dom.btnSubmitSolution) {
@@ -2695,7 +3312,11 @@
         getReturnPreference: () => includeDefaultReturn,
         setReturnPreference: (val) => handleReturnToggleChange(val),
         renderConsoleSubmissions: renderConsoleSubmissions,
-        renderRelatedConcepts: renderRelatedConcepts
+        renderSubmissionsList: renderSubmissionsList,
+        renderRelatedConcepts: renderRelatedConcepts,
+        formatVerdictBadge: formatVerdictBadge,
+        isSubmissionPending: isSubmissionPending,
+        getSubmissionVerdictKey: getSubmissionVerdictKey
     };
 
 
@@ -2703,24 +3324,13 @@
      * Initializes the Bookmark button for the currently loaded problem.
      * Integrates with codearena_guest_bookmarks for cross-page consistency with bookmarks.html.
      */
-    function initBookmarkButton() {
+    async function initBookmarkButton() {
         if (!dom.btnBookmarkProblem || !currentProblem) return;
-        const probId = currentProblem.id || currentProblem.slug;
+        const probKey = currentProblem.id;
+        const probSlug = currentProblem.slug;
+        let isServerBookmarked = false;
 
-        function getBookmarks() {
-            try {
-                const raw = localStorage.getItem('codearena_guest_bookmarks');
-                if (raw) return JSON.parse(raw);
-            } catch (e) { }
-            return [];
-        }
-
-        function isBookmarked() {
-            return getBookmarks().includes(probId);
-        }
-
-        function updateBookmarkBtn() {
-            const bookmarked = isBookmarked();
+        function updateBookmarkBtn(bookmarked) {
             if (dom.bookmarkBtnText) {
                 dom.bookmarkBtnText.textContent = bookmarked ? 'Bookmarked' : 'Bookmark';
             }
@@ -2735,33 +3345,60 @@
             }
         }
 
-        updateBookmarkBtn();
+        const isAuthed = Boolean(window.CodeArenaAPI && window.CodeArenaAPI.authService && window.CodeArenaAPI.authService.isAuthenticated());
+        if (isAuthed && window.CodeArenaAPI.bookmarkService) {
+            try {
+                const res = await window.CodeArenaAPI.bookmarkService.list();
+                if (res && res.success && Array.isArray(res.data)) {
+                    isServerBookmarked = res.data.some(b =>
+                        String(b.problemId) === String(probKey) || (probSlug && b.slug === probSlug)
+                    );
+                }
+            } catch (e) { }
+        }
+        updateBookmarkBtn(isServerBookmarked);
 
-        dom.btnBookmarkProblem.onclick = function () {
-            let bms = getBookmarks();
-            if (bms.includes(probId)) {
-                bms = bms.filter(id => id !== probId);
-                showToast('Bookmark removed', 'info');
-            } else {
-                bms.push(probId);
-                showToast('Challenge added to Bookmarks! 🔖', 'success');
+        dom.btnBookmarkProblem.onclick = async function () {
+            if (!(window.CodeArenaAPI && window.CodeArenaAPI.authService && window.CodeArenaAPI.authService.isAuthenticated())) {
+                showToast('Sign in to save bookmarks to your CodeArena account.', 'info');
+                return;
             }
             try {
-                localStorage.setItem('codearena_guest_bookmarks', JSON.stringify(bms));
-            } catch (e) { }
-            updateBookmarkBtn();
+                if (isServerBookmarked) {
+                    const delRes = await window.CodeArenaAPI.bookmarkService.remove(probSlug || probKey);
+                    if (delRes && delRes.success) {
+                        isServerBookmarked = false;
+                        updateBookmarkBtn(false);
+                        showToast('Bookmark removed', 'info');
+                    } else {
+                        showToast((delRes && delRes.message) || 'Could not remove bookmark', 'error');
+                    }
+                } else {
+                    const addRes = await window.CodeArenaAPI.bookmarkService.add(probKey);
+                    if (addRes && addRes.success) {
+                        isServerBookmarked = true;
+                        updateBookmarkBtn(true);
+                        showToast('Challenge saved to Bookmarks!', 'success');
+                    } else {
+                        showToast((addRes && addRes.message) || 'Could not save bookmark', 'error');
+                    }
+                }
+            } catch (e) {
+                showToast('Unable to update bookmark', 'error');
+            }
         };
     }
 
 
     /**
-     * Records visited problem to Recently Viewed list (Phase 6)
-     * Strict deduplication, capped at 5 problems, called exclusively
-     * when a valid problem workspace is loaded.
+     * Records visited problem to Recently Viewed list (server + local UI cache).
      */
     function saveRecentlyViewedProblem(problem) {
         if (!problem || !problem.id) return;
         try {
+            if (window.CodeArenaAPI && window.CodeArenaAPI.authService && window.CodeArenaAPI.authService.isAuthenticated() && window.CodeArenaAPI.studentService) {
+                window.CodeArenaAPI.studentService.recordRecentlyViewed(problem.id).catch(() => { });
+            }
             if (typeof window !== 'undefined' && window.localStorage) {
                 const raw = window.localStorage.getItem('codearena_recently_viewed');
                 let list = [];

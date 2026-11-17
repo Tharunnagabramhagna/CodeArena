@@ -135,9 +135,20 @@
   box-shadow: 0 0 12px rgba(99, 102, 241, 0.45);
 }
 
+.sidebar-toggle-btn:active {
+  background: #1E3A8A;
+  transform: scale(0.95);
+  box-shadow: none;
+}
+
 .sidebar-toggle-btn:focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
+}
+
+.sidebar-toggle-btn:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* Sidebar Navigation */
@@ -190,7 +201,7 @@
   text-decoration: none;
   font-size: 0.88rem;
   font-weight: 500;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
   white-space: nowrap;
   position: relative;
 }
@@ -198,6 +209,21 @@
 .sidebar-link:hover {
   background-color: rgba(59, 130, 246, 0.1);
   color: var(--color-text-primary);
+}
+
+.sidebar-link:active {
+  transform: scale(0.98);
+  background-color: rgba(59, 130, 246, 0.16);
+}
+
+.sidebar-link:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.sidebar-link:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .nav-icon {
@@ -213,12 +239,22 @@
   transition: opacity 0.2s ease;
 }
 
-/* Active Navigation Item */
+/* Active Navigation Item (Intentional Current Page Indicator) */
 .sidebar-item.active .sidebar-link {
   background-color: #1D4ED8;
   color: white;
   font-weight: 600;
   box-shadow: 0 2px 10px rgba(29, 78, 216, 0.35);
+}
+
+.sidebar-item.active .sidebar-link:hover {
+  background-color: #2563EB;
+  color: white;
+}
+
+.sidebar-item.active .sidebar-link:active {
+  background-color: #1E40AF;
+  transform: scale(0.98);
 }
 
 /* Sidebar Promotional Card at Bottom */
@@ -313,6 +349,7 @@ a.promo-btn:active {
   background-color: var(--color-primary-dark, var(--color-primary-hover));
   color: white;
   transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
 }
 
 .promo-btn:focus-visible,
@@ -320,6 +357,12 @@ a.promo-btn:focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
   color: white;
+}
+
+.promo-btn:focus:not(:focus-visible),
+a.promo-btn:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4) !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -539,13 +582,27 @@ a.promo-btn:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s, transform 0.1s;
 }
 
 .notification-btn:hover {
   color: var(--color-text-primary);
   border-color: var(--color-border-hover);
   background-color: var(--color-bg-hover);
+}
+
+.notification-btn:active {
+  transform: scale(0.95);
+}
+
+.notification-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.notification-btn:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .notif-icon {
@@ -747,10 +804,25 @@ a.promo-btn:focus-visible {
   transform: translateY(-1px);
 }
 
+.dash-auth-login:active {
+  transform: translateY(0);
+}
+
+.dash-auth-signup:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.35);
+}
+
 .dash-auth-login:focus-visible,
 .dash-auth-signup:focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
+}
+
+.dash-auth-login:focus:not(:focus-visible),
+.dash-auth-signup:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Future Authenticated User Profile Area (Hidden by default until real backend auth) */
@@ -773,11 +845,25 @@ a.promo-btn:focus-visible {
   cursor: pointer;
   color: inherit;
   font-family: inherit;
-  transition: border-color var(--transition-normal);
+  transition: border-color var(--transition-normal), transform 0.1s;
 }
 
 .user-profile-trigger:hover {
   border-color: var(--color-border-hover);
+}
+
+.user-profile-trigger:active {
+  transform: scale(0.98);
+}
+
+.user-profile-trigger:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.user-profile-trigger:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .user-avatar {
@@ -905,6 +991,19 @@ a.promo-btn:focus-visible {
   color: var(--color-text-primary);
 }
 
+.menu-item:active {
+  background-color: rgba(59, 130, 246, 0.25);
+}
+
+.menu-item:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -2px;
+}
+
+.menu-item:focus:not(:focus-visible) {
+  outline: none !important;
+}
+
 .menu-divider {
   height: 1px;
   background-color: var(--color-border);
@@ -1013,6 +1112,21 @@ a.promo-btn:focus-visible {
 
 .btn-danger:hover {
   background: #B91C1C;
+}
+
+.btn-danger:active {
+  background: #991B1B;
+  transform: translateY(0);
+}
+
+.btn-danger:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.btn-danger:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Platform Stats Header */
@@ -1189,11 +1303,28 @@ a.promo-btn:focus-visible {
   font-size: 0.82rem;
   font-weight: 600;
   text-decoration: none;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
 
 .shortcut-pill:hover {
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.shortcut-pill:active {
+  transform: translateY(0);
+  box-shadow: none;
+  filter: brightness(0.92);
+}
+
+.shortcut-pill:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.shortcut-pill:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .shortcut-icon {
@@ -1375,13 +1506,17 @@ a.promo-btn:focus-visible {
   display: flex;
   align-items: center;
   gap: 16px;
-  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .stat-card:hover {
   transform: translateY(-2px);
   border-color: var(--color-border-hover);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.stat-card:active {
+  transform: translateY(0);
 }
 
 .stat-icon-wrapper {
@@ -1501,6 +1636,19 @@ a.promo-btn:focus-visible {
   text-decoration: underline;
 }
 
+.section-link-action:active {
+  opacity: 0.75;
+}
+
+.section-link-action:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.section-link-action:focus:not(:focus-visible) {
+  outline: none !important;
+}
+
 .dash-tracks-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1516,13 +1664,26 @@ a.promo-btn:focus-visible {
   flex-direction: column;
   justify-content: space-between;
   gap: 14px;
-  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .dash-track-card:hover {
   transform: translateY(-2px);
   border-color: var(--color-border-hover);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.dash-track-card:active {
+  transform: translateY(0);
+}
+
+.dash-track-card:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.dash-track-card:focus:not(:focus-visible) {
+  outline: none !important;
 }
 
 .track-card-header {
@@ -1648,12 +1809,29 @@ a.promo-btn:focus-visible {
   padding: 6px 14px;
   border-radius: 8px;
   text-decoration: none;
-  transition: transform 0.15s, opacity 0.15s;
+  transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease;
 }
 
 .btn-track:hover {
   transform: translateY(-1px);
   opacity: 0.95;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.btn-track:active {
+  transform: translateY(0);
+  opacity: 1;
+  box-shadow: none;
+}
+
+.btn-track:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.btn-track:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .btn-track-basic {
@@ -1719,12 +1897,25 @@ a.promo-btn:focus-visible {
   color: var(--color-secondary);
   text-decoration: none;
   font-weight: 600;
-  transition: color 0.2s;
+  transition: color 0.15s;
 }
 
 .panel-link:hover {
   color: var(--color-secondary-hover);
   text-decoration: underline;
+}
+
+.panel-link:active {
+  opacity: 0.75;
+}
+
+.panel-link:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.panel-link:focus:not(:focus-visible) {
+  outline: none !important;
 }
 
 /* --------------------------------------------------------------------------
@@ -1744,7 +1935,7 @@ a.promo-btn:focus-visible {
   border-bottom: 1px solid rgba(29, 59, 111, 0.35);
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.15s, transform 0.15s;
+  transition: background-color 0.15s, transform 0.1s;
 }
 
 .problem-item:last-child {
@@ -1755,9 +1946,19 @@ a.promo-btn:focus-visible {
   background-color: rgba(59, 130, 246, 0.08);
 }
 
+.problem-item:active {
+  transform: scale(0.995);
+  background-color: rgba(59, 130, 246, 0.14);
+}
+
 .problem-item:focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 1px;
+}
+
+.problem-item:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .diff-badge {
@@ -1871,13 +2072,28 @@ a.promo-btn:focus-visible {
   align-items: center;
   gap: 12px;
   text-decoration: none;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
   position: relative;
 }
 
 .action-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+.action-card:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.action-card:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.action-card:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .action-compiler {
@@ -1928,10 +2144,6 @@ a.promo-btn:focus-visible {
   display: block;
 }
 
-font-size: 1.15rem;
-flex-shrink: 0;
-}
-
 .action-text-box {
   display: flex;
   flex-direction: column;
@@ -1961,6 +2173,10 @@ flex-shrink: 0;
 .action-card:hover .action-arrow {
   color: white;
   transform: translateX(3px);
+}
+
+.action-card:active .action-arrow {
+  transform: translateX(1px);
 }
 
 /* Recent Activity List */
@@ -2480,6 +2696,21 @@ flex-shrink: 0;
 
 /* Extra Small Mobile (max-width: 480px) */
 @media (max-width: 480px) {
+  .dashboard-header {
+    padding: 0 10px;
+    gap: 6px;
+  }
+
+  .dashboard-content {
+    padding: 12px 12px max(28px, env(safe-area-inset-bottom));
+    gap: 14px;
+  }
+
+  .dashboard-sidebar {
+    height: 100dvh;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
   .header-search {
     display: none;
   }
@@ -2498,12 +2729,44 @@ flex-shrink: 0;
   }
 
   .dash-auth-link {
-    padding: 4px 8px;
+    padding: 6px 8px;
     font-size: 0.74rem;
+    min-height: 34px;
+    display: inline-flex;
+    align-items: center;
   }
 
   .activity-time {
     display: none;
+  }
+
+  .welcome-banner {
+    padding: 16px 14px;
+  }
+
+  .welcome-title {
+    font-size: 1.2rem;
+  }
+
+  .notifications-dropdown,
+  .profile-dropdown {
+    max-width: calc(100vw - 20px);
+    right: 0;
+  }
+
+  .dash-track-card,
+  .dashboard-panel,
+  .stat-card {
+    padding: 14px;
+  }
+}
+
+/* Large Desktops (min-width: 1441px) */
+@media (min-width: 1441px) {
+  .dashboard-content {
+    max-width: 1440px;
+    width: 100%;
+    margin-inline: auto;
   }
 }
 
@@ -2546,9 +2809,13 @@ flex-shrink: 0;
 
 .search-suggestion-item:hover,
 .search-suggestion-item.active,
-.search-suggestion-item:focus {
+.search-suggestion-item:focus-visible {
   background-color: rgba(99, 102, 241, 0.15);
   color: var(--color-text-primary);
+}
+
+.search-suggestion-item:focus:not(:focus-visible) {
+  outline: none !important;
 }
 
 .search-suggestion-left {
@@ -2685,6 +2952,23 @@ flex-shrink: 0;
   transition: all 0.15s ease;
 }
 
+.notif-tab-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.notif-tab-btn:active {
+  transform: scale(0.97);
+}
+
+.notif-tab-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+
+.notif-tab-btn:focus:not(:focus-visible) {
+  outline: none !important;
+}
+
 .notif-tab-btn.active {
   color: var(--color-primary, var(--color-primary));
   border-bottom-color: var(--color-primary, var(--color-primary));
@@ -2735,8 +3019,74 @@ flex-shrink: 0;
   color: var(--color-primary, var(--color-primary));
   cursor: pointer;
   padding: 2px 4px;
+  transition: opacity 0.15s ease;
 }
 
 .notif-action-link:hover {
   text-decoration: underline;
+}
+
+.notif-action-link:active {
+  opacity: 0.7;
+}
+
+.notif-action-link:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+
+.notif-action-link:focus:not(:focus-visible) {
+  outline: none !important;
+}
+
+/* ==========================================================================
+   Dashboard Interaction Normalization & Accessibility Shield
+   Ensures mouse clicks never leave persistent outline, focus, or sticky highlight
+   states across any dashboard element, while preserving keyboard :focus-visible.
+   ========================================================================== */
+.dashboard-layout button:focus:not(:focus-visible),
+.dashboard-layout a:focus:not(:focus-visible),
+.dashboard-layout [role="button"]:focus:not(:focus-visible),
+.dashboard-layout [role="link"]:focus:not(:focus-visible),
+.dashboard-layout [role="tab"]:focus:not(:focus-visible),
+.dashboard-layout [tabindex]:focus:not(:focus-visible),
+.dashboard-layout .sidebar-link:focus:not(:focus-visible),
+.dashboard-layout .shortcut-pill:focus:not(:focus-visible),
+.dashboard-layout .action-card:focus:not(:focus-visible),
+.dashboard-layout .dash-track-card:focus:not(:focus-visible),
+.dashboard-layout .btn-track:focus:not(:focus-visible),
+.dashboard-layout .promo-btn:focus:not(:focus-visible),
+.dashboard-layout a.promo-btn:focus:not(:focus-visible),
+.dashboard-layout .problem-item:focus:not(:focus-visible),
+.dashboard-layout .stat-card:focus:not(:focus-visible),
+.dashboard-layout .notification-btn:focus:not(:focus-visible),
+.dashboard-layout .user-profile-trigger:focus:not(:focus-visible),
+.dashboard-layout .sidebar-toggle-btn:focus:not(:focus-visible),
+.dashboard-layout .mobile-drawer-btn:focus:not(:focus-visible),
+.dashboard-layout .notif-tab-btn:focus:not(:focus-visible),
+.dashboard-layout .notif-action-link:focus:not(:focus-visible),
+.dashboard-layout .section-link-action:focus:not(:focus-visible),
+.dashboard-layout .panel-link:focus:not(:focus-visible),
+.dashboard-layout .search-suggestion-item:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Maintain intentional active sidebar navigation item regardless of focus */
+.dashboard-layout .sidebar-item.active .sidebar-link {
+  box-shadow: 0 2px 10px rgba(29, 78, 216, 0.35) !important;
+}
+
+/* Maintain intentional promo button shadow */
+.dashboard-layout .promo-btn,
+.dashboard-layout a.promo-btn {
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4) !important;
+}
+.dashboard-layout .promo-btn:hover,
+.dashboard-layout a.promo-btn:hover {
+  box-shadow: 0 6px 18px rgba(79, 70, 229, 0.55) !important;
+}
+.dashboard-layout .promo-btn:active,
+.dashboard-layout a.promo-btn:active {
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3) !important;
 }

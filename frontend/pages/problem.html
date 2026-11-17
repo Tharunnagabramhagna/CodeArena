@@ -90,7 +90,7 @@
                     <span class="topic-tag-pill" id="lockProblemTopic">Topic</span>
                 </div>
                 <p class="not-found-desc" style="max-width: 560px; margin: 0 auto 24px; line-height: 1.6;">
-                    This challenge is part of the 50 curated CodeArena Pro problems. To access the complete problem statement, Java starter code, sample test cases, and progressive hints, activate a CodeArena Pro Preview membership.
+                    This challenge is part of the 50 curated CodeArena Pro problems. To access the complete problem statement, Java starter code, sample test cases, and progressive hints, activate a CodeArena Pro membership.
                 </p>
 
                 <!-- Pricing Plans Grid -->
@@ -184,7 +184,7 @@
                         <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
                     <span>Submissions</span>
-                    <span class="pane-tab-tag" id="submissionsTabTag">Preview</span>
+                    <span class="pane-tab-tag" id="submissionsTabTag">0</span>
                 </button>
             </div>
 
@@ -305,17 +305,18 @@
                             <!-- Populated dynamically with concepts and links to learn.html -->
                         </div>
                         <!-- Dedicated Entry Point: Animate the Solution -->
-                        <div class="workspace-animate-entry" id="workspaceAnimateEntry" style="margin-top: 14px;">
-                            <a href="#" id="linkAnimateSolutionConcepts" class="btn-animate-entry-link">
-                                <div class="animate-entry-icon" aria-hidden="true">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        <div class="workspace-animate-entry animate-entry-locked" id="workspaceAnimateEntry" style="margin-top: 14px;">
+                            <a href="#" id="linkAnimateSolutionConcepts" class="btn-animate-entry-link link-disabled" aria-disabled="true" title="Solve this problem successfully to unlock animation">
+                                <div class="animate-entry-icon animate-entry-icon-locked" id="animateEntryIcon" aria-hidden="true">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                                     </svg>
                                 </div>
                                 <div class="animate-entry-details">
-                                    <span class="animate-entry-tag">Visual Algorithm Walkthrough</span>
-                                    <span class="animate-entry-headline">Animate the Solution →</span>
-                                    <span class="animate-entry-desc">Explore step-by-step interactive algorithm execution, pointer states &amp; complexity analysis on a dedicated stage.</span>
+                                    <span class="animate-entry-tag animate-tag-locked" id="animateEntryTag">Animation Locked</span>
+                                    <span class="animate-entry-headline" id="animateEntryHeadline">Animation Locked</span>
+                                    <span class="animate-entry-desc" id="animateEntryDesc">Solve this problem successfully to unlock its interactive algorithm walkthrough.</span>
                                 </div>
                             </a>
                         </div>
@@ -348,7 +349,7 @@
                     </div>
                     <div class="hints-disclaimer-pill">
                         <span class="disclaimer-dot"></span>
-                        <span>Curated algorithmic problem hints — client-side progressive disclosure preview.</span>
+                        <span>Curated algorithmic problem hints — reveal step-by-step when you get stuck.</span>
                     </div>
                 </div>
 
@@ -446,7 +447,7 @@
                         <line x1="12" y1="16" x2="12" y2="12"></line>
                         <line x1="12" y1="8" x2="12.01" y2="8"></line>
                     </svg>
-                    <span>Guest Session Preview: Submissions are stored temporarily in this browser session. Persistent database history connects in Phase 4.</span>
+                    <span>Submissions are stored on the CodeArena server when signed in and judged against the complete test suite.</span>
                 </div>
 
                 <!-- Post-Submission Animation Action Banner (Prominent but compact) -->
@@ -471,7 +472,7 @@
 
                 <div id="submissionsListContainer">
                     <p style="font-size: 0.86rem; color: var(--color-text-muted); font-style: italic;">
-                        No submissions yet for this problem. Click &quot;Submit Solution&quot; to demonstrate simulated evaluation.
+                        No submissions yet for this problem. Click &quot;Submit Solution&quot; to run server judging.
                     </p>
                 </div>
             </div>
@@ -498,9 +499,9 @@
                     <div class="workspace-lang-picker" title="Programming Language">
                         <select id="selectEditorLang" class="workspace-lang-select" aria-label="Programming Language">
                             <option value="java" selected>Java (OpenJDK 17)</option>
-                            <option value="python" disabled>Python 3 (Preview)</option>
-                            <option value="cpp" disabled>C++ 17 (Preview)</option>
-                            <option value="javascript" disabled>JavaScript (Preview)</option>
+                            <option value="python" disabled>Python 3 (Coming Soon)</option>
+                            <option value="cpp" disabled>C++ 17 (Coming Soon)</option>
+                            <option value="javascript" disabled>JavaScript (Coming Soon)</option>
                         </select>
                     </div>
                     <span class="active-file-indicator" title="Current Active File">
@@ -611,7 +612,7 @@
                     <span>Spaces: 4</span>
                 </div>
                 <div class="footer-right">
-                    <span>Target: OpenJDK 17 (Preview)</span>
+                    <span>Target: OpenJDK 17 (Isolated Sandbox)</span>
                 </div>
             </footer>
 
@@ -647,7 +648,7 @@
                                 <polyline points="20 6 9 17 4 12"></polyline>
                             </svg>
                             <span>Output</span>
-                            <span class="console-badge-count">Preview</span>
+                            <span class="console-badge-count">Java 17</span>
                         </button>
                         <button class="console-tab-btn" id="tabBtnDiagnostics" role="tab" aria-selected="false" data-tab="diagnostics" draggable="true" title="Drag to reorder tabs">
                             <span class="tab-drag-grip" aria-hidden="true">⋮⋮</span>
@@ -697,22 +698,22 @@
                                 Load Sample Case
                             </button>
                         </div>
-                        <textarea id="customInputText" class="custominput-textarea" placeholder="Enter custom arguments or input lines for execution preview..." spellcheck="false"></textarea>
+                        <textarea id="customInputText" class="custominput-textarea" placeholder="Enter custom stdin lines for your program..." spellcheck="false"></textarea>
                         <p class="custominput-guidance">
-                            Tip: Provide arguments formatted like the problem's sample inputs. Click &quot;Run Code&quot; (Ctrl+Enter) to preview.
+                            Tip: Provide custom standard input lines. Click &quot;Run Sample Tests&quot; (Ctrl+Enter) to run with custom input.
                         </p>
                     </div>
 
-                    <!-- Panel 3: Test Results / Output (Preview) -->
+                    <!-- Panel 3: Test Results / Output -->
                     <div class="testresults-panel" id="panelTestResults">
                         <div class="results-verdict-banner banner-info" id="resultsVerdictBanner">
                             <div class="verdict-title-group">
-                                <span class="verdict-title-text" id="verdictTitleText">Ready for Sample Preview</span>
-                                <span class="verdict-badge-honest" id="verdictBadgeHonest">Preview Only</span>
+                                <span class="verdict-title-text" id="verdictTitleText">Ready to Run Sample Tests</span>
+                                <span class="verdict-badge-honest" id="verdictBadgeHonest">OpenJDK 17</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span class="verdict-notice-text" id="verdictNoticeText">Click &quot;Run Sample Tests&quot; (Ctrl+Enter)</span>
-                                <button type="button" class="btn-clear-results" id="btnClearResults" title="Reset preview results" style="display: none;">Clear</button>
+                                <button type="button" class="btn-clear-results" id="btnClearResults" title="Reset results" style="display: none;">Clear</button>
                             </div>
                         </div>
 
@@ -725,7 +726,7 @@
                         <div class="results-case-detail" id="resultsCaseDetail">
                             <div class="results-case-header">
                                 <span class="results-case-num" id="resultsCaseNumText">Case 1</span>
-                                <span class="results-status-badge" id="resultsStatusBadge">Not Executed — Preview Only</span>
+                                <span class="results-status-badge" id="resultsStatusBadge">Not Executed</span>
                             </div>
 
                             <div class="testcase-data-grid">
@@ -740,8 +741,8 @@
                             </div>
 
                             <div class="testcase-data-block" style="margin-top: 4px;">
-                                <span class="testcase-data-label">Simulated Output:</span>
-                                <div class="testcase-data-box execution-unavailable-box" id="resultsActualDisplay">Execution unavailable — frontend preview only.</div>
+                                <span class="testcase-data-label">Actual Output:</span>
+                                <div class="testcase-data-box execution-unavailable-box" id="resultsActualDisplay">Not run yet — click &quot;Run Sample Tests&quot; to execute.</div>
                             </div>
                         </div>
 
@@ -751,22 +752,22 @@
                                 <line x1="12" y1="16" x2="12" y2="12"></line>
                                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
                             </svg>
-                            <span><strong>Preview Notice:</strong> Public sample cases demonstrate input/output specification matching. Actual Java code execution, System.in streaming, and hidden test-case evaluation require the Phase 4 Java backend engine.</span>
+                            <span><strong>Execution Info:</strong> Sample runs execute public sample test cases in an isolated OpenJDK container. Click &quot;Submit Solution&quot; to evaluate the complete hidden judge suite.</span>
                         </div>
                     </div>
 
                     <!-- Panel 4: Diagnostics -->
                     <div class="diagnostics-panel" id="panelDiagnostics">
-                        <pre class="diagnostics-terminal-box" id="diagnosticsTerminalBox">No syntax or structural issues detected.</pre>
+                        <pre class="diagnostics-terminal-box" id="diagnosticsTerminalBox">Compiler &amp; runtime diagnostics will appear here after running or submitting.</pre>
                         <p style="font-size: 0.78rem; color: var(--color-text-muted); margin: 4px 0 0 0;">
-                            Client-side structural checks assist with brace matching and class declarations before submission.
+                            Displays javac compiler errors, runtime stderr diagnostics, and per-case timing.
                         </p>
                     </div>
 
                     <!-- Panel 5: Submissions History Console Panel -->
                     <div class="submissions-console-panel" id="panelSubmissionsConsole" style="display: none;">
                         <div class="submissions-console-header">
-                            <span class="submissions-console-title">Submission History Preview</span>
+                            <span class="submissions-console-title">Submission History</span>
                             <span class="submissions-console-count" id="consoleSubmissionsCountBadge">0 Submissions</span>
                         </div>
                         <div class="submission-animate-banner console-sub-animate" id="consoleSubmissionAnimateBanner" style="display: none; margin-bottom: 10px;">
@@ -781,7 +782,7 @@
                         </div>
                         <div id="consoleSubmissionsListContainer" class="console-submissions-list">
                             <p style="font-size: 0.84rem; color: var(--color-text-muted); font-style: italic; padding: 12px 0;">
-                                No submissions recorded yet in this session. Click &quot;Submit Solution&quot; to test simulated evaluation.
+                                No submissions recorded yet for this problem. Click &quot;Submit Solution&quot; to run server judging.
                             </p>
                         </div>
                     </div>
@@ -793,7 +794,7 @@
             <div class="workspace-action-bar">
                 <div class="action-bar-status" id="workspaceStatusIndicator">
                     <span class="status-dot"></span>
-                    <span id="workspaceStatusText">Ready · Preview Mode</span>
+                    <span id="workspaceStatusText">Ready · Java (OpenJDK 17)</span>
                 </div>
 
                 <div class="action-bar-buttons">
@@ -805,7 +806,7 @@
                         <kbd class="key-badge">Ctrl+Enter</kbd>
                     </button>
 
-                    <button id="btnSubmitSolution" class="btn-workspace-action btn-workspace-submit" type="button" title="Submit solution for simulated evaluation">
+                    <button id="btnSubmitSolution" class="btn-workspace-action btn-workspace-submit" type="button" title="Submit solution for server judging">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
@@ -872,7 +873,7 @@
                     <tbody>
                         <tr style="border-bottom: 1px solid var(--color-border);">
                             <td style="padding: 8px 0;"><strong>Ctrl + Enter</strong> / <strong>Cmd + Enter</strong></td>
-                            <td style="padding: 8px 0; color: var(--color-text-secondary);">Run Sample Tests (Preview Action)</td>
+                            <td style="padding: 8px 0; color: var(--color-text-secondary);">Run Sample Tests</td>
                         </tr>
                         <tr style="border-bottom: 1px solid var(--color-border);">
                             <td style="padding: 8px 0;"><strong>Tab</strong></td>

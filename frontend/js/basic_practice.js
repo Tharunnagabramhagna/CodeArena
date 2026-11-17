@@ -13,7 +13,10 @@
         search: '',
         sort: 'number-asc',
         page: 1,
-        limit: 12
+        limit: 12,
+        categories: [],
+        problems: [],
+        loadError: null
     };
 
     let dom = {};
@@ -28,14 +31,118 @@
             .replace(/'/g, '&#39;');
     }
 
-    function init() {
+    async function init() {
         cacheElements();
         parseUrlParams();
-        populateCategoryDropdown();
         bindEvents();
-        renderStats();
-        renderCategoryCards();
-        renderCatalogue();
+        await loadFromServer();
+        document.addEventListener('codearena:auth-changed', function () {
+            loadFromServer();
+        });
+    }
+
+    async function loadFromServer() {
+        if (!window.CodeArenaAPI || !window.CodeArenaAPI.problemService) {
+            state.loadError = 'CodeArena API client is not loaded.';
+            renderCatalogue();
+            return;
+        }
+        try {
+            if (window.CodeArenaAPI.authService && typeof window.CodeArenaAPI.authService.getCurrentUser === 'function') {
+                await window.CodeArenaAPI.authService.getCurrentUser().catch(() => null);
+            }
+
+            const [catRes, probRes] = await Promise.all([
+                window.CodeArenaAPI.problemService.getCategories('basic'),
+                window.CodeArenaAPI.problemService.getProblems({ track: 'basic', limit: 100 })
+            ]);
+
+            if (!probRes || !probRes.success || !probRes.data) {
+                state.loadError = (probRes && probRes.message) || 'Unable to load basic challenges from server.';
+                renderCatalogue();
+                return;
+            }
+
+            state.loadError = null;
+            const rawProblems = Array.isArray(probRes.data.problems) ? probRes.data.problems : [];
+
+            let attemptedSet = new Set();
+            if (window.CodeArenaAPI.authService && window.CodeArenaAPI.authService.isAuthenticated() && window.CodeArenaAPI.submissionService) {
+                try {
+                    const subRes = await window.CodeArenaAPI.submissionService.getSubmissions();
+                    if (subRes && subRes.success && subRes.data && Array.isArray(subRes.data.submissions)) {
+                        subRes.data.submissions.forEach(s => {
+                            if (s.problemId) attemptedSet.add(Number(s.problemId));
+                        });
+                    }
+                } catch (e) { }
+            }
+
+            state.problems = rawProblems.map((p, idx) => {
+                let status = 'unattempted';
+                if (p.solvedByUser) status = 'solved';
+                else if (attemptedSet.has(Number(p.id))) status = 'attempted';
+                return {
+                    id: p.slug || String(p.id),
+                    numericId: p.id,
+                    number: p.problemNumber || (idx + 1),
+                    title: p.title || p.slug,
+                    description: p.description || '',
+                    category: p.topic || 'Fundamentals',
+                    categorySlug: p.categorySlug || '',
+                    difficulty: p.difficulty || 'Easy',
+                    status: status,
+                    relatedConcepts: Array.isArray(p.tags) ? p.tags : []
+                };
+            });
+
+            const rawCats = (catRes && catRes.success && Array.isArray(catRes.data)) ? catRes.data : [];
+            if (rawCats.length > 0) {
+                state.categories = rawCats.map(c => {
+                    const catProbs = state.problems.filter(p =>
+                        (c.slug && p.categorySlug === c.slug) ||
+                        p.category.toLowerCase() === String(c.name || '').toLowerCase()
+                    );
+                    return {
+                        id: c.slug || String(c.id),
+                        name: c.name,
+                        description: c.description || '',
+                        problemCount: catProbs.length || Number(c.problemCount || 0),
+                        difficultyDist: {
+                            easy: catProbs.filter(p => p.difficulty === 'Easy').length,
+                            medium: catProbs.filter(p => p.difficulty === 'Medium').length,
+                            hard: catProbs.filter(p => p.difficulty === 'Hard').length
+                        }
+                    };
+                });
+            } else {
+                const byCat = new Map();
+                state.problems.forEach(p => {
+                    if (!byCat.has(p.category)) byCat.set(p.category, []);
+                    byCat.get(p.category).push(p);
+                });
+                state.categories = Array.from(byCat.entries()).map(([name, list]) => ({
+                    id: name.toLowerCase().replace(/\s+/g, '-'),
+                    name,
+                    description: `${name} exercises`,
+                    problemCount: list.length,
+                    difficultyDist: {
+                        easy: list.filter(p => p.difficulty === 'Easy').length,
+                        medium: list.filter(p => p.difficulty === 'Medium').length,
+                        hard: list.filter(p => p.difficulty === 'Hard').length
+                    }
+                }));
+            }
+
+            populateCategoryDropdown();
+            renderStats();
+            renderCategoryCards();
+            renderCatalogue();
+        } catch (err) {
+            console.error('[BasicPractice] Failed loading server catalog:', err);
+            state.loadError = 'Unable to connect to the CodeArena server.';
+            renderCatalogue();
+        }
     }
 
     function cacheElements() {
@@ -163,19 +270,18 @@
     }
 
     function renderStats() {
-        if (!window.CodeArenaBasicPractice) return;
-        const stats = window.CodeArenaBasicPractice.getStats();
-        if (dom.statTotal) dom.statTotal.textContent = stats.totalProblems;
-        if (dom.statCats) dom.statCats.textContent = stats.totalCategories;
-        if (dom.statEasy) dom.statEasy.textContent = stats.easyCount;
-        if (dom.statMed) dom.statMed.textContent = stats.mediumCount;
+        const easyCount = state.problems.filter(p => p.difficulty === 'Easy').length;
+        const mediumCount = state.problems.filter(p => p.difficulty === 'Medium').length;
+        if (dom.statTotal) dom.statTotal.textContent = state.problems.length;
+        if (dom.statCats) dom.statCats.textContent = state.categories.length;
+        if (dom.statEasy) dom.statEasy.textContent = easyCount;
+        if (dom.statMed) dom.statMed.textContent = mediumCount;
     }
 
     function populateCategoryDropdown() {
-        if (!dom.categorySelect || !window.CodeArenaBasicPractice) return;
-        const categories = window.CodeArenaBasicPractice.getCategories();
-        let optionsHtml = '<option value="All">All Categories (13)</option>';
-        categories.forEach(c => {
+        if (!dom.categorySelect) return;
+        let optionsHtml = `<option value="All">All Categories (${state.categories.length})</option>`;
+        state.categories.forEach(c => {
             optionsHtml += `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)} (${c.problemCount})</option>`;
         });
         dom.categorySelect.innerHTML = optionsHtml;
@@ -221,8 +327,8 @@
     }
 
     function renderCategoryCards() {
-        if (!dom.categoriesGrid || !window.CodeArenaBasicPractice) return;
-        const categories = window.CodeArenaBasicPractice.getCategories();
+        if (!dom.categoriesGrid) return;
+        const categories = state.categories;
 
         dom.categoriesGrid.innerHTML = categories.map(cat => {
             const isActive = state.category.toLowerCase() === cat.name.toLowerCase();
@@ -265,17 +371,53 @@
         });
     }
 
-    function renderCatalogue() {
-        if (!dom.problemsContainer || !window.CodeArenaBasicPractice) return;
+    function queryFilteredProblems() {
+        let list = state.problems.slice();
+        if (state.category && state.category !== 'All') {
+            const target = state.category.toLowerCase();
+            list = list.filter(p =>
+                p.category.toLowerCase() === target ||
+                (p.categorySlug && p.categorySlug.toLowerCase() === target)
+            );
+        }
+        if (state.difficulty && state.difficulty !== 'All') {
+            list = list.filter(p => p.difficulty.toLowerCase() === state.difficulty.toLowerCase());
+        }
+        if (state.search && state.search.trim()) {
+            const q = state.search.trim().toLowerCase();
+            list = list.filter(p =>
+                p.title.toLowerCase().includes(q) ||
+                p.description.toLowerCase().includes(q) ||
+                p.category.toLowerCase().includes(q) ||
+                (p.relatedConcepts && p.relatedConcepts.some(c => c.toLowerCase().includes(q)))
+            );
+        }
+        list.sort((a, b) => a.number - b.number);
+        const total = list.length;
+        const totalPages = Math.ceil(total / state.limit) || 1;
+        const safePage = Math.max(1, Math.min(state.page, totalPages));
+        const start = (safePage - 1) * state.limit;
+        return {
+            problems: list.slice(start, start + state.limit),
+            total,
+            page: safePage,
+            totalPages
+        };
+    }
 
-        const res = window.CodeArenaBasicPractice.getProblems({
-            category: state.category,
-            difficulty: state.difficulty,
-            search: state.search,
-            sort: state.sort,
-            page: state.page,
-            limit: state.limit
-        });
+    function renderCatalogue() {
+        if (!dom.problemsContainer) return;
+
+        if (state.loadError) {
+            dom.problemsContainer.style.display = 'flex';
+            dom.problemsContainer.innerHTML = `<div class="basic-problem-item" style="grid-column: 1 / -1; padding: 24px; color: #F87171;">${escapeHtml(state.loadError)}</div>`;
+            if (dom.emptyState) dom.emptyState.style.display = 'none';
+            if (dom.paginationWrap) dom.paginationWrap.style.display = 'none';
+            if (dom.resultsCount) dom.resultsCount.textContent = 'Server error';
+            return;
+        }
+
+        const res = queryFilteredProblems();
 
         // Update Results Count
         if (dom.resultsCount) {

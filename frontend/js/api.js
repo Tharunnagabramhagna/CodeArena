@@ -2,71 +2,131 @@
 // Prepares frontend for upcoming Java Servlet + JDBC backend endpoints.
 // Encapsulates network communication, JSON serialization, headers, and error handling.
 
+function resolveDefaultApiBase() {
+    if (typeof window === 'undefined' || !window.location) {
+        return '/api';
+    }
+    if (window.CODEARENA_API_BASE) {
+        return String(window.CODEARENA_API_BASE).replace(/\/+$/, '');
+    }
+    try {
+        const meta = document.querySelector('meta[name="codearena-api-base"]');
+        if (meta && meta.content && meta.content.trim()) {
+            return meta.content.trim().replace(/\/+$/, '');
+        }
+    } catch (ignored) {}
+    const proto = window.location.protocol;
+    const port = String(window.location.port || '');
+    const hostname = window.location.hostname || 'localhost';
+    if (proto === 'file:') {
+        return 'http://localhost:8080/api';
+    }
+    if (port === '5500' || port === '5501' || port === '5502' || port === '5173' || port === '5174' || port === '4173' || port === '3000') {
+        const safeHost = (hostname === '127.0.0.1' || hostname === 'localhost') ? hostname : 'localhost';
+        return `${proto}//${safeHost}:8080/api`;
+    }
+    return '/api';
+}
+if (typeof window !== 'undefined') {
+    window.resolveDefaultApiBase = resolveDefaultApiBase;
+}
+
 const API_CONFIG = {
-    // Default base URL; customizable via window.CODEARENA_API_BASE
-    baseURL: (typeof window !== 'undefined' && window.CODEARENA_API_BASE) || '/api',
-    timeoutMs: 6000,
+    // Default base URL; routes static dev servers (e.g. :5500) to the local backend on :8080
+    baseURL: resolveDefaultApiBase(),
+    timeoutMs: 15000,
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     },
-    // In Phase 3, frontend runs with isolated mock adapters until Java Servlet backend is connected
-    useMockAdapter: true
+    useMockAdapter: false
 };
 
 /**
- * Low-level HTTP client with timeout, JSON parsing, and unified error handling.
+ * Low-level HTTP client with timeout, JSON parsing, envelope unwrapping, and unified error handling.
  */
 async function apiClient(endpoint, options = {}) {
     const url = `${API_CONFIG.baseURL}${endpoint}`;
+    const timeoutMs = Number(options.timeoutMs) > 0 ? Number(options.timeoutMs) : API_CONFIG.timeoutMs;
     const controller = new AbortController();
-    const timeoutId = setTimeout(function () { controller.abort(); }, API_CONFIG.timeoutMs);
+    const timeoutId = setTimeout(function () { controller.abort(); }, timeoutMs);
 
     const config = Object.assign({
         method: options.method || 'GET',
         headers: Object.assign({}, API_CONFIG.headers, options.headers || {}),
-        credentials: 'same-origin', // Preserves HTTP-only session cookies from Java Servlets
+        credentials: 'include',
         signal: controller.signal
     }, options);
+    delete config.timeoutMs;
 
-    if (options.body && typeof options.body === 'object') {
+    if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
         config.body = JSON.stringify(options.body);
+    } else if (options.body instanceof FormData) {
+        delete config.headers['Content-Type'];
     }
 
     try {
         const response = await fetch(url, config);
         clearTimeout(timeoutId);
 
-        let data = null;
+        let rawData = null;
         const contentType = response.headers.get('content-type') || '';
         if (contentType.indexOf('application/json') !== -1) {
-            data = await response.json();
+            rawData = await response.json();
         } else {
-            data = await response.text();
+            const text = await response.text();
+            try {
+                rawData = text ? JSON.parse(text) : null;
+            } catch (ignored) {
+                rawData = text;
+            }
         }
 
+        const isWrappedEnvelope = rawData && typeof rawData === 'object' && !Array.isArray(rawData)
+            && Object.prototype.hasOwnProperty.call(rawData, 'success')
+            && Object.prototype.hasOwnProperty.call(rawData, 'data');
+
+        const unwrappedData = isWrappedEnvelope ? rawData.data : rawData;
+        const serverMessage = (rawData && typeof rawData === 'object' && (rawData.message || rawData.error)) || null;
+
         if (!response.ok) {
-            const error = new Error((data && data.message) || ('HTTP error! Status: ' + response.status));
-            error.status = response.status;
-            error.data = data;
-            throw error;
+            return {
+                success: false,
+                status: response.status,
+                isNetworkFailure: false,
+                isUnavailable: response.status === 503,
+                message: serverMessage || ('Request failed with HTTP ' + response.status),
+                data: unwrappedData
+            };
+        }
+
+        if (rawData && typeof rawData === 'object' && !Array.isArray(rawData) && rawData.success === false) {
+            return {
+                success: false,
+                status: rawData.status || response.status,
+                isNetworkFailure: false,
+                message: serverMessage || 'Operation failed.',
+                data: unwrappedData
+            };
         }
 
         return {
             success: true,
             status: response.status,
-            data: data
+            message: serverMessage,
+            data: unwrappedData,
+            raw: rawData
         };
     } catch (err) {
         clearTimeout(timeoutId);
-        const isNetworkFailure = err.name === 'AbortError' || err.name === 'TypeError' || !err.status;
+        const isNetworkFailure = err && (err.name === 'AbortError' || err.name === 'TypeError' || !err.status);
         return {
             success: false,
-            status: err.status || 0,
-            isNetworkFailure: isNetworkFailure,
+            status: (err && err.status) || 0,
+            isNetworkFailure: Boolean(isNetworkFailure),
             message: isNetworkFailure
-                ? 'Backend service is currently in preview mode. Java Servlet endpoints will be active in the upcoming backend phase.'
-                : (err.message || 'An unexpected error occurred.')
+                ? 'Unable to reach the CodeArena backend server. Verify the server is running and try again.'
+                : ((err && err.message) || 'An unexpected error occurred.')
         };
     }
 }
@@ -196,52 +256,107 @@ const authMockAdapter = {
     }
 };
 
+let _liveSessionUser = null;
+let _sessionFetchPromise = null;
+
+function _normalizeUserPayload(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    const u = raw.user && typeof raw.user === 'object' ? raw.user : raw;
+    if (!u.id && !u.email) return null;
+    const fullName = u.fullName || u.name || u.username || (u.email ? u.email.split('@')[0] : 'Learner');
+    const plan = u.plan || 'free';
+    const isPro = Boolean(u.isPro || (plan === 'monthly' || plan === 'annual' || plan === 'pro'));
+    return Object.assign({}, u, {
+        name: fullName,
+        fullName: fullName,
+        plan: plan,
+        isPro: isPro,
+        isGuest: false
+    });
+}
+
+function _clearLegacyAuthStorage() {
+    _storageRemove(AUTH_STORAGE_KEY);
+    _storageRemove(LEGACY_AUTH_STORAGE_KEY);
+    _storageRemove(PLAN_STORAGE_KEY);
+    try {
+        if (typeof sessionStorage !== 'undefined') {
+            sessionStorage.removeItem(LEGACY_AUTH_STORAGE_KEY);
+        }
+    } catch (e) {}
+}
+
 /**
  * Authentication Service Layer
- * Dispatches to backend when active, uses mock adapter in preview mode.
+ * Authenticated strictly via HTTP session cookies (/api/auth/* and /api/users/me).
  */
 const authService = {
     isAuthenticated() {
-        return authMockAdapter.isAuthenticated();
+        if (API_CONFIG.useMockAdapter) {
+            return authMockAdapter.isAuthenticated();
+        }
+        return Boolean(_liveSessionUser && _liveSessionUser.id);
     },
 
     getCurrentUserSync() {
-        return authMockAdapter.getCurrentUser();
-    },
-
-    async getCurrentUser() {
         if (API_CONFIG.useMockAdapter) {
             return authMockAdapter.getCurrentUser();
         }
-        const res = await apiClient('/users/me', { method: 'GET' });
-        if (!res.success && res.isNetworkFailure) {
+        return _liveSessionUser ? { success: true, data: _liveSessionUser } : null;
+    },
+
+    async getCurrentUser(forceRefresh = false) {
+        if (API_CONFIG.useMockAdapter) {
             return authMockAdapter.getCurrentUser();
         }
-        return res;
+        if (!forceRefresh && _sessionFetchPromise) {
+            return _sessionFetchPromise;
+        }
+        _sessionFetchPromise = (async () => {
+            const res = await apiClient('/users/me', { method: 'GET' });
+            _sessionFetchPromise = null;
+            if (res.success && res.data) {
+                const normalized = _normalizeUserPayload(res.data);
+                if (normalized) {
+                    _liveSessionUser = normalized;
+                    return { success: true, status: res.status, data: normalized };
+                }
+            }
+            if (res.status === 401 || res.status === 403) {
+                _liveSessionUser = null;
+                _clearLegacyAuthStorage();
+            }
+            return res;
+        })();
+        return _sessionFetchPromise;
     },
 
     async login(credentials) {
-        let res;
         if (API_CONFIG.useMockAdapter) {
-            res = authMockAdapter.login(credentials);
-        } else {
-            res = await apiClient('/auth/login', {
-                method: 'POST',
-                body: {
-                    email: credentials.email,
-                    password: credentials.password,
-                    rememberMe: Boolean(credentials.rememberMe)
-                }
-            });
-            if (!res.success && res.isNetworkFailure) {
-                res = authMockAdapter.login(credentials);
+            const mockRes = authMockAdapter.login(credentials);
+            if (mockRes && mockRes.success && typeof document !== 'undefined') {
+                document.dispatchEvent(new CustomEvent('codearena:auth-changed', {
+                    detail: { action: 'login', user: mockRes.data && mockRes.data.user }
+                }));
             }
+            return mockRes;
         }
+        const res = await apiClient('/auth/login', {
+            method: 'POST',
+            body: {
+                email: credentials.email,
+                password: credentials.password,
+                rememberMe: Boolean(credentials.rememberMe)
+            }
+        });
         if (res && res.success) {
-            const user = (res.data && res.data.user) || credentials;
+            const normalized = _normalizeUserPayload(res.data);
+            _liveSessionUser = normalized;
+            _clearLegacyAuthStorage();
+            res.data = { user: normalized, ...normalized };
             if (typeof document !== 'undefined') {
                 document.dispatchEvent(new CustomEvent('codearena:auth-changed', {
-                    detail: { action: 'login', user: user }
+                    detail: { action: 'login', user: normalized }
                 }));
             }
         }
@@ -249,27 +364,31 @@ const authService = {
     },
 
     async register(userData) {
-        let res;
         if (API_CONFIG.useMockAdapter) {
-            res = authMockAdapter.register(userData);
-        } else {
-            res = await apiClient('/auth/register', {
-                method: 'POST',
-                body: {
-                    fullName: userData.fullName,
-                    email: userData.email,
-                    password: userData.password
-                }
-            });
-            if (!res.success && res.isNetworkFailure) {
-                res = authMockAdapter.register(userData);
+            const mockRes = authMockAdapter.register(userData);
+            if (mockRes && mockRes.success && typeof document !== 'undefined') {
+                document.dispatchEvent(new CustomEvent('codearena:auth-changed', {
+                    detail: { action: 'register', user: mockRes.data && mockRes.data.user }
+                }));
             }
+            return mockRes;
         }
+        const res = await apiClient('/auth/register', {
+            method: 'POST',
+            body: {
+                fullName: userData.fullName,
+                email: userData.email,
+                password: userData.password
+            }
+        });
         if (res && res.success) {
-            const user = (res.data && res.data.user) || userData;
+            const normalized = _normalizeUserPayload(res.data);
+            _liveSessionUser = normalized;
+            _clearLegacyAuthStorage();
+            res.data = { user: normalized, ...normalized };
             if (typeof document !== 'undefined') {
                 document.dispatchEvent(new CustomEvent('codearena:auth-changed', {
-                    detail: { action: 'register', user: user }
+                    detail: { action: 'register', user: normalized }
                 }));
             }
         }
@@ -279,13 +398,12 @@ const authService = {
     async logout() {
         let res = { success: true };
         if (!API_CONFIG.useMockAdapter) {
-            try {
-                res = await apiClient('/auth/logout', { method: 'POST' });
-            } catch (e) {
-                res = { success: false, message: 'Server communication failed during logout.' };
-            }
+            res = await apiClient('/auth/logout', { method: 'POST' });
+        } else {
+            authMockAdapter.logout();
         }
-        authMockAdapter.logout();
+        _liveSessionUser = null;
+        _clearLegacyAuthStorage();
         if (typeof document !== 'undefined') {
             document.dispatchEvent(new CustomEvent('codearena:auth-changed', {
                 detail: { action: 'logout', user: null }
@@ -294,21 +412,88 @@ const authService = {
         return res;
     },
 
-    demoLogin(plan = 'free') {
-        const res = authMockAdapter.demoLogin(plan);
+    demoLogin() {
+        if (!API_CONFIG.useMockAdapter) {
+            return {
+                success: false,
+                message: 'Demo login bypass is disabled. Sign in with a registered CodeArena account.'
+            };
+        }
+        const res = authMockAdapter.demoLogin();
         if (typeof document !== 'undefined') {
             document.dispatchEvent(new CustomEvent('codearena:auth-changed', {
                 detail: { action: 'login', user: res.data.user }
             }));
         }
         return res;
+    },
+
+    async getOAuthConfig() {
+        return apiClient('/auth/oauth/config', { method: 'GET' });
+    },
+
+    async getOAuthUrl(provider, returnUrl) {
+        const query = returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : '';
+        return apiClient(`/auth/oauth/${encodeURIComponent(provider)}/url${query}`, { method: 'GET' });
+    },
+
+    async requestPasswordReset(email) {
+        return apiClient('/auth/password/forgot', {
+            method: 'POST',
+            body: { email }
+        });
+    },
+
+    async verifyPasswordOtp(email, otp) {
+        return apiClient('/auth/password/verify-otp', {
+            method: 'POST',
+            body: { email, otp }
+        });
+    },
+
+    async resendPasswordOtp(email) {
+        return apiClient('/auth/password/resend-otp', {
+            method: 'POST',
+            body: { email }
+        });
+    },
+
+    async resetPassword(email, resetToken, newPassword, confirmPassword) {
+        return apiClient('/auth/password/reset', {
+            method: 'POST',
+            body: { email, resetToken, newPassword, confirmPassword }
+        });
+    },
+
+    async getOAuthPendingRegistration(token) {
+        const query = token ? `?token=${encodeURIComponent(token)}` : '';
+        return apiClient(`/auth/oauth/pending-registration${query}`, { method: 'GET' });
+    },
+
+    async completeOAuthPasswordRegistration(token, password, confirmPassword) {
+        const res = await apiClient('/auth/oauth/create-password', {
+            method: 'POST',
+            body: { token, password, confirmPassword }
+        });
+        if (res && res.success && res.data) {
+            const rawUser = res.data.user || res.data;
+            const normalized = _normalizeUserPayload(rawUser);
+            _liveSessionUser = normalized;
+            _clearLegacyAuthStorage();
+            res.data = { user: normalized, ...normalized, redirectUrl: res.data.redirectUrl || '/pages/dashboard.html' };
+            if (typeof document !== 'undefined') {
+                document.dispatchEvent(new CustomEvent('codearena:auth-changed', {
+                    detail: { action: 'register', user: normalized }
+                }));
+            }
+        }
+        return res;
     }
 };
 
 /**
- * Subscription Service (Client-Side Preview)
- * Transparent pricing: Monthly ($5/mo), Annual ($199/yr).
- * Note: $199/yr is standard annual rate ($199/yr); monthly is $5/mo ($60/yr). No deceptive discount claims.
+ * Subscription Service
+ * Reflects server-verified user entitlements cleanly without localStorage fake bypasses.
  */
 const subscriptionService = {
     getPlans() {
@@ -319,13 +504,12 @@ const subscriptionService = {
                 price: 5,
                 period: 'month',
                 formattedPrice: '$5 / month',
-                billingTerms: 'Billed monthly ($5/month). Cancel anytime.',
+                billingTerms: 'Billed monthly ($5/month). Requires active payment gateway integration.',
                 comparisonNote: 'Flexible monthly billing ($60/year equivalent).',
                 benefits: [
-                    'Access to all 50 Curated Premium DSA Problems',
+                    'Access to Curated Premium DSA Problems',
                     'Advanced Algorithmic Patterns (Segment Trees, Tarjan, Advanced DP)',
-                    'In-Depth Progressive Hints (3 Levels per challenge)',
-                    'Specialized Pro Problem Collections & Practice Sets'
+                    'In-Depth Progressive Hints (3 Levels per challenge)'
                 ]
             },
             {
@@ -334,69 +518,115 @@ const subscriptionService = {
                 price: 199,
                 period: 'year',
                 formattedPrice: '$199 / year',
-                billingTerms: 'Billed annually ($199/year).',
-                comparisonNote: 'Annual billing commitment ($199/yr). Standard rate.',
+                billingTerms: 'Billed annually ($199/year). Requires active payment gateway integration.',
+                comparisonNote: 'Annual billing option ($199/yr).',
                 benefits: [
-                    'Access to all 50 Curated Premium DSA Problems',
+                    'Access to Curated Premium DSA Problems',
                     'Advanced Algorithmic Patterns (Segment Trees, Tarjan, Advanced DP)',
-                    'In-Depth Progressive Hints (3 Levels per challenge)',
-                    'Specialized Pro Problem Collections & Practice Sets'
+                    'In-Depth Progressive Hints (3 Levels per challenge)'
                 ]
             }
         ];
     },
 
     getCurrentPlan() {
-        try {
+        if (API_CONFIG.useMockAdapter) {
             return _storageGet(PLAN_STORAGE_KEY) || 'free';
-        } catch (e) {
-            return 'free';
         }
+        return (_liveSessionUser && _liveSessionUser.plan) || 'free';
     },
 
     isPremium() {
-        if (typeof authService !== 'undefined' && !authService.isAuthenticated()) {
+        if (!authService.isAuthenticated()) {
             return false;
+        }
+        if (_liveSessionUser && _liveSessionUser.isPro) {
+            return true;
         }
         const plan = this.getCurrentPlan();
         return plan === 'monthly' || plan === 'annual' || plan === 'pro';
     },
 
-    upgradePlan(planId) {
-        const validPlan = (planId === 'annual') ? 'annual' : 'monthly';
-        try {
-            _storageSet(PLAN_STORAGE_KEY, validPlan);
-            const userRes = authMockAdapter.getCurrentUser();
-            if (userRes && userRes.success && userRes.data) {
-                userRes.data.plan = validPlan;
-                _storageSet(AUTH_STORAGE_KEY, JSON.stringify(userRes.data));
-                _storageSet(LEGACY_AUTH_STORAGE_KEY, JSON.stringify(userRes.data));
-            }
-        } catch (e) {}
-        return { success: true, plan: validPlan };
+    upgradePlan() {
+        return {
+            success: false,
+            message: 'Pro subscription billing is not active on this server. Only free problems can be unlocked without verified server billing.'
+        };
     },
 
     downgradePlan() {
-        try {
-            _storageSet(PLAN_STORAGE_KEY, 'free');
-            const userRes = authMockAdapter.getCurrentUser();
-            if (userRes && userRes.success && userRes.data) {
-                userRes.data.plan = 'free';
-                _storageSet(AUTH_STORAGE_KEY, JSON.stringify(userRes.data));
-                _storageSet(LEGACY_AUTH_STORAGE_KEY, JSON.stringify(userRes.data));
-            }
-        } catch (e) {}
         return { success: true, plan: 'free' };
     },
 
     canAccessProblem(problemOrId) {
         if (!problemOrId) return true;
-        let problem = problemOrId;
-        if (typeof problemOrId === 'string') {
-            problem = MOCK_PROBLEMS.find(p => p.id === problemOrId || p.slug === problemOrId);
+        if (typeof problemOrId === 'object') {
+            if (!problemOrId.isPremium && !problemOrId.premium) return true;
+            return this.isPremium();
         }
-        if (!problem || !problem.isPremium) return true;
-        return this.isPremium();
+        return true;
+    }
+};
+
+const paymentService = {
+    async getConfig() {
+        return await apiClient('/payment/config', { method: 'GET' });
+    },
+    async createOrder(planId) {
+        return await apiClient('/payment/create-order', {
+            method: 'POST',
+            body: { planId: planId || 'monthly' }
+        });
+    },
+    async submitUtr(orderReference, utrNumber, receiptFile, userNotes) {
+        if (receiptFile) {
+            const formData = new FormData();
+            formData.append('orderReference', orderReference);
+            formData.append('utrNumber', utrNumber);
+            if (userNotes) formData.append('userNotes', userNotes);
+            formData.append('receipt', receiptFile);
+            return await apiClient('/payment/submit-utr', {
+                method: 'POST',
+                body: formData
+            });
+        } else {
+            return await apiClient('/payment/submit-utr', {
+                method: 'POST',
+                body: { orderReference, utrNumber, userNotes }
+            });
+        }
+    },
+    async getMyOrders() {
+        return await apiClient('/payment/my-orders', { method: 'GET' });
+    },
+    async getOrder(orderReference) {
+        return await apiClient(`/payment/order/${encodeURIComponent(orderReference)}`, { method: 'GET' });
+    },
+    async getSubscription() {
+        return await apiClient('/payment/subscription', { method: 'GET' });
+    },
+    // Administrative endpoints
+    async adminGetPendingOrders() {
+        return await apiClient('/admin/payments/pending', { method: 'GET' });
+    },
+    async adminGetAllOrders(limit = 50, offset = 0, status = '') {
+        const query = `limit=${limit}&offset=${offset}` + (status ? `&status=${encodeURIComponent(status)}` : '');
+        return await apiClient(`/admin/payments/all?${query}`, { method: 'GET' });
+    },
+    async adminApproveOrder(orderId, adminNotes) {
+        return await apiClient('/admin/payments/approve', {
+            method: 'POST',
+            body: { orderId, adminNotes: adminNotes || '' }
+        });
+    },
+    async adminRejectOrder(orderId, reason) {
+        return await apiClient('/admin/payments/reject', {
+            method: 'POST',
+            body: { orderId, reason: reason || 'Rejected by administrator' }
+        });
+    },
+    adminGetReceiptUrl(orderId) {
+        return `${API_CONFIG.baseURL}/admin/payments/receipt/${orderId}`;
     }
 };
 
@@ -9554,17 +9784,18 @@ const compilerService = {
         if (API_CONFIG.useMockAdapter) {
             return compilerMockAdapter.run(payload);
         }
-        const res = await apiClient('/compiler/run', {
+        return await apiClient('/compiler/run', {
             method: 'POST',
-            body: payload
+            body: payload,
+            timeoutMs: 45000
         });
-        if (!res.success && res.isNetworkFailure) {
-            return compilerMockAdapter.run(payload);
-        }
-        return res;
     },
 
-    getDefaultTemplate(language = 'java') {
+    async getStatus() {
+        return await apiClient('/compiler/status', { method: 'GET' });
+    },
+
+    getDefaultTemplate() {
         return DEFAULT_JAVA_TEMPLATE;
     }
 };
@@ -9577,10 +9808,23 @@ const problemService = {
         if (API_CONFIG.useMockAdapter) {
             return problemMockAdapter.list(params);
         }
-        const query = new URLSearchParams(params).toString();
-        const res = await apiClient(`/problems?${query}`, { method: 'GET' });
-        if (!res.success && res.isNetworkFailure) {
-            return problemMockAdapter.list(params);
+        const cleanParams = {};
+        Object.keys(params || {}).forEach(k => {
+            if (params[k] !== undefined && params[k] !== null && params[k] !== '') {
+                cleanParams[k] = params[k];
+            }
+        });
+        const query = new URLSearchParams(cleanParams).toString();
+        const res = await apiClient(`/problems${query ? '?' + query : ''}`, { method: 'GET' });
+        if (res.success && Array.isArray(res.data)) {
+            const list = res.data;
+            res.data = {
+                problems: list,
+                total: list.length,
+                page: 1,
+                limit: list.length,
+                totalPages: 1
+            };
         }
         return res;
     },
@@ -9589,85 +9833,62 @@ const problemService = {
         if (API_CONFIG.useMockAdapter) {
             return problemMockAdapter.getById(id);
         }
-        const res = await apiClient(`/problems/${id}`, { method: 'GET' });
-        if (!res.success && res.isNetworkFailure) {
-            return problemMockAdapter.getById(id);
-        }
-        return res;
+        return await apiClient(`/problems/${encodeURIComponent(id)}`, { method: 'GET' });
     },
 
-    async getTopics() {
+    async getAnimationUnlockStatus(id) {
+        if (!id) return { success: false, unlocked: false, reason: 'INVALID_ID' };
+        return await apiClient(`/problems/${encodeURIComponent(id)}/animation-status`, { method: 'GET' });
+    },
+
+    async getTopics(track) {
         if (API_CONFIG.useMockAdapter) {
             return problemMockAdapter.getTopics();
         }
-        const res = await apiClient('/problems/topics', { method: 'GET' });
-        if (!res.success && res.isNetworkFailure) {
-            return problemMockAdapter.getTopics();
-        }
-        return res;
+        const q = track ? `?track=${encodeURIComponent(track)}` : '';
+        return await apiClient(`/problems/topics${q}`, { method: 'GET' });
     },
 
-    async getPatterns(topic) {
+    async getCategories(track) {
+        const q = track ? `?track=${encodeURIComponent(track)}` : '';
+        return await apiClient(`/problems/categories${q}`, { method: 'GET' });
+    },
+
+    async getPatterns(topic, track) {
         if (API_CONFIG.useMockAdapter) {
             return problemMockAdapter.getPatterns(topic);
         }
-        const query = topic ? ('?topic=' + encodeURIComponent(topic)) : '';
-        const res = await apiClient('/problems/patterns' + query, { method: 'GET' });
-        if (!res.success && res.isNetworkFailure) {
-            return problemMockAdapter.getPatterns(topic);
-        }
-        return res;
+        const p = new URLSearchParams();
+        if (topic && topic !== 'All') p.set('topic', topic);
+        if (track && track !== 'all') p.set('track', track);
+        const q = p.toString();
+        return await apiClient(`/problems/patterns${q ? '?' + q : ''}`, { method: 'GET' });
     },
 
     async getFreeProblems() {
-        if (API_CONFIG.useMockAdapter) {
-            return problemMockAdapter.getFreeProblems();
-        }
-        const res = await apiClient('/problems?access=free', { method: 'GET' });
-        if (!res.success && res.isNetworkFailure) {
-            return problemMockAdapter.getFreeProblems();
-        }
-        return res;
+        return this.getProblems({ access: 'free' });
     },
 
     async getPremiumProblems() {
-        if (API_CONFIG.useMockAdapter) {
-            return problemMockAdapter.getPremiumProblems();
-        }
-        const res = await apiClient('/problems?access=premium', { method: 'GET' });
-        if (!res.success && res.isNetworkFailure) {
-            return problemMockAdapter.getPremiumProblems();
-        }
-        return res;
+        return this.getProblems({ access: 'premium' });
     },
 
     async getStats() {
         if (API_CONFIG.useMockAdapter) {
             return problemMockAdapter.getStats();
         }
-        const res = await apiClient('/problems/stats', { method: 'GET' });
-        if (!res.success && res.isNetworkFailure) {
-            return problemMockAdapter.getStats();
-        }
-        return res;
+        return await apiClient('/problems/stats', { method: 'GET' });
     },
 
     async getUpcomingActivities() {
         if (API_CONFIG.useMockAdapter) {
             return problemMockAdapter.getUpcomingActivities();
         }
-        const res = await apiClient('/platform/activities', { method: 'GET' });
-        if (!res.success && res.isNetworkFailure) {
-            return problemMockAdapter.getUpcomingActivities();
-        }
-        return res;
+        return await apiClient('/platform/activities', { method: 'GET' });
     },
 
     canAccessProblem(problemOrId) {
-        if (typeof subscriptionService !== 'undefined') {
-            return subscriptionService.canAccessProblem(problemOrId);
-        }
-        return true;
+        return subscriptionService.canAccessProblem(problemOrId);
     },
 
     sanitizeHtml(dirty) {
@@ -9683,25 +9904,26 @@ const submissionService = {
         if (API_CONFIG.useMockAdapter) {
             return submissionMockAdapter.submit(payload);
         }
-        const res = await apiClient('/submissions', {
+        return await apiClient('/submissions', {
             method: 'POST',
-            body: payload
+            body: payload,
+            timeoutMs: 30000
         });
-        if (!res.success && res.isNetworkFailure) {
-            return submissionMockAdapter.submit(payload);
-        }
-        return res;
+    },
+
+    async getSubmissionById(submissionId) {
+        return await apiClient(`/submissions/${encodeURIComponent(submissionId)}`, { method: 'GET' });
     },
 
     async getSubmissions(problemId) {
         if (API_CONFIG.useMockAdapter) {
             return submissionMockAdapter.getHistory(problemId);
         }
-        const res = await apiClient(`/submissions?problemId=${encodeURIComponent(problemId)}`, {
-            method: 'GET'
-        });
-        if (!res.success && res.isNetworkFailure) {
-            return submissionMockAdapter.getHistory(problemId);
+        const hasProblem = problemId !== undefined && problemId !== null && String(problemId).trim() !== '' && String(problemId) !== 'undefined';
+        const endpoint = hasProblem ? `/submissions?problemId=${encodeURIComponent(problemId)}` : '/submissions';
+        const res = await apiClient(endpoint, { method: 'GET' });
+        if (res.success && Array.isArray(res.data)) {
+            res.data = { submissions: res.data };
         }
         return res;
     }
@@ -9969,88 +10191,145 @@ const aiService = {
         if (API_CONFIG.useMockAdapter) {
             return aiMockAdapter.listConversations();
         }
-        const res = await apiClient('/ai/conversations', { method: 'GET' });
-        if (!res.success && res.isNetworkFailure) {
-            return aiMockAdapter.listConversations();
-        }
-        return res;
+        return await apiClient('/ai/conversations', { method: 'GET' });
     },
 
     async getConversation(convUid) {
         if (API_CONFIG.useMockAdapter) {
             return aiMockAdapter.getConversation(convUid);
         }
-        const res = await apiClient(`/ai/conversations/${encodeURIComponent(convUid)}`, { method: 'GET' });
-        if (!res.success && res.isNetworkFailure) {
-            return aiMockAdapter.getConversation(convUid);
-        }
-        return res;
+        return await apiClient(`/ai/conversations/${encodeURIComponent(convUid)}`, { method: 'GET' });
     },
 
     async createConversation(title, problemId) {
         if (API_CONFIG.useMockAdapter) {
             return aiMockAdapter.createConversation(title, problemId);
         }
-        const res = await apiClient('/ai/conversations', {
+        return await apiClient('/ai/conversations', {
             method: 'POST',
             body: { title, problemId }
         });
-        if (!res.success && res.isNetworkFailure) {
-            return aiMockAdapter.createConversation(title, problemId);
-        }
-        return res;
     },
 
     async sendMessage(convUid, content) {
         if (API_CONFIG.useMockAdapter) {
             return aiMockAdapter.sendMessage(convUid, content);
         }
-        const res = await apiClient(`/ai/conversations/${encodeURIComponent(convUid)}/messages`, {
+        return await apiClient(`/ai/conversations/${encodeURIComponent(convUid)}/messages`, {
             method: 'POST',
-            body: { content }
+            body: { content },
+            timeoutMs: 30000
         });
-        if (!res.success && res.isNetworkFailure) {
-            return aiMockAdapter.sendMessage(convUid, content);
-        }
-        return res;
     },
 
     async renameConversation(convUid, title) {
         if (API_CONFIG.useMockAdapter) {
             return aiMockAdapter.renameConversation(convUid, title);
         }
-        const res = await apiClient(`/ai/conversations/${encodeURIComponent(convUid)}`, {
+        return await apiClient(`/ai/conversations/${encodeURIComponent(convUid)}`, {
             method: 'PATCH',
             body: { title }
         });
-        if (!res.success && res.isNetworkFailure) {
-            return aiMockAdapter.renameConversation(convUid, title);
-        }
-        return res;
     },
 
     async deleteConversation(convUid) {
         if (API_CONFIG.useMockAdapter) {
             return aiMockAdapter.deleteConversation(convUid);
         }
-        const res = await apiClient(`/ai/conversations/${encodeURIComponent(convUid)}`, {
+        return await apiClient(`/ai/conversations/${encodeURIComponent(convUid)}`, {
             method: 'DELETE'
         });
-        if (!res.success && res.isNetworkFailure) {
-            return aiMockAdapter.deleteConversation(convUid);
-        }
-        return res;
     },
 
     async getStatus() {
         if (API_CONFIG.useMockAdapter) {
             return aiMockAdapter.getStatus();
         }
-        const res = await apiClient('/ai/status', { method: 'GET' });
-        if (!res.success && res.isNetworkFailure) {
-            return aiMockAdapter.getStatus();
-        }
-        return res;
+        return await apiClient('/ai/status', { method: 'GET' });
+    }
+};
+
+/**
+ * Student Profile, Preferences, Password, Analytics & Recently Viewed Service
+ */
+const studentService = {
+    async getProfile() {
+        return await apiClient('/student/profile', { method: 'GET' });
+    },
+    async updateProfile(profileData) {
+        return await apiClient('/student/profile', { method: 'PUT', body: profileData });
+    },
+    async changePassword(payload) {
+        return await apiClient('/student/password', { method: 'POST', body: payload });
+    },
+    async getPreferences() {
+        return await apiClient('/student/preferences', { method: 'GET' });
+    },
+    async updatePreferences(prefs) {
+        return await apiClient('/student/preferences', { method: 'PUT', body: prefs });
+    },
+    async getAnalytics() {
+        return await apiClient('/student/analytics', { method: 'GET' });
+    },
+    async getRecentlyViewed() {
+        return await apiClient('/student/recently-viewed', { method: 'GET' });
+    },
+    async recordRecentlyViewed(problemId) {
+        return await apiClient('/student/recently-viewed', { method: 'POST', body: { problemId } });
+    }
+};
+
+/**
+ * Problem Bookmarks Service
+ */
+const bookmarkService = {
+    async list() {
+        return await apiClient('/bookmarks', { method: 'GET' });
+    },
+    async add(problemId, notes) {
+        return await apiClient('/bookmarks', { method: 'POST', body: { problemId, notes } });
+    },
+    async remove(problemId) {
+        return await apiClient(`/bookmarks/${encodeURIComponent(problemId)}`, { method: 'DELETE' });
+    },
+    async clearAll() {
+        return await apiClient('/bookmarks', { method: 'DELETE' });
+    }
+};
+
+/**
+ * Guided Roadmap Service
+ */
+const roadmapService = {
+    async getRoadmap() {
+        return await apiClient('/roadmap', { method: 'GET' });
+    },
+    async updateTopicProgress(slug, status) {
+        return await apiClient(`/roadmap/topics/${encodeURIComponent(slug)}/progress`, {
+            method: 'PUT',
+            body: { status }
+        });
+    },
+    async resetProgress() {
+        return await apiClient('/roadmap/reset', { method: 'POST' });
+    }
+};
+
+/**
+ * Contests & Leaderboard Service
+ */
+const contestService = {
+    async list() {
+        return await apiClient('/contests', { method: 'GET' });
+    },
+    async getDetail(slug) {
+        return await apiClient(`/contests/${encodeURIComponent(slug)}`, { method: 'GET' });
+    },
+    async register(slug) {
+        return await apiClient(`/contests/${encodeURIComponent(slug)}/register`, { method: 'POST' });
+    },
+    async unregister(slug) {
+        return await apiClient(`/contests/${encodeURIComponent(slug)}/register`, { method: 'DELETE' });
     }
 };
 
@@ -10064,6 +10343,11 @@ const models = Object.freeze({
     sanitizeHtml
 });
 
+// Clear stale legacy localStorage preview auth keys when running against live backend
+if (typeof window !== 'undefined' && !API_CONFIG.useMockAdapter) {
+    _clearLegacyAuthStorage();
+}
+
 // Expose to window for vanilla JS application consumption
 if (typeof window !== 'undefined') {
     window.CodeArenaAPI = {
@@ -10074,7 +10358,12 @@ if (typeof window !== 'undefined') {
         problemService: problemService,
         submissionService: submissionService,
         subscriptionService: subscriptionService,
+        paymentService: paymentService,
         aiService: aiService,
+        studentService: studentService,
+        bookmarkService: bookmarkService,
+        roadmapService: roadmapService,
+        contestService: contestService,
         models: models
     };
 }
@@ -10089,7 +10378,12 @@ if (typeof module !== 'undefined' && module.exports) {
         problemService,
         submissionService,
         subscriptionService,
+        paymentService,
         aiService,
+        studentService,
+        bookmarkService,
+        roadmapService,
+        contestService,
         models
     };
 }

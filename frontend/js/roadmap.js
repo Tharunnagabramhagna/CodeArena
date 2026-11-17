@@ -57,7 +57,7 @@
     /**
      * Initialization entrypoint
      */
-    function init() {
+    async function init() {
         cacheDom();
         bindEvents();
         renderOverviewStats();
@@ -76,6 +76,15 @@
             renderLevelsAndTopics();
             if (activeTopicId) {
                 renderDrawerContent(activeTopicId);
+            }
+        });
+
+        if (typeof Service.syncFromServer === 'function') {
+            await Service.syncFromServer();
+        }
+        document.addEventListener('codearena:auth-changed', function () {
+            if (typeof Service.syncFromServer === 'function') {
+                Service.syncFromServer();
             }
         });
     }
@@ -520,8 +529,8 @@
                 drawerToggleBtn.title = 'Mark as completed';
             }
 
-            drawerToggleBtn.onclick = function () {
-                Service.toggleTopicCompleted(topicId);
+            drawerToggleBtn.onclick = async function () {
+                await Service.toggleTopicCompleted(topicId);
                 renderDrawerContent(topicId);
                 renderOverviewStats();
                 renderLevelsAndTopics();

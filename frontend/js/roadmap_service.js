@@ -20,6 +20,18 @@
     const STORAGE_KEY = 'codearena_roadmap_progress';
     let listeners = [];
     let memoryFallbackState = null;
+    let serverSynced = false;
+    let serverCompletedIds = [];
+    let serverUnlockedMap = {};
+    let serverProblemsBySlug = {};
+
+    function hasLiveBackend() {
+        return typeof window !== 'undefined' && window.CodeArenaAPI && window.CodeArenaAPI.roadmapService;
+    }
+
+    function isAuthedLive() {
+        return hasLiveBackend() && window.CodeArenaAPI.authService && window.CodeArenaAPI.authService.isAuthenticated();
+    }
 
     function getStorage() {
         try {
@@ -104,41 +116,72 @@
          * Get array of completed topic ID strings
          */
         getCompletedTopicIds: function () {
+            if (serverSynced) {
+                return serverCompletedIds.slice();
+            }
             const state = loadState();
             return Array.from(state.completedTopics || []);
         },
 
-        /**
-         * Check if a specific topic is completed
-         */
         isTopicCompleted: function (topicId) {
             if (!topicId) return false;
-            const state = loadState();
-            return (state.completedTopics || []).indexOf(topicId) !== -1;
+            return this.getCompletedTopicIds().indexOf(topicId) !== -1;
         },
 
-        /**
-         * Check if a topic is unlocked (prerequisites satisfied)
-         */
         isTopicUnlocked: function (topicId) {
+            if (serverSynced && Object.prototype.hasOwnProperty.call(serverUnlockedMap, topicId)) {
+                return Boolean(serverUnlockedMap[topicId]);
+            }
             const topic = RoadmapData.getTopicById(topicId);
             if (!topic) return false;
-
-            // Topics with no prerequisites are always unlocked
             if (!topic.prerequisites || topic.prerequisites.length === 0) {
                 return true;
             }
-
             const completed = this.getCompletedTopicIds();
-            // All prerequisites must be completed
             return topic.prerequisites.every(function (prereqId) {
                 return completed.indexOf(prereqId) !== -1;
             });
         },
 
-        /**
-         * Get lifecycle status of topic: 'completed' | 'in-progress' | 'locked'
-         */
+        getTopicProblems: function (topicId) {
+            return serverProblemsBySlug[topicId] || null;
+        },
+
+        syncFromServer: async function () {
+            if (!hasLiveBackend()) return null;
+            try {
+                if (window.CodeArenaAPI.authService && typeof window.CodeArenaAPI.authService.getCurrentUser === 'function') {
+                    await window.CodeArenaAPI.authService.getCurrentUser().catch(() => null);
+                }
+                const res = await window.CodeArenaAPI.roadmapService.getRoadmap();
+                if (res && res.success && res.data && Array.isArray(res.data.topics)) {
+                    const completed = [];
+                    const unlocked = {};
+                    const probMap = {};
+                    res.data.topics.forEach(function (t) {
+                        const slug = t.slug || t.id;
+                        if (!slug) return;
+                        if (t.completed || String(t.status || '').toUpperCase() === 'COMPLETED') {
+                            completed.push(slug);
+                        }
+                        unlocked[slug] = Boolean(t.unlocked);
+                        if (Array.isArray(t.problems)) {
+                            probMap[slug] = t.problems;
+                        }
+                    });
+                    serverCompletedIds = completed;
+                    serverUnlockedMap = unlocked;
+                    serverProblemsBySlug = probMap;
+                    serverSynced = true;
+                    notifyListeners({ completedTopics: completed, synced: true });
+                    return res.data;
+                }
+            } catch (e) {
+                console.warn('[RoadmapService] Failed syncing from backend:', e);
+            }
+            return null;
+        },
+
         getTopicStatus: function (topicId) {
             if (this.isTopicCompleted(topicId)) {
                 return 'completed';
@@ -149,42 +192,77 @@
             return 'locked';
         },
 
-        /**
-         * Mark topic as completed
-         */
-        markTopicCompleted: function (topicId) {
-            if (!topicId) return;
+        _requireAuthForMutation: function () {
+            if (!hasLiveBackend()) return true;
+            if (isAuthedLive()) return true;
+            if (typeof window !== 'undefined') {
+                if (window.CodeArenaToast) {
+                    window.CodeArenaToast.info('Log in to save your roadmap milestone progress.');
+                }
+                if (window.CodeArenaAuthModal && typeof window.CodeArenaAuthModal.open === 'function') {
+                    window.CodeArenaAuthModal.open('login');
+                }
+            }
+            return false;
+        },
+
+        markTopicCompleted: async function (topicId) {
+            if (!topicId) return false;
+            if (hasLiveBackend()) {
+                if (!this._requireAuthForMutation()) return false;
+                const res = await window.CodeArenaAPI.roadmapService.updateTopicProgress(topicId, 'COMPLETED');
+                if (res && res.success) {
+                    await this.syncFromServer();
+                    if (typeof window !== 'undefined' && window.CodeArenaToast) {
+                        window.CodeArenaToast.success('Milestone marked completed.');
+                    }
+                    return true;
+                } else {
+                    if (typeof window !== 'undefined' && window.CodeArenaToast) {
+                        window.CodeArenaToast.warning((res && res.message) || 'Prerequisites must be completed first.');
+                    }
+                    return false;
+                }
+            }
             const state = loadState();
             if (state.completedTopics.indexOf(topicId) === -1) {
                 state.completedTopics.push(topicId);
                 state.lastVisitedTopic = topicId;
                 saveState(state);
             }
+            return true;
         },
 
-        /**
-         * Unmark topic from completed
-         */
-        unmarkTopicCompleted: function (topicId) {
-            if (!topicId) return;
+        unmarkTopicCompleted: async function (topicId) {
+            if (!topicId) return false;
+            if (hasLiveBackend()) {
+                if (!this._requireAuthForMutation()) return false;
+                const res = await window.CodeArenaAPI.roadmapService.updateTopicProgress(topicId, 'NOT_STARTED');
+                if (res && res.success) {
+                    await this.syncFromServer();
+                    return true;
+                } else {
+                    if (typeof window !== 'undefined' && window.CodeArenaToast) {
+                        window.CodeArenaToast.warning((res && res.message) || 'Unable to update milestone.');
+                    }
+                    return false;
+                }
+            }
             const state = loadState();
             const idx = state.completedTopics.indexOf(topicId);
             if (idx !== -1) {
                 state.completedTopics.splice(idx, 1);
                 saveState(state);
             }
+            return true;
         },
 
-        /**
-         * Toggle completion state
-         */
-        toggleTopicCompleted: function (topicId) {
+        toggleTopicCompleted: async function (topicId) {
             if (this.isTopicCompleted(topicId)) {
-                this.unmarkTopicCompleted(topicId);
+                await this.unmarkTopicCompleted(topicId);
                 return false;
             } else {
-                this.markTopicCompleted(topicId);
-                return true;
+                return await this.markTopicCompleted(topicId);
             }
         },
 
@@ -208,7 +286,23 @@
         /**
          * Reset all progress (with local storage wipe)
          */
-        resetProgress: function () {
+        resetProgress: async function () {
+            if (hasLiveBackend()) {
+                if (!this._requireAuthForMutation()) return null;
+                const res = await window.CodeArenaAPI.roadmapService.resetProgress();
+                if (res && res.success) {
+                    await this.syncFromServer();
+                    if (typeof window !== 'undefined' && window.CodeArenaToast) {
+                        window.CodeArenaToast.info('Roadmap progress reset on server.');
+                    }
+                    return { completedTopics: serverCompletedIds };
+                } else {
+                    if (typeof window !== 'undefined' && window.CodeArenaToast) {
+                        window.CodeArenaToast.error((res && res.message) || 'Failed to reset roadmap progress.');
+                    }
+                    return null;
+                }
+            }
             const freshState = {
                 completedTopics: [],
                 lastVisitedTopic: null,

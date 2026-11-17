@@ -16,7 +16,8 @@
         access: 'All',
         sortBy: 'default',
         page: 1,
-        limit: 8
+        limit: 8,
+        track: 'dsa'
     };
 
     // DOM Elements Cache
@@ -49,6 +50,11 @@
         if (urlParams.has('access')) {
             state.access = urlParams.get('access');
             if (dom.accessFilter) dom.accessFilter.value = state.access;
+        }
+        if (urlParams.has('track')) {
+            state.track = urlParams.get('track');
+        } else {
+            state.track = 'dsa';
         }
 
         await loadTopics();
@@ -134,7 +140,7 @@
 
         try {
             if (window.CodeArenaAPI && window.CodeArenaAPI.problemService) {
-                const res = await window.CodeArenaAPI.problemService.getTopics();
+                const res = await window.CodeArenaAPI.problemService.getTopics(state.track || 'dsa');
                 if (res.success && Array.isArray(res.data)) {
                     // Retain "All Topics" and append unique topics
                     dom.topicFilter.innerHTML = '<option value="All">All Topics</option>';
@@ -161,7 +167,7 @@
 
         try {
             if (window.CodeArenaAPI && window.CodeArenaAPI.problemService && window.CodeArenaAPI.problemService.getPatterns) {
-                const res = await window.CodeArenaAPI.problemService.getPatterns(selectedTopic || 'All');
+                const res = await window.CodeArenaAPI.problemService.getPatterns(selectedTopic || 'All', state.track || 'dsa');
                 if (res.success && Array.isArray(res.data)) {
                     dom.patternFilter.innerHTML = '<option value="All">All Patterns</option>';
                     res.data.forEach(function (pattern) {
@@ -192,15 +198,38 @@
                 const sRes = await window.CodeArenaAPI.problemService.getStats();
                 if (sRes.success && sRes.data) {
                     const st = sRes.data;
-                    if (dom.heroTotalProblems) dom.heroTotalProblems.textContent = String(st.totalProblems || 200);
-                    if (dom.heroFreeProblems) dom.heroFreeProblems.textContent = String(st.freeProblems || 150);
-                    if (dom.heroPremiumProblems) dom.heroPremiumProblems.textContent = String(st.premiumProblems || 50);
-                    if (dom.heroTotalTopics) dom.heroTotalTopics.textContent = String(st.topicsCount || 12);
-                    if (dom.heroTotalPatterns) dom.heroTotalPatterns.textContent = String(st.patternsCount || 63);
+                    const noticeTag = document.getElementById('catalogueNoticeTag');
+                    const totalLbl = document.getElementById('heroTotalProblemsLabel');
+
+                    if (state.track === 'dsa') {
+                        if (noticeTag) noticeTag.textContent = 'DSA Track';
+                        if (totalLbl) totalLbl.textContent = 'DSA Problems';
+                        if (dom.heroTotalProblems) dom.heroTotalProblems.textContent = String(st.dsaProblems || 200);
+                        if (dom.heroFreeProblems) dom.heroFreeProblems.textContent = '150';
+                        if (dom.heroPremiumProblems) dom.heroPremiumProblems.textContent = String(st.premiumProblems || 50);
+                        if (dom.heroTotalTopics) dom.heroTotalTopics.textContent = '12';
+                        if (dom.heroTotalPatterns) dom.heroTotalPatterns.textContent = '63';
+                    } else if (state.track === 'basic') {
+                        if (noticeTag) noticeTag.textContent = 'Basic Track';
+                        if (totalLbl) totalLbl.textContent = 'Basic Problems';
+                        if (dom.heroTotalProblems) dom.heroTotalProblems.textContent = String(st.basicProblems || 50);
+                        if (dom.heroFreeProblems) dom.heroFreeProblems.textContent = String(st.basicProblems || 50);
+                        if (dom.heroPremiumProblems) dom.heroPremiumProblems.textContent = '0';
+                        if (dom.heroTotalTopics) dom.heroTotalTopics.textContent = '13';
+                        if (dom.heroTotalPatterns) dom.heroTotalPatterns.textContent = String(st.patternsCount || 189);
+                    } else {
+                        if (noticeTag) noticeTag.textContent = 'All Challenges (250)';
+                        if (totalLbl) totalLbl.textContent = 'Total Challenges';
+                        if (dom.heroTotalProblems) dom.heroTotalProblems.textContent = String(st.totalProblems || 250);
+                        if (dom.heroFreeProblems) dom.heroFreeProblems.textContent = String(st.freeProblems || 200);
+                        if (dom.heroPremiumProblems) dom.heroPremiumProblems.textContent = String(st.premiumProblems || 50);
+                        if (dom.heroTotalTopics) dom.heroTotalTopics.textContent = String(st.topicsCount || 25);
+                        if (dom.heroTotalPatterns) dom.heroTotalPatterns.textContent = String(st.patternsCount || 189);
+                    }
                     return;
                 }
             }
-        } catch (err) {}
+        } catch (err) { }
     }
 
 
@@ -333,6 +362,7 @@
                 limit: state.limit
             };
 
+            if (state.track && state.track !== 'all') params.track = state.track;
             if (state.search) params.search = state.search;
             if (state.difficulty !== 'All') params.difficulty = state.difficulty;
             if (state.topic !== 'All') params.topic = state.topic;
@@ -388,7 +418,7 @@
                 const parsed = JSON.parse(bmRaw);
                 if (Array.isArray(parsed)) bookmarkedIds = parsed;
             }
-        } catch (e) {}
+        } catch (e) { }
 
         problems.forEach(function (problem, index) {
             const isBookmarked = bookmarkedIds.includes(problem.id) || bookmarkedIds.includes(problem.slug);
@@ -403,13 +433,18 @@
                 ? problem.provisionalStats.acceptanceRate
                 : '—';
 
-            const isPro = Boolean(problem.isPremium);
+            const isPro = Boolean(problem.isPremium || problem.premium);
             const userIsPro = Boolean(
                 window.CodeArenaAPI &&
                 window.CodeArenaAPI.subscriptionService &&
                 window.CodeArenaAPI.subscriptionService.isPremium()
             );
             const isLocked = isPro && !userIsPro;
+
+            const isBasic = (problem.track === 'basic' || problem.trackId === 1);
+            const targetWorkspace = isBasic ? 'basic-problem.html' : 'problem.html';
+            const targetId = isBasic ? (problem.slug || problem.id) : (problem.id || problem.slug);
+            const problemUrl = `${targetWorkspace}?id=${encodeURIComponent(targetId)}`;
 
             const accessBadgeHtml = isPro
                 ? `<span class="badge-pro" title="CodeArena Pro Challenge">PRO</span>`
@@ -428,7 +463,7 @@
                     <div class="problem-title-cell">
                         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                             ${lockIconHtml}
-                            <a href="problem.html?id=${encodeURIComponent(problem.id)}" class="problem-link-title ${isLocked ? 'link-locked' : ''}" data-id="${escapeHtml(problem.id)}" title="${solveTitle}">
+                            <a href="${problemUrl}" class="problem-link-title ${isLocked ? 'link-locked' : ''}" data-id="${escapeHtml(problem.id)}" title="${solveTitle}">
                                 <span>${escapeHtml(problem.title)}</span>
                             </a>
                             ${accessBadgeHtml}
@@ -466,7 +501,7 @@
                     e.stopPropagation();
                     openSubscriptionModal(problem);
                 } else {
-                    window.location.href = `problem.html?id=${encodeURIComponent(problem.id)}`;
+                    window.location.href = problemUrl;
                 }
             }
 
@@ -510,26 +545,11 @@
     }
 
     /**
-     * Activates the selected preview membership plan and reloads the problem list.
+     * Redirects to the Upgrade to Pro checkout page for the chosen plan.
      */
     function activatePlanAndRefresh(planId) {
-        if (window.CodeArenaAPI && window.CodeArenaAPI.subscriptionService) {
-            window.CodeArenaAPI.subscriptionService.upgradePlan(planId);
-            if (window.CodeArenaAPI.authService && !window.CodeArenaAPI.authService.isAuthenticated()) {
-                window.CodeArenaAPI.authService.demoLogin(planId);
-            }
-            if (window.CodeArenaToast && typeof window.CodeArenaToast.success === 'function') {
-                window.CodeArenaToast.success(`Activated ${planId === 'annual' ? 'Pro Annual ($199/yr)' : 'Pro Monthly ($5/mo)'} preview membership!`);
-            }
-            const targetProb = pendingModalProblem;
-            closeSubscriptionModal();
-            loadProblems();
-            if (targetProb) {
-                setTimeout(function () {
-                    window.location.href = `problem.html?id=${encodeURIComponent(targetProb.id || targetProb.slug)}`;
-                }, 350);
-            }
-        }
+        closeSubscriptionModal();
+        window.location.href = `upgrade.html?plan=${encodeURIComponent(planId || 'monthly')}`;
     }
 
     /**
@@ -612,6 +632,16 @@
                 clear: function () {
                     state.pattern = 'All';
                     if (dom.patternFilter) dom.patternFilter.value = 'All';
+                }
+            });
+        }
+
+        if (state.access !== 'All') {
+            activeFilters.push({
+                label: `Access: ${state.access}`,
+                clear: function () {
+                    state.access = 'All';
+                    if (dom.accessFilter) dom.accessFilter.value = 'All';
                 }
             });
         }
@@ -748,6 +778,7 @@
         state.search = '';
         state.difficulty = 'All';
         state.topic = 'All';
+        state.access = 'All';
         state.sortBy = 'default';
         state.page = 1;
 
@@ -758,6 +789,7 @@
         if (dom.difficultyFilter) dom.difficultyFilter.value = 'All';
         if (dom.topicFilter) dom.topicFilter.value = 'All';
         if (dom.patternFilter) dom.patternFilter.value = 'All';
+        if (dom.accessFilter) dom.accessFilter.value = 'All';
         if (dom.sortBySelect) dom.sortBySelect.value = 'default';
 
         loadPatterns('All');
@@ -879,7 +911,7 @@
                     if (typeof window !== 'undefined' && window.localStorage) {
                         window.localStorage.removeItem('codearena_recently_viewed');
                     }
-                } catch (e) {}
+                } catch (e) { }
                 renderRecentlyViewed();
                 if (window.CodeArenaToast) {
                     window.CodeArenaToast.info('Recently viewed history cleared');
@@ -907,13 +939,17 @@
 
             let allProblems = [];
             if (window.CodeArenaAPI && window.CodeArenaAPI.problemService) {
-                const res = await window.CodeArenaAPI.problemService.getProblems({ limit: 100 });
-                allProblems = (res && res.data) ? res.data : [];
+                const res = await window.CodeArenaAPI.problemService.getProblems({ track: 'dsa', limit: 250 });
+                if (res && res.success && res.data) {
+                    allProblems = Array.isArray(res.data.problems)
+                        ? res.data.problems
+                        : (Array.isArray(res.data) ? res.data : []);
+                }
             }
 
             currentMatches = allProblems.filter(function (p) {
                 return (p.title || '').toLowerCase().includes(term) ||
-                       (p.topic || '').toLowerCase().includes(term);
+                    (p.topic || '').toLowerCase().includes(term);
             }).slice(0, 5);
 
             if (currentMatches.length === 0) {

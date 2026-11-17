@@ -169,20 +169,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         const elPatterns = document.getElementById('dashStatPatterns');
                         const elContests = document.getElementById('dashStatContests');
 
-                        const basicCount = (window.CodeArenaBasicData && Array.isArray(window.CodeArenaBasicData.problems))
-                            ? window.CodeArenaBasicData.problems.length
-                            : 50;
-                        const basicCategories = (window.CodeArenaBasicData && Array.isArray(window.CodeArenaBasicData.categories))
-                            ? window.CodeArenaBasicData.categories.length
-                            : 13;
-                        const totalAll = (st.totalProblems || 200) + basicCount;
-                        const totalFree = (st.freeProblems || 150) + basicCount;
-                        const totalDomains = (st.topicsCount || 12) + basicCategories;
+                        const totalAll = st.totalProblems !== undefined ? st.totalProblems : ((st.dsaProblems || 200) + (st.basicProblems || 50));
+                        const premCount = st.premiumProblems !== undefined ? st.premiumProblems : 50;
+                        const freeCount = st.freeProblems !== undefined ? st.freeProblems : Math.max(0, totalAll - premCount);
 
                         if (elProb) elProb.textContent = String(totalAll);
-                        if (elFree) elFree.textContent = String(totalFree);
-                        if (elPrem) elPrem.textContent = String(st.premiumProblems || 50);
-                        if (elTopics) elTopics.textContent = String(totalDomains);
+                        if (elFree) elFree.textContent = String(freeCount);
+                        if (elPrem) elPrem.textContent = String(premCount);
+                        if (elTopics) elTopics.textContent = String(st.topicsCount || 25);
                         if (elPatterns) elPatterns.textContent = String(st.patternsCount || 63);
                         if (elContests) elContests.textContent = String(st.contestsCount || 4);
                     }
@@ -218,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <p class="activity-desc">${escapeHtml(act.description)}</p>
                     </div>
                     <div class="activity-card-footer">
-                        <span class="activity-demo-tag">Sample Preview Event</span>
+                        <span class="activity-demo-tag">${escapeHtml(act.status || 'Scheduled')}</span>
                         <a href="${escapeHtml(act.actionUrl || '#')}" class="activity-action-link">
                             ${escapeHtml(act.actionLabel || 'View Details')} &rarr;
                         </a>
@@ -228,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }).join('');
     }
 
-    function updateAuthStateUI() {
+    async function updateAuthStateUI() {
         const isAuth = Boolean(
             window.CodeArenaAPI &&
             window.CodeArenaAPI.authService &&
@@ -241,12 +235,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 : (window.CodeArenaAPI.authService.getCurrentUser ? window.CodeArenaAPI.authService.getCurrentUser() : null);
         }
 
-        const isPro = Boolean(
-            window.CodeArenaAPI &&
-            window.CodeArenaAPI.subscriptionService &&
-            window.CodeArenaAPI.subscriptionService.isPremium()
-        );
-
         const guestAuthActions = document.getElementById('guestAuthActions');
         const userProfileArea = document.getElementById('userProfileArea');
         const userNameEl = document.getElementById('userName');
@@ -255,23 +243,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const menuUserNameEl = document.getElementById('menuUserName');
         const menuUserEmailEl = document.getElementById('menuUserEmail');
         const menuUserTierEl = document.getElementById('menuUserTier');
+        const menuUserExpiryEl = document.getElementById('menuUserExpiry');
+        const menuUpgradeTextEl = document.getElementById('menuUpgradeText');
         const promoCard = document.querySelector('.sidebar-promo-card');
-
-        function applyUserData(userData) {
-            if (!userData) return;
-            const displayName = userData.name || userData.fullName || userData.username || (userData.email ? userData.email.split('@')[0] : 'Student');
-            const displayEmail = userData.email || 'student@codearena.dev';
-            const initial = displayName.charAt(0).toUpperCase() || 'U';
-            const tierText = isPro ? 'Pro Member' : 'Free Tier';
-
-            if (userNameEl) userNameEl.textContent = displayName;
-            if (userRoleEl) userRoleEl.textContent = tierText;
-            if (userAvatarEl) userAvatarEl.textContent = initial;
-
-            if (menuUserNameEl) menuUserNameEl.textContent = displayName;
-            if (menuUserEmailEl) menuUserEmailEl.textContent = displayEmail;
-            if (menuUserTierEl) menuUserTierEl.textContent = tierText;
-        }
+        const bannerContainer = document.getElementById('dashSubscriptionBannerContainer');
 
         if (!isAuth) {
             // Guest mode
@@ -281,6 +256,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 userProfileArea.classList.add('auth-hidden');
                 userProfileArea.setAttribute('aria-hidden', 'true');
             }
+            if (bannerContainer) bannerContainer.innerHTML = '';
             const userProfileMenu = document.getElementById('userProfileMenu');
             if (userProfileMenu) userProfileMenu.classList.remove('menu-open');
             const userProfileTrigger = document.getElementById('userProfileTrigger');
@@ -298,56 +274,249 @@ document.addEventListener('DOMContentLoaded', function () {
                     <a href="roadmap.html" class="btn btn-primary promo-btn">Explore Roadmap &rarr;</a>
                 `;
             }
-        } else {
-            // Authenticated mode
-            if (guestAuthActions) guestAuthActions.style.display = 'none';
-            if (userProfileArea) {
-                userProfileArea.style.display = 'flex';
-                userProfileArea.classList.remove('auth-hidden');
-                userProfileArea.setAttribute('aria-hidden', 'false');
-            }
+            return;
+        }
 
-            if (userRes && typeof userRes.then === 'function') {
-                userRes.then(res => {
-                    if (res && res.data) applyUserData(res.data);
-                });
-            } else if (userRes && userRes.data) {
-                applyUserData(userRes.data);
-            }
+        // Authenticated mode
+        if (guestAuthActions) guestAuthActions.style.display = 'none';
+        if (userProfileArea) {
+            userProfileArea.style.display = 'flex';
+            userProfileArea.classList.remove('auth-hidden');
+            userProfileArea.setAttribute('aria-hidden', 'false');
+        }
 
-            if (promoCard) {
-                if (isPro) {
-                    promoCard.innerHTML = `
-                        <div class="promo-icon" style="color: var(--color-primary, #60a5fa);" aria-hidden="true">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                            </svg>
+        let userData = null;
+        if (userRes && typeof userRes.then === 'function') {
+            const r = await userRes.catch(() => null);
+            userData = r && r.data ? r.data : r;
+        } else if (userRes && userRes.data) {
+            userData = userRes.data;
+        } else if (userRes) {
+            userData = userRes;
+        }
+
+        if (!userData && window.CodeArenaAPI && window.CodeArenaAPI.authService) {
+            const r = await window.CodeArenaAPI.authService.getCurrentUser().catch(() => null);
+            userData = r && r.data ? r.data : r;
+        }
+
+        if (!userData) return;
+
+        const displayName = userData.name || userData.fullName || userData.username || (userData.email ? userData.email.split('@')[0] : 'Student');
+        const displayEmail = userData.email || 'student@codearena.dev';
+        const initial = displayName.charAt(0).toUpperCase() || 'U';
+
+        if (userNameEl) userNameEl.textContent = displayName;
+        if (userAvatarEl) userAvatarEl.textContent = initial;
+        if (menuUserNameEl) menuUserNameEl.textContent = displayName;
+        if (menuUserEmailEl) menuUserEmailEl.textContent = displayEmail;
+
+        const isAdmin = userData.role === 'ADMIN' || userData.role_id === 3 || userData.roleId === 3;
+        const adminPaymentsLink = document.getElementById('sidebarAdminPayments');
+        if (adminPaymentsLink) {
+            adminPaymentsLink.style.display = isAdmin ? 'block' : 'none';
+        }
+
+        // Fetch authoritative live subscription and order records from backend database
+        let subData = null;
+        let orders = [];
+        try {
+            if (window.CodeArenaAPI && window.CodeArenaAPI.paymentService) {
+                const [subRes, ordersRes] = await Promise.allSettled([
+                    window.CodeArenaAPI.paymentService.getSubscription(),
+                    window.CodeArenaAPI.paymentService.getMyOrders()
+                ]);
+                if (subRes.status === 'fulfilled' && subRes.value && subRes.value.success && subRes.value.data) {
+                    subData = subRes.value.data;
+                }
+                if (ordersRes.status === 'fulfilled' && ordersRes.value && ordersRes.value.success && Array.isArray(ordersRes.value.data)) {
+                    orders = ordersRes.value.data;
+                }
+            }
+        } catch (e) {
+            console.warn('[Dashboard] Error querying payment subscription data:', e);
+        }
+
+        const isPro = Boolean(subData && subData.hasActiveSubscription) ||
+                      Boolean(userData.isPro) ||
+                      (userData.plan && userData.plan !== 'free');
+
+        const currentPlan = (subData && subData.plan) || userData.plan || 'free';
+        const isAnnual = currentPlan === 'annual';
+        const planDisplayName = isAnnual ? 'Annual Pro' : 'Monthly Pro';
+        const tierText = isPro ? `Pro Member (${isAnnual ? 'Annual' : 'Monthly'})` : 'Free Tier';
+
+        if (userRoleEl) userRoleEl.textContent = tierText;
+        if (menuUserTierEl) menuUserTierEl.textContent = tierText;
+
+        // Subscription Expiry
+        let expiryFormatted = '';
+        const rawEndDate = (subData && subData.endDate) || userData.subscriptionEndDate;
+        if (rawEndDate) {
+            try {
+                const d = new Date(rawEndDate);
+                if (!isNaN(d.getTime())) {
+                    expiryFormatted = d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                }
+            } catch (ignored) {}
+        }
+
+        if (menuUserExpiryEl) {
+            if (isPro && expiryFormatted) {
+                menuUserExpiryEl.textContent = 'Active until ' + expiryFormatted;
+                menuUserExpiryEl.style.display = 'block';
+            } else {
+                menuUserExpiryEl.style.display = 'none';
+                menuUserExpiryEl.textContent = '';
+            }
+        }
+
+        if (menuUpgradeTextEl) {
+            menuUpgradeTextEl.textContent = isPro ? 'Manage Subscription' : 'Upgrade to Pro';
+        }
+
+        // Sidebar promo card
+        if (promoCard) {
+            if (isPro) {
+                promoCard.innerHTML = `
+                    <div class="promo-icon" style="color: var(--color-primary, #60a5fa);" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                    </div>
+                    <h4 class="promo-title">CodeArena Pro Active</h4>
+                    <p class="promo-subtitle">${planDisplayName} &middot; All 250 Challenges</p>
+                    <a href="problems.html?access=Premium" class="btn btn-primary promo-btn" style="background: linear-gradient(135deg, #2563EB, #1D4ED8); border: none;">Explore Pro &rarr;</a>
+                `;
+            } else {
+                promoCard.innerHTML = `
+                    <div class="promo-icon" style="color: var(--color-primary, #60a5fa);" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                    </div>
+                    <h4 class="promo-title">Upgrade to Pro</h4>
+                    <p class="promo-subtitle">50 Advanced DSA Challenges</p>
+                    <a href="upgrade.html" class="btn btn-primary promo-btn" id="btnSidebarUpgrade">Upgrade for $5/mo &rarr;</a>
+                `;
+            }
+        }
+
+        // Dashboard Subscription Banner Container
+        if (bannerContainer) {
+            if (isPro) {
+                bannerContainer.innerHTML = `
+                    <div class="dash-subscription-banner" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">⭐</div>
+                            <div>
+                                <h3 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #10b981;">CodeArena Pro Active (${escapeHtml(planDisplayName)})</h3>
+                                <p style="margin: 3px 0 0; font-size: 0.8rem; color: var(--color-text-secondary);">Your subscription is active and verified server-side${expiryFormatted ? ' &bull; Active until ' + escapeHtml(expiryFormatted) : ''}. All 50 curated Pro challenges and progressive hints are unlocked.</p>
+                            </div>
                         </div>
-                        <h4 class="promo-title">CodeArena Pro Active</h4>
-                        <p class="promo-subtitle">All 250 Challenges Unlocked</p>
-                        <a href="problems.html?access=Premium" class="btn btn-primary promo-btn" style="background: linear-gradient(135deg, #2563EB, #1D4ED8); border: none;">Explore Pro &rarr;</a>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <a href="upgrade.html" class="btn btn-sm btn-secondary" style="font-size: 0.78rem; padding: 6px 12px; text-decoration: none;">Billing Details</a>
+                            <a href="problems.html" class="btn btn-sm btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); border: none; font-size: 0.78rem; padding: 6px 14px; text-decoration: none;">Solve Pro Challenges &rarr;</a>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const pendingOrder = orders.find(o => o.status === 'PENDING_VERIFICATION');
+                const latestOrder = orders.length > 0 ? orders[0] : null;
+                const isLatestRejected = latestOrder && latestOrder.status === 'REJECTED';
+
+                if (pendingOrder) {
+                    bannerContainer.innerHTML = `
+                        <div class="dash-subscription-banner" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0;">⏳</div>
+                                <div>
+                                    <h3 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #f59e0b;">Payment Verification in Progress</h3>
+                                    <p style="margin: 3px 0 0; font-size: 0.8rem; color: var(--color-text-secondary);">Order <strong>${escapeHtml(pendingOrder.orderReference)}</strong> (Submitted UTR: <code>${escapeHtml(pendingOrder.utrNumber || 'Submitted')}</code>) is awaiting manual administrator verification. Pro access activates immediately upon approval.</p>
+                                </div>
+                            </div>
+                            <a href="upgrade.html" class="btn btn-sm btn-secondary" style="font-size: 0.78rem; padding: 6px 12px; text-decoration: none;">Check Verification Status &rarr;</a>
+                        </div>
+                    `;
+                } else if (isLatestRejected) {
+                    const rejReason = latestOrder.adminNotes || latestOrder.rejectionReason || 'Transaction could not be verified in bank records';
+                    bannerContainer.innerHTML = `
+                        <div class="dash-subscription-banner" style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; color: #ef4444;">✕</div>
+                                <div>
+                                    <h3 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #ef4444;">Payment Verification Unsuccessful</h3>
+                                    <p style="margin: 3px 0 0; font-size: 0.8rem; color: var(--color-text-secondary);">Order <strong>${escapeHtml(latestOrder.orderReference)}</strong> (UTR: <code>${escapeHtml(latestOrder.utrNumber || 'N/A')}</code>) was rejected. Administrator Reason: <strong style="color: #ef4444;">${escapeHtml(rejReason)}</strong></p>
+                                </div>
+                            </div>
+                            <a href="upgrade.html" class="btn btn-sm btn-danger" style="font-size: 0.78rem; padding: 6px 12px; text-decoration: none;">Review &amp; Retry &rarr;</a>
+                        </div>
                     `;
                 } else {
-                    promoCard.innerHTML = `
-                        <div class="promo-icon" style="color: var(--color-primary, #60a5fa);" aria-hidden="true">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                            </svg>
-                        </div>
-                        <h4 class="promo-title">Upgrade to Pro</h4>
-                        <p class="promo-subtitle">50 Advanced DSA Challenges</p>
-                        <a href="problems.html" class="btn btn-primary promo-btn" id="btnSidebarUpgrade">Upgrade for $5/mo &rarr;</a>
-                    `;
+                    bannerContainer.innerHTML = '';
                 }
             }
         }
     }
 
+    async function loadRecentActivityPanel() {
+        const container = document.getElementById('dashRecentActivityBody');
+        if (!container || !window.CodeArenaAPI || !window.CodeArenaAPI.authService) return;
+        const isAuth = window.CodeArenaAPI.authService.isAuthenticated();
+        if (!isAuth || !window.CodeArenaAPI.studentService) return;
+        try {
+            const res = await window.CodeArenaAPI.studentService.getAnalytics();
+            if (res && res.success && res.data && Array.isArray(res.data.recentActivity) && res.data.recentActivity.length > 0) {
+                container.innerHTML = res.data.recentActivity.slice(0, 5).map(item => {
+                    const verdict = String(item.verdict || item.status || 'PENDING').toUpperCase();
+                    const isAccepted = verdict === 'ACCEPTED';
+                    const href = item.track === 'basic'
+                        ? `basic-problem.html?id=${encodeURIComponent(item.problemSlug || item.problemId)}`
+                        : `problem.html?id=${encodeURIComponent(item.problemSlug || item.problemId)}`;
+                    const timeStr = item.submittedAt ? new Date(item.submittedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent';
+                    return `
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 4px; border-bottom: 1px solid var(--color-border); font-size: 0.84rem;">
+                            <div>
+                                <a href="${href}" style="color: var(--color-text-primary); font-weight: 600; text-decoration: none;">
+                                    ${escapeHtml(item.problemTitle || ('Problem #' + item.problemId))}
+                                </a>
+                                <div style="font-size: 0.74rem; color: var(--color-text-muted); margin-top: 2px;">
+                                    ${escapeHtml(timeStr)}${item.executionTimeMs ? ` · ${item.executionTimeMs} ms` : ''}
+                                </div>
+                            </div>
+                            <span class="diff-badge ${isAccepted ? 'diff-easy' : 'diff-hard'}" style="font-size: 0.7rem;">
+                                ${escapeHtml(verdict.replace(/_/g, ' '))}
+                            </span>
+                        </div>
+                    `;
+                }).join('');
+            }
+        } catch (e) { }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    async function initAuthAndActivity() {
+        if (window.CodeArenaAPI && window.CodeArenaAPI.authService && typeof window.CodeArenaAPI.authService.getCurrentUser === 'function') {
+            await window.CodeArenaAPI.authService.getCurrentUser().catch(() => null);
+        }
+        await updateAuthStateUI();
+        await loadRecentActivityPanel();
+    }
+
     loadPlatformIntelligence();
-    updateAuthStateUI();
+    initAuthAndActivity();
 
     document.addEventListener('codearena:auth-changed', function () {
         updateAuthStateUI();
+        loadRecentActivityPanel();
     });
 
     // --------------------------------------------------------------------------
@@ -403,6 +572,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     const res = await window.CodeArenaAPI.authService.logout();
                     if (res && res.success !== false) {
                         closeLogoutModal();
+                        document.dispatchEvent(new CustomEvent('codearena:auth-changed', {
+                            detail: { user: null, action: 'logout' }
+                        }));
                         updateAuthStateUI();
                         if (window.CodeArenaToast) {
                             window.CodeArenaToast.info('Logged out successfully. Returned to guest mode.');
@@ -527,7 +699,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     item.classList.remove('unread');
                 });
                 if (notifBadge) notifBadge.style.display = 'none';
-                if (notifHeaderTag) notifHeaderTag.textContent = '0 new (Sample)';
+                if (notifHeaderTag) notifHeaderTag.textContent = '0 unread';
                 if (window.CodeArenaToast) {
                     window.CodeArenaToast.info('All notifications marked as read');
                 }
@@ -566,7 +738,7 @@ document.addEventListener('DOMContentLoaded', function () {
         { title: 'Guided Java Roadmap', category: 'Roadmap', url: 'roadmap.html', desc: '30 milestones with prerequisite DAG & progress tracking', badge: 'Roadmap' },
         { title: 'Interactive Algorithm Visualizer', category: 'Visualizer', url: 'solution-animation.html?id=two-sum', desc: 'Step-by-step visual animation for 200 DSA problems', badge: 'Visualizer' },
         { title: 'Java Mastery Studio', category: 'Learn', url: 'learn.html', desc: '14 interactive lessons, JVM architecture & visualizers', badge: 'Learn' },
-        { title: 'AI Learning Assistant', category: 'Mentor', url: 'ai_assistant.html', desc: 'Simulated AI guidance, Java concepts & explanations', badge: 'AI' },
+        { title: 'AI Learning Assistant', category: 'Mentor', url: 'ai_assistant.html', desc: 'Java coding mentor, concept explanations & debugging help', badge: 'AI' },
         { title: 'Coding Contests', category: 'Competitions', url: 'contests.html', desc: 'Scheduled Java tournaments and leaderboards', badge: 'Contest' },
         { title: 'Learning Progress & Analytics', category: 'Analytics', url: 'progress.html', desc: 'Activity heatmap, solve streaks & distribution', badge: 'Progress' },
         { title: 'Bookmarked Problems', category: 'Saved', url: 'bookmarks.html', desc: 'Quickly access your saved Java challenges', badge: 'Bookmarks' },
@@ -577,30 +749,31 @@ document.addEventListener('DOMContentLoaded', function () {
     if (dashSearchInput && dashSearchSuggestions) {
         let activeIndex = -1;
         let currentSuggestions = [];
-        let cachedDSAProblems = [];
+        let cachedProblems = [];
+        let cachedRoadmapTopics = [];
 
-        async function prefetchDSAProblems() {
+        async function prefetchSearchIndex() {
             try {
                 if (window.CodeArenaAPI && window.CodeArenaAPI.problemService) {
-                    const res = await window.CodeArenaAPI.problemService.getProblems({ limit: 200 });
-                    // canonical fallback check: window.CodeArenaAPI.problemService.getProblems()
+                    // window.CodeArenaAPI.problemService.getProblems()
+                    const res = await window.CodeArenaAPI.problemService.getProblems({ track: 'all', limit: 300 });
                     if (res && res.success && res.data) {
-                        if (Array.isArray(res.data.problems)) {
-                            cachedDSAProblems = res.data.problems;
-                        } else if (Array.isArray(res.data)) {
-                            cachedDSAProblems = res.data;
-                        }
+                        cachedProblems = Array.isArray(res.data.problems)
+                            ? res.data.problems
+                            : (Array.isArray(res.data) ? res.data : []);
+                    }
+                }
+                if (window.CodeArenaAPI && window.CodeArenaAPI.roadmapService) {
+                    const rRes = await window.CodeArenaAPI.roadmapService.getRoadmap();
+                    if (rRes && rRes.success && rRes.data && Array.isArray(rRes.data.topics)) {
+                        cachedRoadmapTopics = rRes.data.topics;
                     }
                 }
             } catch (err) {
-                console.warn('Unable to prefetch problemService problems:', err);
+                console.warn('Unable to prefetch dashboard search index:', err);
             }
         }
-        prefetchDSAProblems();
-
-        function getCanonicalProblems() {
-            return cachedDSAProblems;
-        }
+        prefetchSearchIndex();
 
         function queryIndex(keyword) {
             const term = keyword.trim().toLowerCase();
@@ -608,62 +781,42 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const results = [];
 
-            // 1. Match Basic Java problems if loaded
-            if (window.CodeArenaBasicData && Array.isArray(window.CodeArenaBasicData.problems)) {
-                window.CodeArenaBasicData.problems.forEach(function (bp) {
-                    const titleMatch = (bp.title || '').toLowerCase().includes(term);
-                    const catMatch = (bp.categoryTitle || '').toLowerCase().includes(term);
-                    const descMatch = (bp.description || '').toLowerCase().includes(term);
-                    if (titleMatch || catMatch || descMatch) {
-                        results.push({
-                            type: 'basic',
-                            title: bp.title,
-                            desc: `Basic Java · ${bp.categoryTitle || 'Fundamentals'}`,
-                            url: `basic-problem.html?id=${encodeURIComponent(bp.id)}`,
-                            badge: 'Basic',
-                            badgeClass: 'search-badge-basic'
-                        });
-                    }
-                });
-            }
-
-            // 2. Match DSA problems
-            const problems = getCanonicalProblems();
-            problems.forEach(function (p) {
+            // 1. Match all seeded Basic & DSA problems from backend
+            cachedProblems.forEach(function (p) {
                 const titleMatch = (p.title || '').toLowerCase().includes(term);
                 const topicMatch = (p.topic || '').toLowerCase().includes(term);
                 const diffMatch = (p.difficulty || '').toLowerCase() === term;
                 const descMatch = (p.description || '').toLowerCase().includes(term);
 
                 if (titleMatch || topicMatch || diffMatch || descMatch) {
+                    const isBasic = String(p.track || '').toLowerCase() === 'basic';
+                    const targetKey = p.slug || p.id;
                     results.push({
-                        type: 'problem',
+                        type: isBasic ? 'basic' : 'problem',
                         title: p.title,
-                        desc: `DSA · ${p.topic} · ${p.difficulty}`,
-                        url: `problem.html?id=${encodeURIComponent(p.id)}`,
-                        badge: p.difficulty,
-                        badgeClass: `search-badge-${(p.difficulty || 'easy').toLowerCase()}`
+                        desc: isBasic ? `Basic Java · ${p.topic || 'Fundamentals'}` : `DSA · ${p.topic} · ${p.difficulty}`,
+                        url: isBasic ? `basic-problem.html?id=${encodeURIComponent(targetKey)}` : `problem.html?id=${encodeURIComponent(targetKey)}`,
+                        badge: isBasic ? 'Basic' : p.difficulty,
+                        badgeClass: isBasic ? 'search-badge-basic' : `search-badge-${(p.difficulty || 'easy').toLowerCase()}`
                     });
                 }
             });
 
-            // 3. Match Roadmap topics if loaded
-            if (window.CodeArenaRoadmapData && Array.isArray(window.CodeArenaRoadmapData.topics)) {
-                window.CodeArenaRoadmapData.topics.forEach(function (tp) {
-                    const titleMatch = (tp.title || '').toLowerCase().includes(term);
-                    const descMatch = (tp.description || '').toLowerCase().includes(term);
-                    if (titleMatch || descMatch) {
-                        results.push({
-                            type: 'roadmap',
-                            title: tp.title,
-                            desc: `Milestone #${tp.id} · Level ${tp.level}`,
-                            url: `roadmap.html?topic=${encodeURIComponent(tp.id)}`,
-                            badge: 'Roadmap',
-                            badgeClass: 'search-badge-roadmap'
-                        });
-                    }
-                });
-            }
+            // 2. Match Roadmap topics from backend
+            cachedRoadmapTopics.forEach(function (tp) {
+                const titleMatch = (tp.title || '').toLowerCase().includes(term);
+                const descMatch = (tp.description || '').toLowerCase().includes(term);
+                if (titleMatch || descMatch) {
+                    results.push({
+                        type: 'roadmap',
+                        title: tp.title,
+                        desc: `Milestone #${tp.id} · Level ${tp.level || 1}`,
+                        url: `roadmap.html?topic=${encodeURIComponent(tp.slug || tp.id)}`,
+                        badge: 'Roadmap',
+                        badgeClass: 'search-badge-roadmap'
+                    });
+                }
+            });
 
             // 4. Match pages
             platformPages.forEach(function (pg) {
@@ -831,5 +984,23 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    // --------------------------------------------------------------------------
+    // 7. Mouse / Pointer Focus Normalization
+    // Immediately blur clickable elements (buttons, links, action cards, pills)
+    // after mouse click so they do not retain unwanted focus outlines or highlights,
+    // while preserving 100% keyboard accessibility and :focus-visible outlines.
+    // --------------------------------------------------------------------------
+    document.addEventListener('mouseup', function (e) {
+        if (e.button !== 0) return; // Only primary mouse clicks
+        const interactive = e.target.closest('button, a, .shortcut-pill, .action-card, .dash-track-card, .problem-item, .stat-card, [role="button"], [role="link"], [tabindex="0"]');
+        if (interactive && !interactive.matches('input, textarea, select')) {
+            setTimeout(function () {
+                if (document.activeElement === interactive) {
+                    interactive.blur();
+                }
+            }, 0);
+        }
+    });
 });
 

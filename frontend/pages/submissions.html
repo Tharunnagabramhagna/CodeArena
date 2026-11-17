@@ -37,7 +37,7 @@
                 <span class="user-avatar-small" id="subUserAvatar">U</span>
                 <span class="sub-user-name" id="subUserName">Student</span>
                 <span class="badge-plan-tag" id="subUserPlanTag">Free</span>
-                <button type="button" class="sub-logout-btn" id="btnSubLogout" title="Log out of preview session">Log Out</button>
+                <button type="button" class="sub-logout-btn" id="btnSubLogout" title="Log out of your CodeArena account">Log Out</button>
             </div>
 
             <a href="problems.html" class="secondary-header-btn" title="Problem Catalogue">
@@ -76,19 +76,18 @@
                         </svg>
                     </div>
                     <div class="auth-gate-badge">
-                        <span>Preview Authentication Gate · Registered Access Only</span>
+                        <span>Registered Access Only</span>
                     </div>
                     <h2 id="authGateHeading" class="auth-gate-title">Authentication Required</h2>
                     <p class="auth-gate-desc">
-                        Problem submission history, evaluation verdicts on test cases, and code revision logs are reserved for registered CodeArena members. Log in or create a free account to track your submissions.
+                        Problem submission history, server judging verdicts, and source code logs are linked to your CodeArena account. Log in or create a free account to view your submissions.
                     </p>
                     <div class="auth-gate-actions">
                         <a href="login.html?redirect=submissions.html" class="btn btn-primary auth-gate-btn">Log In →</a>
                         <a href="signup.html?redirect=submissions.html" class="btn btn-secondary auth-gate-btn">Create Free Account</a>
-                        <button type="button" class="btn btn-demo-auth auth-gate-btn" id="btnSubDemoLogin">⚡ Demo One-Click Login (Preview)</button>
                     </div>
                     <div class="auth-gate-disclaimer">
-                        <span>ℹ️ Client-side preview state. Persistent user authentication via Java Servlets & JDBC connects in Phase 4.</span>
+                        <span>ℹ️ Protected by server session authentication. Your submissions are stored persistently per user account.</span>
                     </div>
                 </div>
             </section>
@@ -97,18 +96,17 @@
             <section class="feature-hero" id="submissionsHero" aria-labelledby="submissions-heading">
                 <div class="feature-hero-text">
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                        <span class="preview-badge-pill" id="subSessionPill">Guest Session Records</span>
+                        <span class="preview-badge-pill" id="subSessionPill">Verified Judge History</span>
                     </div>
                     <h1 id="submissions-heading">Problem Submission History</h1>
                     <p>
-                        Review your solutions, verify preview execution outcomes on sample test cases, and inspect previously submitted Java source code.
-                        Submissions are stored during your active browser session.
+                        Review your judged solutions, runtime and test-case pass counts, compiler diagnostics, and previously submitted Java source code.
                     </p>
                 </div>
                 <div class="feature-hero-stats">
                     <div class="hero-stat-card">
                         <div class="hero-stat-val" id="subCountBadge">0</div>
-                        <div class="hero-stat-lbl">Session Submissions</div>
+                        <div class="hero-stat-lbl">Submissions</div>
                     </div>
                 </div>
             </section>
@@ -122,8 +120,14 @@
 
                     <select id="subVerdictFilter" class="feature-select" aria-label="Filter by verdict">
                         <option value="All">All Verdicts</option>
-                        <option value="PREVIEW_PASSED">Preview Passed</option>
-                        <option value="COMPILE_ERROR">Compilation Error</option>
+                        <option value="ACCEPTED">Accepted</option>
+                        <option value="WRONG_ANSWER">Wrong Answer</option>
+                        <option value="COMPILATION_ERROR">Compilation Error</option>
+                        <option value="TIME_LIMIT_EXCEEDED">Time Limit Exceeded</option>
+                        <option value="MEMORY_LIMIT_EXCEEDED">Memory Limit Exceeded</option>
+                        <option value="RUNTIME_ERROR">Runtime Error</option>
+                        <option value="SYSTEM_ERROR">System Error</option>
+                        <option value="PENDING">Pending / Judging</option>
                     </select>
 
                     <select id="subSortSelect" class="feature-select" aria-label="Sort submissions">
@@ -140,9 +144,9 @@
                         <tr>
                             <th scope="col">ID</th>
                             <th scope="col">Problem</th>
-                            <th scope="col">Sample Verdict</th>
+                            <th scope="col">Verdict</th>
                             <th scope="col">Language</th>
-                            <th scope="col">Time</th>
+                            <th scope="col">Submitted</th>
                             <th scope="col" style="text-align: right;">Action</th>
                         </tr>
                     </thead>
@@ -174,7 +178,7 @@
                 <div>
                     <h3 class="compiler-modal-title" id="subModalProblemTitle" style="margin-bottom: 4px;">Submission Source</h3>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <span id="subModalVerdict" class="verdict-tag passed">PREVIEW_PASSED</span>
+                        <span id="subModalVerdict" class="verdict-tag passed">ACCEPTED</span>
                         <span id="subModalTime" style="font-size: 0.76rem; color: var(--color-text-muted);"></span>
                     </div>
                 </div>
@@ -190,7 +194,7 @@
             </div>
 
             <div class="compiler-modal-actions">
-                <button type="button" class="secondary-header-btn" id="btnCloseSubModal">
+                <button type="button" class="secondary-header-btn" id="btnCloseSubModalFooter">
                     Close
                 </button>
             </div>

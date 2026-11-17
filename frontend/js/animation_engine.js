@@ -3100,9 +3100,12 @@
                 return synthesized;
             }
 
+            const safeTitle = (problemObj && problemObj.title)
+                ? problemObj.title
+                : String(problemId).replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
             return {
-                title: problemId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-                canonicalId: problemId,
+                title: safeTitle,
+                canonicalId: String(problemId),
                 category: 'C',
                 isFallback: true,
                 approaches: [

@@ -2903,11 +2903,15 @@ body.animation-page-body {
         padding: 0 12px;
     }
     .stage-canvas-wrapper {
-        min-height: 320px;
+        min-height: 300px;
         padding: 14px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
     .stage-controls-bar {
         padding: 10px 14px;
+        flex-wrap: wrap;
+        gap: 8px;
     }
     .anim-array-cell {
         width: 44px;
@@ -2971,4 +2975,233 @@ body.animation-page-body {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
+}
+
+/* =========================================================================
+   Basic Java Practice Visualizer Styles
+   ========================================================================= */
+.anim-pipeline-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 16px 0;
+    width: 100%;
+}
+.anim-stage-card {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 16px;
+    min-width: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+.anim-stage-card.stage-active {
+    border-color: #3B82F6;
+    background: rgba(59, 130, 246, 0.15);
+    box-shadow: 0 0 16px rgba(59, 130, 246, 0.3);
+}
+.anim-stage-card.stage-success {
+    border-color: #10B981;
+    background: rgba(16, 185, 129, 0.15);
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.3);
+}
+.anim-stage-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+.anim-stage-val {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #F8FAFC;
+    font-family: var(--font-mono, monospace);
+}
+.anim-stage-arrow {
+    color: #64748B;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+.anim-reg-grid {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 14px 0;
+}
+.anim-reg-box {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 100px;
+}
+.anim-reg-box.reg-highlight {
+    border-color: #F59E0B;
+    background: rgba(245, 158, 11, 0.12);
+}
+.anim-reg-box.reg-active {
+    border-color: #3B82F6;
+    background: rgba(59, 130, 246, 0.12);
+}
+.anim-reg-box.reg-done {
+    border-color: #10B981;
+    background: rgba(16, 185, 129, 0.12);
+}
+.anim-reg-name {
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+    margin-bottom: 4px;
+    font-family: var(--font-mono, monospace);
+}
+.anim-reg-val {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #F1F5F9;
+    font-family: var(--font-mono, monospace);
+}
+.anim-pattern-board {
+    background: #090D16;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 16px 24px;
+    font-family: var(--font-mono, monospace);
+    font-size: 1.15rem;
+    line-height: 1.6;
+    letter-spacing: 4px;
+    color: #38BDF8;
+    margin: 16px auto;
+    max-width: 380px;
+    text-align: left;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+.anim-pattern-line {
+    display: block;
+    white-space: pre;
+}
+.anim-pattern-line.line-active {
+    color: #F59E0B;
+    font-weight: 700;
+    background: rgba(245, 158, 11, 0.1);
+    border-radius: 4px;
+}
+.anim-comp-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 20px;
+    margin: 14px auto;
+    max-width: 440px;
+    font-size: 1.1rem;
+    font-family: var(--font-mono, monospace);
+}
+.anim-comp-operand {
+    padding: 6px 12px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    font-weight: 700;
+}
+.anim-comp-op {
+    color: #F59E0B;
+    font-weight: 800;
+}
+.anim-comp-result {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.88rem;
+}
+.anim-comp-result.res-true {
+    background: rgba(16, 185, 129, 0.2);
+    border: 1px solid #10B981;
+    color: #34D399;
+}
+.anim-comp-result.res-false {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid #EF4444;
+    color: #F87171;
+}
+.anim-stack-wrap {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 8px;
+    max-width: 320px;
+    margin: 14px auto;
+    width: 100%;
+}
+.anim-stack-frame {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 6px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+.anim-stack-frame.frame-active {
+    border-color: #6366F1;
+    background: rgba(99, 102, 241, 0.2);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+.anim-stack-frame.frame-returned {
+    border-color: #10B981;
+    background: rgba(16, 185, 129, 0.15);
+}
+.anim-oop-display {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 14px auto;
+}
+.anim-oop-card {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 16px;
+    min-width: 180px;
+}
+.anim-oop-header {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #94A3B8;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 4px;
+}
+.anim-oop-field {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.85rem;
+    margin: 4px 0;
+}
+.anim-oop-field-name {
+    color: #94A3B8;
+}
+.anim-oop-field-val {
+    color: #38BDF8;
+    font-weight: 600;
 }

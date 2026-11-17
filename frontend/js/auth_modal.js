@@ -12,7 +12,11 @@
     let modalOverlay = null;
     let modalCard = null;
     let activeTriggerElement = null;
-    let currentView = 'login'; // 'login' | 'signup'
+    let currentView = 'login'; // 'login' | 'signup' | 'forgot' | 'verify_otp' | 'reset_pwd' | 'reset_success'
+    let recoveryEmail = '';
+    let recoveryResetToken = '';
+    let resendTimer = null;
+    let resendCountdown = 60;
 
     // Premium Vector SVGs
     const ICONS = {
@@ -375,11 +379,168 @@
                                 <button type="button" class="auth-modal-switch-btn" id="btnSwitchToLogin">Log in</button>
                             </div>
                         </div>
+
+                        <!-- PANE 3: FORGOT PASSWORD / REQUEST OTP -->
+                        <div class="auth-view-pane" id="paneAuthForgot" role="tabpanel">
+                            <div class="auth-pane-intro">
+                                <span class="auth-step-pill">Step 1 of 3</span>
+                                <span class="auth-step-heading">Request verification code</span>
+                            </div>
+                            <form class="auth-modal-form" id="modalForgotForm" novalidate>
+                                <div class="auth-field-group">
+                                    <label class="auth-field-label" for="modalForgotEmail">Email address</label>
+                                    <div class="auth-input-wrapper">
+                                        <span class="auth-input-icon">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                                <polyline points="22,6 12,13 2,6"></polyline>
+                                            </svg>
+                                        </span>
+                                        <input type="email" id="modalForgotEmail" name="email" class="auth-glass-input" placeholder="name@example.com" required autocomplete="email">
+                                    </div>
+                                    <div class="auth-field-error" id="errorModalForgotEmail"></div>
+                                </div>
+
+                                <div class="auth-info-note">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                    <span>Enter your registered email address. We will send a secure 6-digit verification code valid for 5 minutes.</span>
+                                </div>
+
+                                <button type="submit" class="btn-auth-submit" id="btnModalForgotSubmit">
+                                    <span>Send Verification Code</span>
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        <polyline points="12 5 19 12 12 19"></polyline>
+                                    </svg>
+                                </button>
+                            </form>
+
+                            <div class="auth-modal-footer">
+                                <button type="button" class="auth-modal-switch-btn auth-back-link" id="btnForgotBackToLogin">&larr; Back to Log In</button>
+                            </div>
+                        </div>
+
+                        <!-- PANE 4: VERIFY OTP -->
+                        <div class="auth-view-pane" id="paneAuthVerifyOtp" role="tabpanel">
+                            <div class="auth-pane-intro">
+                                <span class="auth-step-pill">Step 2 of 3</span>
+                                <span class="auth-step-heading">Enter verification code</span>
+                                <p class="auth-pane-subtext">A 6-digit code was sent to <strong id="modalOtpTargetEmail">your email</strong></p>
+                            </div>
+                            <form class="auth-modal-form" id="modalVerifyOtpForm" novalidate>
+                                <div class="auth-field-group">
+                                    <label class="auth-field-label" for="modalOtpCode">Verification code</label>
+                                    <div class="auth-input-wrapper auth-otp-wrapper">
+                                        <input type="text" id="modalOtpCode" name="otp" class="auth-glass-input auth-otp-input" placeholder="0 0 0 0 0 0" maxlength="6" inputmode="numeric" pattern="[0-9]{6}" autocomplete="one-time-code" required>
+                                    </div>
+                                    <div class="auth-field-error" id="errorModalOtpCode"></div>
+                                </div>
+
+                                <div class="auth-otp-actions-row">
+                                    <span class="auth-otp-timer" id="otpTimerText">Resend available in <strong id="otpCountdown">60</strong>s</span>
+                                    <button type="button" class="auth-link-btn" id="btnResendOtp" style="display: none;">Resend code</button>
+                                </div>
+
+                                <button type="submit" class="btn-auth-submit" id="btnModalVerifyOtpSubmit">
+                                    <span>Verify Code</span>
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                </button>
+                            </form>
+
+                            <div class="auth-modal-footer">
+                                <button type="button" class="auth-modal-switch-btn auth-back-link" id="btnOtpChangeEmail">&larr; Change email address</button>
+                            </div>
+                        </div>
+
+                        <!-- PANE 5: RESET PASSWORD -->
+                        <div class="auth-view-pane" id="paneAuthResetPassword" role="tabpanel">
+                            <div class="auth-pane-intro">
+                                <span class="auth-step-pill">Step 3 of 3</span>
+                                <span class="auth-step-heading">Create new password</span>
+                            </div>
+                            <form class="auth-modal-form" id="modalResetPasswordForm" novalidate>
+                                <div class="auth-field-group">
+                                    <label class="auth-field-label" for="modalResetNewPassword">New password</label>
+                                    <div class="auth-input-wrapper">
+                                        <span class="auth-input-icon">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                            </svg>
+                                        </span>
+                                        <input type="password" id="modalResetNewPassword" name="newPassword" class="auth-glass-input" placeholder="At least 8 characters" minlength="8" required autocomplete="new-password">
+                                        <button type="button" class="auth-toggle-pwd-btn" data-target="modalResetNewPassword" aria-label="Show password" title="Show password">
+                                            ${ICONS.eye}
+                                        </button>
+                                    </div>
+                                    <!-- Password Strength Meter for Reset -->
+                                    <div class="auth-pwd-strength-container" id="resetPwdStrengthContainer">
+                                        <div class="auth-pwd-strength-bars">
+                                            <span class="auth-pwd-strength-bar" id="resetPwdBar1"></span>
+                                            <span class="auth-pwd-strength-bar" id="resetPwdBar2"></span>
+                                            <span class="auth-pwd-strength-bar" id="resetPwdBar3"></span>
+                                            <span class="auth-pwd-strength-bar" id="resetPwdBar4"></span>
+                                        </div>
+                                        <div class="auth-pwd-strength-text">
+                                            <span>Password strength</span>
+                                            <span id="resetPwdStrengthStatus">—</span>
+                                        </div>
+                                    </div>
+                                    <div class="auth-field-error" id="errorModalResetNewPassword"></div>
+                                </div>
+
+                                <div class="auth-field-group">
+                                    <label class="auth-field-label" for="modalResetConfirmPassword">Confirm new password</label>
+                                    <div class="auth-input-wrapper">
+                                        <span class="auth-input-icon">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                            </svg>
+                                        </span>
+                                        <input type="password" id="modalResetConfirmPassword" name="confirmPassword" class="auth-glass-input" placeholder="Re-enter your new password" minlength="8" required autocomplete="new-password">
+                                        <button type="button" class="auth-toggle-pwd-btn" data-target="modalResetConfirmPassword" aria-label="Show password" title="Show password">
+                                            ${ICONS.eye}
+                                        </button>
+                                    </div>
+                                    <div class="auth-field-error" id="errorModalResetConfirmPassword"></div>
+                                </div>
+
+                                <button type="submit" class="btn-auth-submit" id="btnModalResetPasswordSubmit">
+                                    <span>Update Password</span>
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        <polyline points="12 5 19 12 12 19"></polyline>
+                                    </svg>
+                                </button>
+                            </form>
+
+                            <div class="auth-modal-footer">
+                                <button type="button" class="auth-modal-switch-btn auth-back-link" id="btnResetBackToLogin">&larr; Back to Log In</button>
+                            </div>
+                        </div>
+
+                        <!-- PANE 6: RESET SUCCESS -->
+                        <div class="auth-view-pane" id="paneAuthResetSuccess" role="tabpanel">
+                            <div class="auth-success-card">
+                                <div class="auth-success-icon-wrap" aria-hidden="true">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                </div>
+                                <h3 class="auth-success-title">Password Reset Complete</h3>
+                                <p class="auth-success-desc">Your password has been updated securely. You can now log in using your new credentials.</p>
+                                <button type="button" class="btn-auth-submit" id="btnResetSuccessLogin" style="margin-top: 8px;">
+                                    <span>Sign In Now</span>
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Preview Notice Footer -->
+                    <!-- Session Security Notice Footer -->
                     <div class="auth-modal-preview-notice">
-                        <span>ℹ️ Client-side preview session. Real authentication with Java Servlets, BCrypt &amp; JDBC connects in upcoming phase.</span>
+                        <span>🔒 Authenticated sessions are verified server-side with BCrypt password hashing and HTTP session cookies.</span>
                     </div>
                 </div>
             </div>
@@ -416,15 +577,15 @@
     /**
      * Updates the password strength meter UI.
      */
-    function updatePasswordStrengthUI(val) {
+    function updatePasswordStrengthUI(val, prefix = 'pwd') {
         const result = computePasswordStrength(val);
         const bars = [
-            document.getElementById('pwdBar1'),
-            document.getElementById('pwdBar2'),
-            document.getElementById('pwdBar3'),
-            document.getElementById('pwdBar4')
+            document.getElementById(prefix === 'reset' ? 'resetPwdBar1' : 'pwdBar1'),
+            document.getElementById(prefix === 'reset' ? 'resetPwdBar2' : 'pwdBar2'),
+            document.getElementById(prefix === 'reset' ? 'resetPwdBar3' : 'pwdBar3'),
+            document.getElementById(prefix === 'reset' ? 'resetPwdBar4' : 'pwdBar4')
         ];
-        const label = document.getElementById('pwdStrengthStatus');
+        const label = document.getElementById(prefix === 'reset' ? 'resetPwdStrengthStatus' : 'pwdStrengthStatus');
 
         if (label) {
             label.textContent = result.label;
@@ -440,20 +601,73 @@
     }
 
     /**
-     * Switches between Login and Sign Up views inside the modal.
+     * Controls the 60s cooldown timer for OTP resend.
+     */
+    function startOtpCooldown(seconds = 60) {
+        stopOtpCooldown();
+        resendCountdown = seconds;
+        const timerText = document.getElementById('otpTimerText');
+        const countdownEl = document.getElementById('otpCountdown');
+        const resendBtn = document.getElementById('btnResendOtp');
+
+        if (timerText) timerText.style.display = 'inline';
+        if (countdownEl) countdownEl.textContent = String(resendCountdown);
+        if (resendBtn) {
+            resendBtn.style.display = 'none';
+            resendBtn.disabled = true;
+        }
+
+        resendTimer = setInterval(() => {
+            resendCountdown--;
+            if (countdownEl) countdownEl.textContent = String(resendCountdown);
+            if (resendCountdown <= 0) {
+                stopOtpCooldown();
+                if (timerText) timerText.style.display = 'none';
+                if (resendBtn) {
+                    resendBtn.style.display = 'inline';
+                    resendBtn.disabled = false;
+                }
+            }
+        }, 1000);
+    }
+
+    function stopOtpCooldown() {
+        if (resendTimer) {
+            clearInterval(resendTimer);
+            resendTimer = null;
+        }
+    }
+
+    /**
+     * Switches between views inside the modal:
+     * 'login' | 'signup' | 'forgot' | 'verify_otp' | 'reset_pwd' | 'reset_success'
      */
     function switchView(view) {
-        currentView = view === 'signup' ? 'signup' : 'login';
+        currentView = view || 'login';
         clearValidationErrors();
 
         const tabLogin = document.getElementById('tabBtnLogin');
         const tabSignup = document.getElementById('tabBtnSignup');
-        const paneLogin = document.getElementById('paneAuthLogin');
-        const paneSignup = document.getElementById('paneAuthSignup');
+        const tabsWrap = document.querySelector('.auth-modal-tabs');
         const title = document.getElementById('authModalTitle');
         const subtitle = document.getElementById('authModalSubtitle');
 
+        const allPanes = [
+            'paneAuthLogin',
+            'paneAuthSignup',
+            'paneAuthForgot',
+            'paneAuthVerifyOtp',
+            'paneAuthResetPassword',
+            'paneAuthResetSuccess'
+        ];
+
+        allPanes.forEach(paneId => {
+            const el = document.getElementById(paneId);
+            if (el) el.classList.remove('active');
+        });
+
         if (currentView === 'login') {
+            if (tabsWrap) tabsWrap.style.display = 'flex';
             if (tabLogin) {
                 tabLogin.classList.add('active');
                 tabLogin.setAttribute('aria-selected', 'true');
@@ -462,8 +676,8 @@
                 tabSignup.classList.remove('active');
                 tabSignup.setAttribute('aria-selected', 'false');
             }
-            if (paneLogin) paneLogin.classList.add('active');
-            if (paneSignup) paneSignup.classList.remove('active');
+            const pane = document.getElementById('paneAuthLogin');
+            if (pane) pane.classList.add('active');
 
             if (title) title.textContent = 'Welcome back';
             if (subtitle) subtitle.textContent = 'Enter your credentials to access your CodeArena workspace.';
@@ -472,7 +686,8 @@
                 const emailInp = document.getElementById('modalLoginEmail');
                 if (emailInp) emailInp.focus();
             }, 60);
-        } else {
+        } else if (currentView === 'signup') {
+            if (tabsWrap) tabsWrap.style.display = 'flex';
             if (tabSignup) {
                 tabSignup.classList.add('active');
                 tabSignup.setAttribute('aria-selected', 'true');
@@ -481,8 +696,8 @@
                 tabLogin.classList.remove('active');
                 tabLogin.setAttribute('aria-selected', 'false');
             }
-            if (paneSignup) paneSignup.classList.add('active');
-            if (paneLogin) paneLogin.classList.remove('active');
+            const pane = document.getElementById('paneAuthSignup');
+            if (pane) pane.classList.add('active');
 
             if (title) title.textContent = 'Create your account';
             if (subtitle) subtitle.textContent = 'Join CodeArena to practice algorithms and level up your Java skills.';
@@ -491,6 +706,60 @@
                 const nameInp = document.getElementById('modalSignupName');
                 if (nameInp) nameInp.focus();
             }, 60);
+        } else if (currentView === 'forgot') {
+            if (tabsWrap) tabsWrap.style.display = 'none';
+            const pane = document.getElementById('paneAuthForgot');
+            if (pane) pane.classList.add('active');
+
+            if (title) title.textContent = 'Reset your password';
+            if (subtitle) subtitle.textContent = 'Enter your registered email to receive a 6-digit verification code.';
+
+            const loginEmailVal = (document.getElementById('modalLoginEmail') || {}).value || '';
+            const forgotEmailInp = document.getElementById('modalForgotEmail');
+            if (forgotEmailInp && !forgotEmailInp.value && loginEmailVal) {
+                forgotEmailInp.value = loginEmailVal;
+            }
+
+            setTimeout(() => {
+                if (forgotEmailInp) forgotEmailInp.focus();
+            }, 60);
+        } else if (currentView === 'verify_otp') {
+            if (tabsWrap) tabsWrap.style.display = 'none';
+            const pane = document.getElementById('paneAuthVerifyOtp');
+            if (pane) pane.classList.add('active');
+
+            if (title) title.textContent = 'Verify your email';
+            if (subtitle) subtitle.textContent = 'Enter the 6-digit verification code sent to your inbox.';
+
+            const targetEmailEl = document.getElementById('modalOtpTargetEmail');
+            if (targetEmailEl) targetEmailEl.textContent = recoveryEmail || 'your email';
+
+            setTimeout(() => {
+                const otpInp = document.getElementById('modalOtpCode');
+                if (otpInp) {
+                    otpInp.value = '';
+                    otpInp.focus();
+                }
+            }, 60);
+        } else if (currentView === 'reset_pwd') {
+            if (tabsWrap) tabsWrap.style.display = 'none';
+            const pane = document.getElementById('paneAuthResetPassword');
+            if (pane) pane.classList.add('active');
+
+            if (title) title.textContent = 'Set new password';
+            if (subtitle) subtitle.textContent = 'Choose a strong password with at least 8 characters.';
+
+            setTimeout(() => {
+                const newPwdInp = document.getElementById('modalResetNewPassword');
+                if (newPwdInp) newPwdInp.focus();
+            }, 60);
+        } else if (currentView === 'reset_success') {
+            if (tabsWrap) tabsWrap.style.display = 'none';
+            const pane = document.getElementById('paneAuthResetSuccess');
+            if (pane) pane.classList.add('active');
+
+            if (title) title.textContent = 'Password updated';
+            if (subtitle) subtitle.textContent = 'Your account is secure and ready to use.';
         }
     }
 
@@ -580,6 +849,7 @@
         modalOverlay.classList.remove('active');
         document.body.style.overflow = '';
         clearValidationErrors();
+        stopOtpCooldown();
 
         if (activeTriggerElement && typeof activeTriggerElement.focus === 'function') {
             try {
@@ -657,7 +927,13 @@
         const signupPwd = document.getElementById('modalSignupPassword');
         if (signupPwd) {
             signupPwd.addEventListener('input', function () {
-                updatePasswordStrengthUI(this.value);
+                updatePasswordStrengthUI(this.value, 'pwd');
+            });
+        }
+        const resetPwd = document.getElementById('modalResetNewPassword');
+        if (resetPwd) {
+            resetPwd.addEventListener('input', function () {
+                updatePasswordStrengthUI(this.value, 'reset');
             });
         }
     }
@@ -711,26 +987,18 @@
             if (window.CodeArenaAPI && window.CodeArenaAPI.authService) {
                 res = await window.CodeArenaAPI.authService.login({ email, password, rememberMe });
             } else {
-                const fallbackUser = {
-                    id: 'usr_' + Date.now(),
-                    name: email.split('@')[0],
-                    email: email,
-                    role: 'Student',
-                    plan: 'free',
-                    isMockSession: true
-                };
-                try {
-                    localStorage.setItem('codearena_auth_user', JSON.stringify(fallbackUser));
-                } catch (e) {}
-                res = { success: true, data: { user: fallbackUser } };
+                showModalFeedback('CodeArena authentication client is not loaded on this page. Please refresh and try again.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                return;
             }
 
             if (res && res.success) {
-                showModalFeedback('Signed in successfully (Preview Session)!', 'success');
+                showModalFeedback('Signed in successfully!', 'success');
                 submitBtn.innerHTML = `${ICONS.check} <span>Signed In!</span>`;
 
                 document.dispatchEvent(new CustomEvent('codearena:auth-changed', {
-                    detail: { user: (res.data && res.data.user) || { email }, action: 'login' }
+                    detail: { user: (res.data && res.data.user) || res.data || { email }, action: 'login' }
                 }));
 
                 const urlParams = new URLSearchParams(window.location.search);
@@ -740,17 +1008,17 @@
                     closeModal();
                     if (redirect) {
                         window.location.href = redirect;
-                    } else if (window.location.pathname.endsWith('submissions.html')) {
+                    } else if (window.location.pathname.endsWith('submissions.html') || window.location.pathname.endsWith('dashboard.html')) {
                         window.location.reload();
                     }
-                }, 600);
+                }, 500);
             } else {
-                showModalFeedback(res.message || 'Authentication failed. Please verify credentials.', 'error');
+                showModalFeedback((res && res.message) || 'Authentication failed. Please verify credentials.', 'error');
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
             }
         } catch (err) {
-            showModalFeedback('An error occurred during authentication preview.', 'error');
+            showModalFeedback('Unable to reach the CodeArena authentication service.', 'error');
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
         }
@@ -827,26 +1095,18 @@
             if (window.CodeArenaAPI && window.CodeArenaAPI.authService) {
                 res = await window.CodeArenaAPI.authService.register({ fullName: name, email, password });
             } else {
-                const fallbackUser = {
-                    id: 'usr_' + Date.now(),
-                    name: name,
-                    email: email,
-                    role: 'Student',
-                    plan: 'free',
-                    isMockSession: true
-                };
-                try {
-                    localStorage.setItem('codearena_auth_user', JSON.stringify(fallbackUser));
-                } catch (e) {}
-                res = { success: true, data: { user: fallbackUser } };
+                showModalFeedback('CodeArena registration service is not loaded on this page. Please refresh and try again.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                return;
             }
 
             if (res && res.success) {
-                showModalFeedback('Account created successfully (Preview Session)!', 'success');
+                showModalFeedback('Account created successfully!', 'success');
                 submitBtn.innerHTML = `${ICONS.check} <span>Account Created!</span>`;
 
                 document.dispatchEvent(new CustomEvent('codearena:auth-changed', {
-                    detail: { user: (res.data && res.data.user) || { name, email }, action: 'register' }
+                    detail: { user: (res.data && res.data.user) || res.data || { name, email }, action: 'register' }
                 }));
 
                 const urlParams = new URLSearchParams(window.location.search);
@@ -856,17 +1116,201 @@
                     closeModal();
                     if (redirect) {
                         window.location.href = redirect;
-                    } else if (window.location.pathname.endsWith('submissions.html')) {
+                    } else if (window.location.pathname.endsWith('submissions.html') || window.location.pathname.endsWith('dashboard.html')) {
                         window.location.reload();
                     }
-                }, 600);
+                }, 500);
             } else {
-                showModalFeedback(res.message || 'Registration failed. Please try again.', 'error');
+                showModalFeedback((res && res.message) || 'Registration failed. Please try again.', 'error');
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
             }
         } catch (err) {
-            showModalFeedback('An error occurred during account registration preview.', 'error');
+            showModalFeedback('Unable to reach the CodeArena registration service.', 'error');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    }
+
+    /**
+     * Submits the Step 1 Forgot Password / Request OTP form.
+     */
+    async function handleForgotSubmit(e) {
+        e.preventDefault();
+        clearValidationErrors();
+
+        const emailInp = document.getElementById('modalForgotEmail');
+        const submitBtn = document.getElementById('btnModalForgotSubmit');
+        const email = emailInp ? emailInp.value.trim() : '';
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email) {
+            setFieldError('modalForgotEmail', 'errorModalForgotEmail', 'Please enter your email address.');
+            showModalFeedback('Please provide your email address to receive a verification code.', 'error');
+            return;
+        } else if (!emailRegex.test(email)) {
+            setFieldError('modalForgotEmail', 'errorModalForgotEmail', 'Please enter a valid email format.');
+            showModalFeedback('Please provide a valid email address.', 'error');
+            return;
+        }
+
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `${ICONS.spinner} <span>Sending code...</span>`;
+
+        try {
+            if (!window.CodeArenaAPI || !window.CodeArenaAPI.authService || !window.CodeArenaAPI.authService.requestPasswordReset) {
+                showModalFeedback('CodeArena authentication client is not loaded. Please refresh and try again.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                return;
+            }
+
+            const res = await window.CodeArenaAPI.authService.requestPasswordReset(email);
+            if (res && res.success) {
+                recoveryEmail = email;
+                switchView('verify_otp');
+                startOtpCooldown(60);
+                showModalFeedback(res.message || 'Verification code sent! Please check your email.', 'success');
+            } else {
+                showModalFeedback((res && res.message) || 'Unable to process password reset request. Please try again.', 'error');
+            }
+        } catch (err) {
+            showModalFeedback('Unable to reach password reset service.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    }
+
+    /**
+     * Submits the Step 2 Verify OTP form.
+     */
+    async function handleVerifyOtpSubmit(e) {
+        e.preventDefault();
+        clearValidationErrors();
+
+        const otpInp = document.getElementById('modalOtpCode');
+        const submitBtn = document.getElementById('btnModalVerifyOtpSubmit');
+        const otp = otpInp ? otpInp.value.trim().replace(/\s+/g, '') : '';
+
+        if (!otp) {
+            setFieldError('modalOtpCode', 'errorModalOtpCode', 'Please enter the 6-digit verification code.');
+            showModalFeedback('Please enter the 6-digit code.', 'error');
+            return;
+        } else if (!/^\d{6}$/.test(otp)) {
+            setFieldError('modalOtpCode', 'errorModalOtpCode', 'Verification code must be exactly 6 digits.');
+            showModalFeedback('Verification code must be 6 digits.', 'error');
+            return;
+        }
+
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `${ICONS.spinner} <span>Verifying...</span>`;
+
+        try {
+            const res = await window.CodeArenaAPI.authService.verifyPasswordOtp(recoveryEmail, otp);
+            if (res && res.success && res.data && res.data.resetToken) {
+                recoveryResetToken = res.data.resetToken;
+                stopOtpCooldown();
+                switchView('reset_pwd');
+                showModalFeedback('Code verified! Choose your new secure password.', 'success');
+            } else {
+                showModalFeedback((res && res.message) || 'Invalid or expired verification code.', 'error');
+                setFieldError('modalOtpCode', 'errorModalOtpCode', (res && res.message) || 'Invalid code.');
+            }
+        } catch (err) {
+            showModalFeedback('Unable to verify code. Please try again.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    }
+
+    /**
+     * Handles Resend OTP click.
+     */
+    async function handleResendOtp(e) {
+        if (e) e.preventDefault();
+        const resendBtn = document.getElementById('btnResendOtp');
+        if (resendBtn) resendBtn.disabled = true;
+
+        try {
+            const res = await window.CodeArenaAPI.authService.resendPasswordOtp(recoveryEmail);
+            if (res && res.success) {
+                startOtpCooldown(60);
+                showModalFeedback(res.message || 'A fresh verification code has been dispatched.', 'success');
+            } else {
+                showModalFeedback((res && res.message) || 'Unable to resend code.', 'error');
+                if (res && res.status === 429) {
+                    startOtpCooldown(60);
+                } else if (resendBtn) {
+                    resendBtn.disabled = false;
+                }
+            }
+        } catch (err) {
+            showModalFeedback('Unable to resend verification code.', 'error');
+            if (resendBtn) resendBtn.disabled = false;
+        }
+    }
+
+    /**
+     * Submits the Step 3 Set New Password form.
+     */
+    async function handleResetPasswordSubmit(e) {
+        e.preventDefault();
+        clearValidationErrors();
+
+        const newPwdInp = document.getElementById('modalResetNewPassword');
+        const confirmPwdInp = document.getElementById('modalResetConfirmPassword');
+        const submitBtn = document.getElementById('btnModalResetPasswordSubmit');
+
+        const newPassword = newPwdInp ? newPwdInp.value : '';
+        const confirmPassword = confirmPwdInp ? confirmPwdInp.value : '';
+
+        let hasError = false;
+        if (!newPassword) {
+            setFieldError('modalResetNewPassword', 'errorModalResetNewPassword', 'Please enter your new password.');
+            hasError = true;
+        } else if (newPassword.length < 8) {
+            setFieldError('modalResetNewPassword', 'errorModalResetNewPassword', 'Password must be at least 8 characters long.');
+            hasError = true;
+        }
+
+        if (!confirmPassword) {
+            setFieldError('modalResetConfirmPassword', 'errorModalResetConfirmPassword', 'Please re-enter your new password.');
+            hasError = true;
+        } else if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+            setFieldError('modalResetConfirmPassword', 'errorModalResetConfirmPassword', 'Passwords do not match.');
+            hasError = true;
+        }
+
+        if (hasError) {
+            showModalFeedback('Please correct the highlighted fields.', 'error');
+            return;
+        }
+
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `${ICONS.spinner} <span>Updating password...</span>`;
+
+        try {
+            const res = await window.CodeArenaAPI.authService.resetPassword(
+                recoveryEmail,
+                recoveryResetToken,
+                newPassword,
+                confirmPassword
+            );
+
+            if (res && res.success) {
+                recoveryResetToken = '';
+                switchView('reset_success');
+            } else {
+                showModalFeedback((res && res.message) || 'Password update failed. Your reset session may have expired.', 'error');
+            }
+        } catch (err) {
+            showModalFeedback('Unable to reach password reset service.', 'error');
+        } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
         }
@@ -905,14 +1349,51 @@
         if (loginForm) loginForm.addEventListener('submit', handleLoginSubmit);
         if (signupForm) signupForm.addEventListener('submit', handleSignupSubmit);
 
-        // Forgot password link (preview notification)
+        // Password Recovery Flow Events
         const forgotLink = document.getElementById('modalForgotPasswordLink');
         if (forgotLink) {
             forgotLink.addEventListener('click', function (e) {
                 e.preventDefault();
-                showModalFeedback('Password recovery will connect to SMTP email microservice in backend phase.', 'info');
+                switchView('forgot');
             });
         }
+
+        const btnForgotBack = document.getElementById('btnForgotBackToLogin');
+        if (btnForgotBack) btnForgotBack.addEventListener('click', () => switchView('login'));
+
+        const btnOtpBack = document.getElementById('btnOtpChangeEmail');
+        if (btnOtpBack) btnOtpBack.addEventListener('click', () => switchView('forgot'));
+
+        const btnResetBack = document.getElementById('btnResetBackToLogin');
+        if (btnResetBack) btnResetBack.addEventListener('click', () => switchView('login'));
+
+        const btnResetSuccessLogin = document.getElementById('btnResetSuccessLogin');
+        if (btnResetSuccessLogin) {
+            btnResetSuccessLogin.addEventListener('click', function () {
+                switchView('login');
+                const loginEmailInp = document.getElementById('modalLoginEmail');
+                if (loginEmailInp && recoveryEmail) {
+                    loginEmailInp.value = recoveryEmail;
+                    const pwdInp = document.getElementById('modalLoginPassword');
+                    if (pwdInp) {
+                        pwdInp.value = '';
+                        pwdInp.focus();
+                    }
+                }
+            });
+        }
+
+        const forgotForm = document.getElementById('modalForgotForm');
+        if (forgotForm) forgotForm.addEventListener('submit', handleForgotSubmit);
+
+        const verifyOtpForm = document.getElementById('modalVerifyOtpForm');
+        if (verifyOtpForm) verifyOtpForm.addEventListener('submit', handleVerifyOtpSubmit);
+
+        const resendOtpBtn = document.getElementById('btnResendOtp');
+        if (resendOtpBtn) resendOtpBtn.addEventListener('click', handleResendOtp);
+
+        const resetPasswordForm = document.getElementById('modalResetPasswordForm');
+        if (resetPasswordForm) resetPasswordForm.addEventListener('submit', handleResetPasswordSubmit);
 
         // Terms and Privacy links
         const termsLink = document.getElementById('modalTermsLink');
@@ -921,17 +1402,90 @@
             if (link) {
                 link.addEventListener('click', function (e) {
                     e.preventDefault();
-                    showModalFeedback('CodeArena Terms of Service & Privacy Policy preview agreement active.', 'info');
+                    showModalFeedback('CodeArena platform usage terms apply to registered accounts.', 'info');
                 });
             }
         });
 
         // Social Sign-in buttons (Google & Facebook)
+        let modalOAuthConfig = { google: { enabled: false }, facebook: { enabled: false } };
+
+        async function loadModalOAuthConfig() {
+            try {
+                if (window.CodeArenaAPI && window.CodeArenaAPI.authService && window.CodeArenaAPI.authService.getOAuthConfig) {
+                    const r = await window.CodeArenaAPI.authService.getOAuthConfig();
+                    if (r && r.success && r.data) {
+                        modalOAuthConfig = r.data;
+                        updateModalOAuthUI();
+                        return;
+                    }
+                }
+                const apiBase = (typeof resolveDefaultApiBase === 'function') ? resolveDefaultApiBase() : '/api';
+                const res = await fetch(apiBase + '/auth/oauth/config');
+                const r = await res.json();
+                if (r && r.success && r.data) {
+                    modalOAuthConfig = r.data;
+                }
+            } catch (ignored) {
+            } finally {
+                updateModalOAuthUI();
+            }
+        }
+
+        function updateModalOAuthUI() {
+            document.querySelectorAll('.btn-auth-social').forEach(btn => {
+                const prov = (btn.getAttribute('data-provider') || '').toLowerCase();
+                if (modalOAuthConfig && modalOAuthConfig[prov] && modalOAuthConfig[prov].enabled) {
+                    btn.style.opacity = '1';
+                    btn.title = 'Continue with ' + (btn.getAttribute('data-provider') || 'Social');
+                } else {
+                    btn.style.opacity = '0.65';
+                    btn.title = (btn.getAttribute('data-provider') || 'Social') + ' sign-in is not configured on this server.';
+                }
+            });
+        }
+        loadModalOAuthConfig();
+
         document.querySelectorAll('.btn-auth-social').forEach(btn => {
-            btn.addEventListener('click', function (e) {
+            btn.addEventListener('click', async function (e) {
                 e.preventDefault();
-                const provider = btn.getAttribute('data-provider') || 'Social';
-                showModalFeedback(`${provider} authentication will be available when the authentication backend is integrated.`, 'info');
+                const providerName = btn.getAttribute('data-provider') || 'Social';
+                const provider = providerName.toLowerCase();
+                let isConfigured = modalOAuthConfig && modalOAuthConfig[provider] && modalOAuthConfig[provider].enabled;
+                if (!isConfigured) {
+                    try {
+                        await loadModalOAuthConfig();
+                        isConfigured = modalOAuthConfig && modalOAuthConfig[provider] && modalOAuthConfig[provider].enabled;
+                    } catch (ignored) {}
+                }
+
+                if (!isConfigured) {
+                    showModalFeedback(`${providerName} OAuth sign-in is not configured on this server. Please register or log in with email and password.`, 'info');
+                    return;
+                }
+
+                try {
+                    btn.disabled = true;
+                    const returnDest = (typeof window !== 'undefined' && window.location) ? window.location.href : '/pages/dashboard.html';
+                    let data = null;
+                    if (window.CodeArenaAPI && window.CodeArenaAPI.authService && window.CodeArenaAPI.authService.getOAuthUrl) {
+                        data = await window.CodeArenaAPI.authService.getOAuthUrl(provider, returnDest);
+                    } else {
+                        const apiBase = (typeof resolveDefaultApiBase === 'function') ? resolveDefaultApiBase() : '/api';
+                        const res = await fetch(`${apiBase}/auth/oauth/${provider}/url?returnUrl=` + encodeURIComponent(returnDest));
+                        data = await res.json();
+                    }
+
+                    if (data && data.success && data.data && data.data.authorizationUrl) {
+                        window.location.href = data.data.authorizationUrl;
+                    } else {
+                        showModalFeedback((data && data.message) ? data.message : `Failed to initiate ${providerName} sign-in.`, 'error');
+                    }
+                } catch (err) {
+                    showModalFeedback(`Unable to reach OAuth service. Please try again.`, 'error');
+                } finally {
+                    btn.disabled = false;
+                }
             });
         });
 
@@ -999,7 +1553,7 @@
         bindAuthTriggers();
 
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('auth')) {
+        if (urlParams.has('auth') || urlParams.has('error')) {
             const authParam = urlParams.get('auth');
             if (authParam === 'signup' || authParam === 'register') {
                 openModal('signup');
@@ -1010,11 +1564,16 @@
                         updatePasswordStrengthUI(pwdInp.value);
                     }
                 }
-            } else if (authParam === 'login' || authParam === 'signin' || authParam === 'modal') {
+            } else if (authParam === 'forgot' || authParam === 'reset') {
+                openModal('forgot');
+            } else {
                 openModal('login');
             }
 
-            if (urlParams.has('social')) {
+            if (urlParams.has('error')) {
+                const errMsg = urlParams.get('error');
+                showModalFeedback(decodeURIComponent(errMsg), 'error');
+            } else if (urlParams.has('social')) {
                 const prov = urlParams.get('social');
                 const provName = prov.toLowerCase() === 'facebook' ? 'Facebook' : 'Google';
                 showModalFeedback(`${provName} sign-in will be available when authentication integration is enabled.`, 'info');

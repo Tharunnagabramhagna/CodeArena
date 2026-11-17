@@ -132,13 +132,22 @@
     async function loadPracticeData() {
         try {
             if (window.CodeArenaAPI && window.CodeArenaAPI.problemService) {
-                const res = await window.CodeArenaAPI.problemService.getProblems({ limit: 250 });
+                if (window.CodeArenaAPI.authService && typeof window.CodeArenaAPI.authService.getCurrentUser === 'function') {
+                    await window.CodeArenaAPI.authService.getCurrentUser().catch(() => null);
+                }
+                const [res, topRes, statsRes] = await Promise.all([
+                    window.CodeArenaAPI.problemService.getProblems({ track: 'dsa', limit: 250 }),
+                    window.CodeArenaAPI.problemService.getTopics('dsa'),
+                    window.CodeArenaAPI.problemService.getStats()
+                ]);
                 if (res && res.success && res.data && res.data.problems) {
                     state.problems = res.data.problems;
                 }
-                const topRes = await window.CodeArenaAPI.problemService.getTopics();
                 if (topRes && topRes.success && topRes.data) {
                     state.topics = Array.isArray(topRes.data) ? topRes.data : ((topRes.data && topRes.data.topics) || []);
+                }
+                if (statsRes && statsRes.success && statsRes.data) {
+                    state.stats = statsRes.data;
                 }
             }
         } catch (err) {
@@ -153,14 +162,16 @@
         const hard = state.problems.filter(p => (p.difficulty || '').toLowerCase() === 'hard').length;
 
         if (dom.totalProblemsStat) dom.totalProblemsStat.textContent = total;
-        if (dom.totalTopicsStat) dom.totalTopicsStat.textContent = state.topics.length || 10;
+        if (dom.totalTopicsStat) dom.totalTopicsStat.textContent = state.topics.length || (state.stats && state.stats.topicsCount) || 12;
         if (dom.easyCountStat) dom.easyCountStat.textContent = easy;
         if (dom.mediumCountStat) dom.mediumCountStat.textContent = med;
         if (dom.hardCountStat) dom.hardCountStat.textContent = hard;
 
         const lblBasic = document.getElementById('lblBasicCount');
-        if (lblBasic && window.CodeArenaBasicPractice) {
-            lblBasic.textContent = window.CodeArenaBasicPractice.getStats().totalProblems;
+        if (lblBasic) {
+            if (state.stats && state.stats.basicProblems !== undefined) {
+                lblBasic.textContent = state.stats.basicProblems;
+            }
         }
 
         renderRecommendedSection();
@@ -340,23 +351,10 @@
     }
 
     function activatePlanAndRefresh(planId) {
-        if (window.CodeArenaAPI && window.CodeArenaAPI.subscriptionService) {
-            window.CodeArenaAPI.subscriptionService.upgradePlan(planId);
-            if (window.CodeArenaAPI.authService && !window.CodeArenaAPI.authService.isAuthenticated()) {
-                window.CodeArenaAPI.authService.demoLogin(planId);
-            }
-            if (window.CodeArenaToast) {
-                window.CodeArenaToast.success(`Activated ${planId === 'annual' ? 'Pro Annual ($199/yr)' : 'Pro Monthly ($5/mo)'} preview membership!`);
-            }
-            const targetProb = pendingModalProblem;
-            closeSubscriptionModal();
-            filterAndRenderProblems();
-            if (targetProb) {
-                setTimeout(function () {
-                    window.location.href = `problem.html?id=${encodeURIComponent(targetProb.id || targetProb.slug)}`;
-                }, 350);
-            }
+        if (window.CodeArenaToast) {
+            window.CodeArenaToast.info('Pro membership requires server-side account billing/provisioning. Client-side preview bypass is disabled.');
         }
+        closeSubscriptionModal();
     }
 
     function getDiffClass(diff) {

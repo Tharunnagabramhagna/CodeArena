@@ -64,7 +64,9 @@
     // 1. Authentication Verification & Guest Gate
     // -------------------------------------------------------------------------
 
-    function checkAuthentication() {
+    let aiProviderStatus = { externalConfigured: false, provider: 'Builtin-Tutor-Fallback', fallbackReason: null };
+
+    async function checkAuthentication() {
         // Bypass flag for automated testing environments
         if (typeof window !== 'undefined' && window.__BYPASS_AI_AUTH_GATE__) {
             authenticatedUser = { id: 1, name: 'Test Student', email: 'test@codearena.dev' };
@@ -73,13 +75,18 @@
 
         let isAuth = false;
         try {
-            if (window.CodeArenaAPI && window.CodeArenaAPI.authService && window.CodeArenaAPI.authService.isAuthenticated()) {
-                isAuth = true;
-                const userRes = window.CodeArenaAPI.authService.getCurrentUserSync
-                    ? window.CodeArenaAPI.authService.getCurrentUserSync()
-                    : window.CodeArenaAPI.authService.getCurrentUser();
-                if (userRes && userRes.data) {
-                    authenticatedUser = userRes.data;
+            if (window.CodeArenaAPI && window.CodeArenaAPI.authService) {
+                if (!window.CodeArenaAPI.authService.isAuthenticated() && typeof window.CodeArenaAPI.authService.getCurrentUser === 'function') {
+                    await window.CodeArenaAPI.authService.getCurrentUser().catch(() => null);
+                }
+                if (window.CodeArenaAPI.authService.isAuthenticated()) {
+                    isAuth = true;
+                    const userRes = window.CodeArenaAPI.authService.getCurrentUserSync
+                        ? window.CodeArenaAPI.authService.getCurrentUserSync()
+                        : await window.CodeArenaAPI.authService.getCurrentUser();
+                    if (userRes && userRes.data) {
+                        authenticatedUser = userRes.data;
+                    }
                 }
             }
         } catch (e) {
@@ -87,9 +94,9 @@
         }
 
         if (!isAuth) {
-            // Unauthenticated visitor: redirect immediately to login with return parameter
+            // Unauthenticated visitor: redirect immediately to login modal on dashboard with return parameter
             const returnUrl = encodeURIComponent('ai_assistant.html');
-            window.location.replace(`login.html?redirect=${returnUrl}&notice=ai_auth_required`);
+            window.location.replace(`dashboard.html?auth=login&redirect=${returnUrl}&notice=ai_auth_required`);
             return false;
         }
 
@@ -101,16 +108,28 @@
     // -------------------------------------------------------------------------
 
     async function init() {
-        if (!checkAuthentication()) {
+        if (!(await checkAuthentication())) {
             return;
         }
 
         cacheDom();
         bindEvents();
+        await refreshAIStatus();
         updateStudentHeader();
 
         // Load authenticated student's saved conversations
         await loadConversations();
+    }
+
+    async function refreshAIStatus() {
+        try {
+            if (window.CodeArenaAPI && window.CodeArenaAPI.aiService && typeof window.CodeArenaAPI.aiService.getStatus === 'function') {
+                const res = await window.CodeArenaAPI.aiService.getStatus();
+                if (res && res.success && res.data) {
+                    aiProviderStatus = res.data;
+                }
+            }
+        } catch (e) { }
     }
 
     function cacheDom() {
@@ -251,7 +270,7 @@
         document.addEventListener('codearena:auth-changed', function (e) {
             if (e.detail && e.detail.action === 'logout') {
                 const returnUrl = encodeURIComponent('ai_assistant.html');
-                window.location.replace(`login.html?redirect=${returnUrl}&notice=ai_auth_required`);
+                window.location.replace(`dashboard.html?auth=login&redirect=${returnUrl}&notice=ai_auth_required`);
             }
         });
     }
@@ -261,8 +280,20 @@
             const name = authenticatedUser.name || authenticatedUser.fullName || authenticatedUser.username || authenticatedUser.email || 'Authenticated Student';
             dom.studentDisplayName.textContent = name;
         }
+        const isExt = Boolean(aiProviderStatus && (aiProviderStatus.externalConfigured || aiProviderStatus.isExternal));
+        const badgeText = isExt
+            ? `Gemini (${aiProviderStatus.model || 'gemini-3.5-flash-lite'})`
+            : 'Built-In Tutor Fallback';
         if (dom.studentStatusSub) {
-            dom.studentStatusSub.textContent = 'Local Preview Session · Educational Mentor';
+            dom.studentStatusSub.textContent = isExt
+                ? `Live Gemini AI · ${aiProviderStatus.model || 'gemini-3.5-flash-lite'}`
+                : 'Built-In Mentor · GEMINI_API_KEY unconfigured';
+        }
+        if (dom.headerModeBadge) {
+            dom.headerModeBadge.textContent = badgeText;
+            dom.headerModeBadge.title = isExt
+                ? 'Responses powered by live Gemini API'
+                : (aiProviderStatus.fallbackReason || 'GEMINI_API_KEY not configured on server; using structured fallback mentor.');
         }
     }
 
@@ -491,13 +522,34 @@
                         <div class="msg-list-item msg-unordered-item"><span class="list-bullet">•</span> <strong>Algorithms:</strong> Two Pointers, Dynamic Programming, and Big-O complexity.</div>
                         <div class="msg-list-item msg-unordered-item"><span class="list-bullet">•</span> <strong>Debugging:</strong> Stack traces, NPEs, and compiler diagnostics.</div>
                         <div class="msg-paragraph-spacer"></div>
-                        <p class="msg-note"><em>All guidance in Built-in Assistant mode runs locally as Simulated educational preview. Your conversations are isolated to your student session.</em></p>
+                        <p class="msg-note"><em>${aiProviderStatus && aiProviderStatus.externalConfigured
+                            ? `Connected to live external Gemini API (${escapeHtml(aiProviderStatus.model || 'gemini-2.5-flash')}). Conversations are saved to your CodeArena account.`
+                            : `Running with CodeArena Built-In Tutor Fallback (${escapeHtml((aiProviderStatus && aiProviderStatus.fallbackReason) || 'GEMINI_API_KEY not configured on server')}). Conversations are saved to your CodeArena account.`}</em></p>
                     </div>
                 </div>
             </div>
         `;
         dom.chatMessages.appendChild(welcomeDiv);
         scrollChatToBottom();
+    }
+
+    function formatTimestamp(val) {
+        if (!val) return '';
+        try {
+            let d;
+            if (typeof val === 'string') {
+                const clean = (val.includes(' ') && !val.includes('T')) ? val.replace(' ', 'T') : val;
+                d = new Date(clean);
+            } else {
+                d = new Date(val);
+            }
+            if (isNaN(d.getTime())) {
+                return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+            return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } catch (e) {
+            return '';
+        }
     }
 
     function renderMessages(messages) {
@@ -509,7 +561,7 @@
             const msgDiv = document.createElement('div');
             msgDiv.className = `ai-message ${isUser ? 'user-message' : 'assistant-message'}`;
 
-            const timeStr = msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+            const timeStr = formatTimestamp(msg.createdAt);
             const avatarSvg = isUser ? `
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
@@ -574,9 +626,23 @@
             removeThinkingIndicator();
 
             if (res.success && res.data) {
-                // Update assistant response
+                // Update assistant response and report honest provider/fallback metadata
                 const assistantMsg = res.data.assistantMessage;
-                appendSingleMessage('assistant', assistantMsg.content, assistantMsg.createdAt);
+                const providerMeta = {
+                    isExternal: Boolean(res.data.isExternal),
+                    isFallback: Boolean(res.data.isFallback),
+                    provider: res.data.provider,
+                    model: res.data.model,
+                    fallbackReason: res.data.fallbackReason
+                };
+                if (res.data.provider) {
+                    aiProviderStatus.externalConfigured = Boolean(res.data.isExternal);
+                    aiProviderStatus.provider = res.data.provider;
+                    aiProviderStatus.model = res.data.model;
+                    aiProviderStatus.fallbackReason = res.data.fallbackReason;
+                    updateStudentHeader();
+                }
+                appendSingleMessage('assistant', assistantMsg.content, assistantMsg.createdAt, providerMeta);
 
                 // Update active title if auto-titled
                 if (res.data.conversation && res.data.conversation.title) {
@@ -608,13 +674,21 @@
         }
     }
 
-    function appendSingleMessage(role, content, timestamp) {
+    function appendSingleMessage(role, content, timestamp, providerMeta) {
         if (!dom.chatMessages) return;
         const isUser = role === 'user';
         const msgDiv = document.createElement('div');
         msgDiv.className = `ai-message ${isUser ? 'user-message' : 'assistant-message'}`;
 
-        const timeStr = timestamp ? new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+        const timeStr = formatTimestamp(timestamp);
+        const authorLabel = isUser
+            ? 'You'
+            : (providerMeta && providerMeta.isExternal
+                ? `GEMINI (${escapeHtml(providerMeta.model || 'Live')})`
+                : (providerMeta && providerMeta.isFallback ? 'BUILT-IN FALLBACK' : 'CODEARENA MENTOR'));
+        const fallbackBanner = (!isUser && providerMeta && providerMeta.isFallback && providerMeta.fallbackReason)
+            ? `<div style="font-size: 0.72rem; color: #FBBF24; margin-top: 6px; opacity: 0.9;">Fallback active: ${escapeHtml(providerMeta.fallbackReason)}</div>`
+            : '';
         const avatarSvg = isUser ? `
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
@@ -630,11 +704,11 @@
             <div class="msg-avatar" aria-hidden="true">${avatarSvg}</div>
             <div class="msg-bubble-wrap">
                 <div class="msg-header">
-                    <span class="msg-author-tag">${isUser ? 'You' : 'BUILT-IN ASSISTANT'}</span>
+                    <span class="msg-author-tag">${authorLabel}</span>
                     <span class="msg-time">${timeStr}</span>
                 </div>
                 <div class="msg-bubble ${isUser ? 'user-bubble' : 'assistant-bubble'}">
-                    <div class="msg-content">${formatMessageText(content)}</div>
+                    <div class="msg-content">${formatMessageText(content)}${fallbackBanner}</div>
                 </div>
             </div>
         `;
@@ -722,7 +796,7 @@
             const trimmed = newTitle.trim().substring(0, 80);
             try {
                 const res = await window.CodeArenaAPI.aiService.renameConversation(convUid, trimmed);
-                if (res.success) {
+                if (res && res.success) {
                     if (activeConversationUid === convUid) {
                         activeConversationTitle = trimmed;
                         if (dom.convTitleDisplay) dom.convTitleDisplay.textContent = trimmed;
@@ -733,8 +807,12 @@
                     if (window.CodeArenaToast) {
                         window.CodeArenaToast.info('Conversation title updated');
                     }
+                } else if (window.CodeArenaToast) {
+                    window.CodeArenaToast.error((res && res.message) || 'Failed to rename conversation');
                 }
-            } catch (e) {}
+            } catch (e) {
+                if (window.CodeArenaToast) window.CodeArenaToast.error('Error renaming conversation');
+            }
         }
     }
 
@@ -744,7 +822,7 @@
         if (confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
             try {
                 const res = await window.CodeArenaAPI.aiService.deleteConversation(convUid);
-                if (res.success) {
+                if (res && res.success) {
                     conversations = conversations.filter(c => c.conversationUid !== convUid);
                     if (window.CodeArenaToast) {
                         window.CodeArenaToast.info('Conversation deleted');
@@ -758,8 +836,12 @@
                     } else {
                         filterAndRenderConversations();
                     }
+                } else if (window.CodeArenaToast) {
+                    window.CodeArenaToast.error((res && res.message) || 'Failed to delete conversation');
                 }
-            } catch (e) {}
+            } catch (e) {
+                if (window.CodeArenaToast) window.CodeArenaToast.error('Error deleting conversation');
+            }
         }
     }
 

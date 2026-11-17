@@ -65,7 +65,7 @@
 
 .roadmap-hero-content {
     flex: 1;
-    min-width: 320px;
+    min-width: min(320px, 100%);
 }
 
 .roadmap-tagline-wrap {
@@ -500,7 +500,7 @@
     align-items: center;
     gap: 16px;
     flex: 1;
-    min-width: 280px;
+    min-width: min(280px, 100%);
 }
 
 .level-tier-badge {
@@ -617,7 +617,7 @@
 .level-topics-grid {
     padding: 24px 28px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(360px, 100%), 1fr));
     gap: 18px;
 }
 
@@ -819,7 +819,8 @@
 .roadmap-detail-drawer {
     width: 100%;
     max-width: 760px;
-    height: 100vh;
+    height: 100dvh;
+    padding-bottom: env(safe-area-inset-bottom);
     background: var(--roadmap-card-bg);
     border-left: 1px solid var(--roadmap-border);
     display: flex;
@@ -1479,5 +1480,18 @@
     
     .filter-pill-btn {
         white-space: nowrap;
+        min-height: 36px;
+    }
+
+    .roadmap-modal-card {
+        max-height: calc(100dvh - 24px);
+        overflow-y: auto;
+    }
+}
+
+@media (min-width: 1441px) {
+    .roadmap-main-canvas {
+        max-width: 1400px;
+        margin-inline: auto;
     }
 }

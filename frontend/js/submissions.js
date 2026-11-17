@@ -19,30 +19,24 @@
     // DOM Elements Cache
     let dom = {};
 
-    function init() {
+    async function init() {
         cacheElements();
         bindEvents();
-
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('auth') || urlParams.has('demo')) {
-            if (window.CodeArenaAPI && window.CodeArenaAPI.authService && !window.CodeArenaAPI.authService.isAuthenticated()) {
-                window.CodeArenaAPI.authService.demoLogin('free');
-            }
-        }
-
-        checkAuthAndRender();
+        await checkAuthAndRender();
 
         document.addEventListener('codearena:auth-changed', function () {
             checkAuthAndRender();
         });
     }
 
-    function checkAuthAndRender() {
-        const isAuth = Boolean(
-            window.CodeArenaAPI &&
-            window.CodeArenaAPI.authService &&
-            window.CodeArenaAPI.authService.isAuthenticated()
-        );
+    async function checkAuthAndRender() {
+        let isAuth = false;
+        if (window.CodeArenaAPI && window.CodeArenaAPI.authService) {
+            if (!window.CodeArenaAPI.authService.isAuthenticated()) {
+                await window.CodeArenaAPI.authService.getCurrentUser().catch(() => null);
+            }
+            isAuth = window.CodeArenaAPI.authService.isAuthenticated();
+        }
 
         if (!isAuth) {
             // Guest mode: enforce authentication required gate
@@ -55,26 +49,28 @@
             return;
         }
 
-        // Authenticated preview mode
+        // Authenticated mode
         if (dom.authGate) dom.authGate.style.display = 'none';
         if (dom.heroSection) dom.heroSection.style.display = 'flex';
         if (dom.controlsRow) dom.controlsRow.style.display = 'block';
 
         // Render user session pill in header
-        renderUserHeader();
+        await renderUserHeader();
 
         // Load submission records
-        loadData();
+        await loadData();
     }
 
     async function renderUserHeader() {
         if (!dom.userPill) return;
         try {
             if (window.CodeArenaAPI && window.CodeArenaAPI.authService) {
-                const res = await window.CodeArenaAPI.authService.getCurrentUser();
+                const sync = window.CodeArenaAPI.authService.getCurrentUserSync();
+                const res = sync && sync.data ? sync : await window.CodeArenaAPI.authService.getCurrentUser();
                 const user = (res && res.data) || { name: 'Student', plan: 'free' };
-                if (dom.userName) dom.userName.textContent = user.name || 'Student';
-                if (dom.userAvatar) dom.userAvatar.textContent = (user.name || 'U').charAt(0).toUpperCase();
+                const displayName = user.fullName || user.name || user.username || 'Student';
+                if (dom.userName) dom.userName.textContent = displayName;
+                if (dom.userAvatar) dom.userAvatar.textContent = displayName.charAt(0).toUpperCase();
                 if (dom.userPlanTag) {
                     const isPro = (user.plan === 'monthly' || user.plan === 'annual' || user.plan === 'pro');
                     dom.userPlanTag.textContent = isPro ? 'Pro Member' : 'Free Tier';
@@ -87,7 +83,7 @@
         }
 
         if (dom.sessionPill) {
-            dom.sessionPill.textContent = 'Authenticated Preview Session';
+            dom.sessionPill.textContent = 'Account Submissions';
         }
     }
 
@@ -103,7 +99,6 @@
             heroSection: document.getElementById('submissionsHero'),
             authGate: document.getElementById('submissionsAuthGate'),
             controlsRow: document.querySelector('.feature-controls-row'),
-            demoLoginBtn: document.getElementById('btnSubDemoLogin'),
             userPill: document.getElementById('subUserPill'),
             userAvatar: document.getElementById('subUserAvatar'),
             userName: document.getElementById('subUserName'),
@@ -116,7 +111,8 @@
             modalTime: document.getElementById('subModalTime'),
             modalCodeSnippet: document.getElementById('subModalCodeSnippet'),
             copyCodeBtn: document.getElementById('btnCopySubCode'),
-            closeModalBtn: document.getElementById('btnCloseSubModal')
+            closeModalBtn: document.getElementById('btnCloseSubModal'),
+            closeModalFooterBtn: document.getElementById('btnCloseSubModalFooter')
         };
     }
 
@@ -142,32 +138,23 @@
             });
         }
 
-        if (dom.demoLoginBtn) {
-            dom.demoLoginBtn.addEventListener('click', function () {
-                if (window.CodeArenaAPI && window.CodeArenaAPI.authService) {
-                    window.CodeArenaAPI.authService.demoLogin('free');
-                    if (window.CodeArenaToast) {
-                        window.CodeArenaToast.success('Logged in as Demo Student (Preview Session).');
-                    }
-                    checkAuthAndRender();
-                }
-            });
-        }
-
         if (dom.logoutBtn) {
-            dom.logoutBtn.addEventListener('click', function () {
+            dom.logoutBtn.addEventListener('click', async function () {
                 if (window.CodeArenaAPI && window.CodeArenaAPI.authService) {
-                    window.CodeArenaAPI.authService.logout();
+                    await window.CodeArenaAPI.authService.logout();
                     if (window.CodeArenaToast) {
-                        window.CodeArenaToast.info('Logged out. Guest restrictions restored.');
+                        window.CodeArenaToast.info('Logged out.');
                     }
-                    checkAuthAndRender();
+                    await checkAuthAndRender();
                 }
             });
         }
 
         if (dom.closeModalBtn) {
             dom.closeModalBtn.addEventListener('click', closeCodeModal);
+        }
+        if (dom.closeModalFooterBtn) {
+            dom.closeModalFooterBtn.addEventListener('click', closeCodeModal);
         }
 
         if (dom.codeModalOverlay) {
@@ -187,7 +174,7 @@
         // Load canonical problems for filter dropdown and titles
         try {
             if (window.CodeArenaAPI && window.CodeArenaAPI.problemService) {
-                const pRes = await window.CodeArenaAPI.problemService.getProblems({ limit: 100 });
+                const pRes = await window.CodeArenaAPI.problemService.getProblems({ track: 'all', limit: 300 });
                 if (pRes && pRes.success && pRes.data && pRes.data.problems) {
                     state.canonicalProblems = pRes.data.problems;
                     populateProblemDropdown();
@@ -203,13 +190,13 @@
                 const sRes = await window.CodeArenaAPI.submissionService.getSubmissions();
                 if (sRes && sRes.success && sRes.data && Array.isArray(sRes.data.submissions)) {
                     state.submissions = sRes.data.submissions;
+                } else {
+                    state.submissions = [];
                 }
             }
         } catch (e) {
             console.warn('[Submissions] Error loading submissions from service:', e);
         }
-
-        // Honest session: zero submissions initially until user runs solutions in workspace
 
         renderSubmissions();
     }
@@ -220,7 +207,7 @@
         dom.problemSelect.innerHTML = `
             <option value="All">All Problems</option>
             ${state.canonicalProblems.map(p => `
-                <option value="${escapeHtml(p.id)}">${escapeHtml(p.title)}</option>
+                <option value="${escapeHtml(String(p.id))}">${escapeHtml(p.title)}</option>
             `).join('')}
         `;
         dom.problemSelect.value = currentVal || 'All';
@@ -230,17 +217,19 @@
         if (!dom.tableBody) return;
 
         let filtered = state.submissions.filter(sub => {
-            if (state.selectedProblem !== 'All' && sub.problemId !== state.selectedProblem) {
+            if (state.selectedProblem !== 'All' &&
+                String(sub.problemId) !== String(state.selectedProblem) &&
+                String(sub.problemSlug || '') !== String(state.selectedProblem)) {
                 return false;
             }
-            if (state.selectedVerdict !== 'All' && sub.verdict !== state.selectedVerdict) {
+            if (state.selectedVerdict !== 'All' && String(sub.verdict || sub.status || '') !== state.selectedVerdict) {
                 return false;
             }
             return true;
         });
 
         if (dom.countBadge) {
-            dom.countBadge.textContent = `${filtered.length} ${filtered.length === 1 ? 'record' : 'records'}`;
+            dom.countBadge.textContent = `${filtered.length}`;
         }
 
         // Apply sorting
@@ -260,34 +249,40 @@
         if (dom.emptyState) dom.emptyState.style.display = 'none';
 
         dom.tableBody.innerHTML = filtered.map(sub => {
-            const dateStr = sub.submittedAt ? new Date(sub.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Recent';
-            const isPassed = sub.verdict === 'PREVIEW_PASSED' || sub.verdict === 'ACCEPTED';
-            const canonicalProb = state.canonicalProblems.find(p => p.id === sub.problemId || p.slug === sub.problemId);
-            const title = sub.problemTitle || (canonicalProb ? canonicalProb.title : sub.problemId);
+            const dateStr = sub.submittedAt ? new Date(sub.submittedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent';
+            const verdict = String(sub.verdict || sub.status || 'PENDING').toUpperCase();
+            const isPassed = verdict === 'ACCEPTED';
+            const canonicalProb = state.canonicalProblems.find(p => String(p.id) === String(sub.problemId) || p.slug === sub.problemSlug);
+            const title = sub.problemTitle || (canonicalProb ? canonicalProb.title : `Problem #${sub.problemId}`);
+            const targetKey = sub.problemSlug || (canonicalProb && canonicalProb.slug) || sub.problemId;
+            const passedCases = sub.testCasesPassed !== undefined ? sub.testCasesPassed : (sub.passedCount || 0);
+            const totalCases = sub.testCasesTotal !== undefined ? sub.testCasesTotal : (sub.totalCount || 0);
+            const runtimeMs = sub.executionTime !== undefined ? sub.executionTime : sub.executionTimeMs;
+            const subLabel = totalCases > 0
+                ? `${passedCases}/${totalCases} cases${runtimeMs ? ' · ' + runtimeMs + ' ms' : ''}`
+                : (runtimeMs ? `${runtimeMs} ms` : (sub.status || ''));
 
             return `
                 <tr>
                     <td>
                         <span style="font-family: var(--font-family-mono); font-size: 0.78rem; color: var(--color-text-muted);">
-                            ${escapeHtml(sub.id || 'SUB-001')}
+                            #${escapeHtml(String(sub.id || ''))}
                         </span>
                     </td>
                     <td>
-                        <a href="problem.html?id=${encodeURIComponent(sub.problemId)}" style="color: var(--color-text-primary); font-weight: 600; text-decoration: none;">
+                        <a href="problem.html?id=${encodeURIComponent(targetKey)}" style="color: var(--color-text-primary); font-weight: 600; text-decoration: none;">
                             ${escapeHtml(title)}
                         </a>
                     </td>
                     <td>
-                        <span class="verdict-tag ${isPassed ? 'passed' : 'failed'}" title="Sample test preview verdict">
-                            ${isPassed ? '✓ PREVIEW PASSED' : '✕ ' + escapeHtml(sub.verdict || 'ERROR')}
+                        <span class="verdict-tag ${isPassed ? 'passed' : 'failed'}">
+                            ${isPassed ? '✓ ACCEPTED' : '✕ ' + escapeHtml(verdict.replace(/_/g, ' '))}
                         </span>
-                        <div style="font-size: 0.72rem; color: var(--color-text-muted); margin-top: 2px;">
-                            ${sub.passedCount || 2}/${sub.totalCount || 2} Sample Cases
-                        </div>
+                        ${subLabel ? `<div style="font-size: 0.72rem; color: var(--color-text-muted); margin-top: 2px;">${escapeHtml(subLabel)}</div>` : ''}
                     </td>
                     <td>
                         <span style="font-size: 0.8rem; color: var(--color-text-secondary);">
-                            ${escapeHtml(sub.language || 'Java 17')}
+                            ${escapeHtml(sub.language || 'Java')}
                         </span>
                     </td>
                     <td>
@@ -296,7 +291,7 @@
                         </span>
                     </td>
                     <td style="text-align: right;">
-                        <button type="button" class="secondary-header-btn btn-view-sub-code" data-id="${escapeHtml(sub.id)}" style="height: 28px; font-size: 0.76rem;">
+                        <button type="button" class="secondary-header-btn btn-view-sub-code" data-id="${escapeHtml(String(sub.id))}" style="height: 28px; font-size: 0.76rem;">
                             View Code
                         </button>
                     </td>
@@ -308,28 +303,46 @@
         dom.tableBody.querySelectorAll('.btn-view-sub-code').forEach(btn => {
             btn.addEventListener('click', function () {
                 const subId = this.getAttribute('data-id');
-                const submission = state.submissions.find(s => s.id === subId);
+                const submission = state.submissions.find(s => String(s.id) === String(subId));
                 if (submission) openCodeModal(submission);
             });
         });
     }
 
-    function openCodeModal(submission) {
+    async function openCodeModal(submission) {
         if (!dom.codeModalOverlay) return;
 
-        const title = submission.problemTitle || submission.problemId;
-        if (dom.modalProblemTitle) dom.modalProblemTitle.textContent = `${title} (${submission.id})`;
-        if (dom.modalVerdict) {
-            dom.modalVerdict.textContent = submission.verdict || 'PREVIEW_PASSED';
-            dom.modalVerdict.className = 'verdict-tag ' + ((submission.verdict === 'PREVIEW_PASSED' || submission.verdict === 'ACCEPTED') ? 'passed' : 'failed');
+        let detailed = submission;
+        if (submission && submission.id && !submission.sourceCode && window.CodeArenaAPI && window.CodeArenaAPI.submissionService) {
+            try {
+                const res = await window.CodeArenaAPI.submissionService.getSubmissionById(submission.id);
+                if (res && res.success && res.data) {
+                    detailed = res.data;
+                }
+            } catch (e) { }
         }
-        if (dom.modalTime) dom.modalTime.textContent = submission.submittedAt ? new Date(submission.submittedAt).toLocaleString() : 'Just now';
-        if (dom.modalCodeSnippet) dom.modalCodeSnippet.textContent = submission.sourceCode || '// No code recorded for this preview';
+
+        const verdict = String(detailed.verdict || detailed.status || 'PENDING').toUpperCase();
+        const title = detailed.problemTitle || `Problem #${detailed.problemId}`;
+        if (dom.modalProblemTitle) dom.modalProblemTitle.textContent = `${title} (#${detailed.id})`;
+        if (dom.modalVerdict) {
+            dom.modalVerdict.textContent = verdict;
+            dom.modalVerdict.className = 'verdict-tag ' + (verdict === 'ACCEPTED' ? 'passed' : 'failed');
+        }
+        if (dom.modalTime) dom.modalTime.textContent = detailed.submittedAt ? new Date(detailed.submittedAt).toLocaleString() : 'Just now';
+
+        const diagBlock = detailed.compilerOutput || detailed.runtimeErrorLog;
+        const codeText = detailed.sourceCode || '// Source code unavailable';
+        if (dom.modalCodeSnippet) {
+            dom.modalCodeSnippet.textContent = diagBlock
+                ? `${codeText}\n\n/* --- Server Diagnostics ---\n${diagBlock}\n*/`
+                : codeText;
+        }
 
         if (dom.copyCodeBtn) {
             dom.copyCodeBtn.onclick = function () {
-                if (submission.sourceCode) {
-                    navigator.clipboard.writeText(submission.sourceCode).then(() => {
+                if (detailed.sourceCode) {
+                    navigator.clipboard.writeText(detailed.sourceCode).then(() => {
                         this.textContent = 'Copied!';
                         if (window.CodeArenaToast) {
                             window.CodeArenaToast.success('Submission source code copied to clipboard');

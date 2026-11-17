@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,13 +11,16 @@
     <!-- Immediate Theme Application Script (Zero Flash) -->
     <script src="../js/theme.js"></script>
 </head>
+
 <body class="animation-page-body">
 
     <!-- Top Application Navbar -->
     <header class="workspace-header anim-navbar" role="banner">
         <div class="workspace-header-left anim-navbar-left">
-            <a href="../index.html" class="workspace-brand-wrap" title="Return to CodeArena Home" aria-label="CodeArena Home">
-                <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo" onerror="this.onerror=null; this.src='../assets/logo/codearena-logo.png';">
+            <a href="../index.html" class="workspace-brand-wrap" title="Return to CodeArena Home"
+                aria-label="CodeArena Home">
+                <img src="../assets/images/codearena-full-icon.png" alt="CodeArena" class="brand-full-logo"
+                    onerror="this.onerror=null; this.src='../assets/logo/codearena-logo.png';">
             </a>
             <span class="anim-nav-divider" aria-hidden="true">/</span>
             <div class="anim-nav-problem-info">
@@ -33,40 +37,39 @@
         <div class="workspace-header-actions anim-navbar-right">
             <!-- Approach Selector (visible for problems with multiple approaches like Two Sum) -->
             <div class="approach-selector-wrap" id="approachSelectorWrap" style="display: none;">
-                <label for="customApproachTrigger" class="approach-selector-label" id="approachSelectorLabel">Approach:</label>
-                
+                <label for="customApproachTrigger" class="approach-selector-label"
+                    id="approachSelectorLabel">Approach:</label>
+
                 <!-- Custom Accessible Dropdown Component -->
                 <div class="custom-approach-dropdown" id="customApproachDropdown">
-                    <button type="button" 
-                            class="custom-approach-trigger" 
-                            id="customApproachTrigger" 
-                            aria-haspopup="listbox" 
-                            aria-expanded="false" 
-                            aria-labelledby="approachSelectorLabel customApproachSelectedText">
-                        <span class="custom-approach-selected-text" id="customApproachSelectedText">Select approach...</span>
-                        <svg class="custom-dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <button type="button" class="custom-approach-trigger" id="customApproachTrigger"
+                        aria-haspopup="listbox" aria-expanded="false"
+                        aria-labelledby="approachSelectorLabel customApproachSelectedText">
+                        <span class="custom-approach-selected-text" id="customApproachSelectedText">Select
+                            approach...</span>
+                        <svg class="custom-dropdown-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5" aria-hidden="true">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                     </button>
-                    <ul class="custom-approach-menu" 
-                        id="customApproachMenu" 
-                        role="listbox" 
-                        aria-labelledby="approachSelectorLabel" 
-                        tabindex="-1" 
-                        style="display: none;">
+                    <ul class="custom-approach-menu" id="customApproachMenu" role="listbox"
+                        aria-labelledby="approachSelectorLabel" tabindex="-1" style="display: none;">
                         <!-- Populated dynamically -->
                     </ul>
                 </div>
 
                 <!-- Hidden native select for test suite compatibility & fallback -->
-                <select id="selectApproach" class="approach-select-control sr-only" aria-label="Select Algorithmic Approach" tabindex="-1">
+                <select id="selectApproach" class="approach-select-control sr-only"
+                    aria-label="Select Algorithmic Approach" tabindex="-1">
                     <!-- Populated dynamically -->
                 </select>
             </div>
 
             <!-- Back to Problem Action -->
-            <a href="#" id="btnBackToProblem" class="btn-anim-nav-action btn-back-problem" title="Return to Problem-Solving Workspace">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <a href="#" id="btnBackToProblem" class="btn-anim-nav-action btn-back-problem"
+                title="Return to Problem-Solving Workspace">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
@@ -77,7 +80,15 @@
             <a href="problems.html" class="btn-anim-nav-secondary" title="Browse Catalogue">Problems</a>
 
             <!-- Theme Toggle Button with Standard Inline SVG -->
-            <button class="theme-toggle" id="themeToggleBtn" type="button" aria-label="Switch to light theme" title="Switch to light theme"><svg class="theme-icon theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg></button>
+            <button class="theme-toggle" id="themeToggleBtn" type="button" aria-label="Switch to light theme"
+                title="Switch to light theme"><svg class="theme-icon theme-icon-sun" width="18" height="18"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path
+                        d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41">
+                    </path>
+                </svg></button>
         </div>
     </header>
 
@@ -89,15 +100,17 @@
 
             <!-- LEFT / PRIMARY: Visual Stage & Playback Controls -->
             <section class="anim-stage-section" aria-label="Algorithm Visualization Stage">
-                
+
                 <div class="stage-header-bar">
                     <div class="stage-header-title-group">
                         <div class="stage-live-indicator" aria-hidden="true">
                             <span class="live-pulse-dot"></span>
                         </div>
                         <div>
-                            <h2 class="stage-approach-heading" id="stageApproachHeading">Algorithmic Step-by-Step Visualization</h2>
-                            <span class="stage-step-tagline" id="stageStepTagline">Step 1 of -- · Initializing State</span>
+                            <h2 class="stage-approach-heading" id="stageApproachHeading">Algorithmic Step-by-Step
+                                Visualization</h2>
+                            <span class="stage-step-tagline" id="stageStepTagline">Step 1 of -- · Initializing
+                                State</span>
                         </div>
                     </div>
                     <div class="stage-speed-wrap">
@@ -120,20 +133,38 @@
                 <!-- Playback Controls Bar -->
                 <div class="stage-controls-bar" id="stageControlsBar">
                     <div class="controls-playback-group">
-                        <button id="btnAnimPrev" class="btn-anim-ctl" type="button" title="Previous Step (Left Arrow)" aria-label="Previous Step">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="19 20 9 12 19 4 19 20"></polygon><line x1="5" y1="19" x2="5" y2="5"></line></svg>
+                        <button id="btnAnimPrev" class="btn-anim-ctl" type="button" title="Previous Step (Left Arrow)"
+                            aria-label="Previous Step">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <polygon points="19 20 9 12 19 4 19 20"></polygon>
+                                <line x1="5" y1="19" x2="5" y2="5"></line>
+                            </svg>
                             <span>Prev</span>
                         </button>
-                        <button id="btnAnimPlayPause" class="btn-anim-ctl btn-anim-play" type="button" title="Play / Pause (Spacebar)" aria-label="Play / Pause Animation">
-                            <svg class="icon-play" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        <button id="btnAnimPlayPause" class="btn-anim-ctl btn-anim-play" type="button"
+                            title="Play / Pause (Spacebar)" aria-label="Play / Pause Animation">
+                            <svg class="icon-play" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
                             <span id="btnPlayText">Play</span>
                         </button>
-                        <button id="btnAnimNext" class="btn-anim-ctl" type="button" title="Next Step (Right Arrow)" aria-label="Next Step">
+                        <button id="btnAnimNext" class="btn-anim-ctl" type="button" title="Next Step (Right Arrow)"
+                            aria-label="Next Step">
                             <span>Next</span>
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" y1="5" x2="19" y2="19"></line></svg>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <polygon points="5 4 15 12 5 20 5 4"></polygon>
+                                <line x1="19" y1="5" x2="19" y2="19"></line>
+                            </svg>
                         </button>
-                        <button id="btnAnimRestart" class="btn-anim-ctl" type="button" title="Restart Animation (R)" aria-label="Restart Animation">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                        <button id="btnAnimRestart" class="btn-anim-ctl" type="button" title="Restart Animation (R)"
+                            aria-label="Restart Animation">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                            </svg>
                             <span>Restart</span>
                         </button>
                     </div>
@@ -149,19 +180,22 @@
 
                 <!-- Educational Notice & Honest Disclaimer -->
                 <div class="anim-disclaimer-card" id="animDisclaimerCard">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="12" y1="16" x2="12" y2="12"></line>
                         <line x1="12" y1="8" x2="12.01" y2="8"></line>
                     </svg>
-                    <span><strong>Educational Reference Solution:</strong> Conceptual step-by-step algorithmic visualization. This walkthrough demonstrates the canonical approach and is not derived from student source code.</span>
+                    <span><strong>Educational Reference Solution:</strong> Conceptual step-by-step algorithmic
+                        visualization. This walkthrough demonstrates the canonical approach and is not derived from
+                        student source code.</span>
                 </div>
 
             </section>
 
             <!-- RIGHT / SECONDARY: Step Explanation & Complexity Analysis -->
             <aside class="anim-sidebar-section" aria-label="Algorithm Explanation & Complexity">
-                
+
                 <!-- Card 1: Step-by-Step Explanation -->
                 <div class="anim-info-card" id="explanationCard">
                     <div class="info-card-header">
@@ -185,7 +219,8 @@
                         </div>
                         <div class="explanation-block takeaway-block">
                             <h4 class="explanation-subhead">Core Concept</h4>
-                            <p class="explanation-text takeaway-text" id="stepTakeaway">Loading educational concept...</p>
+                            <p class="explanation-text takeaway-text" id="stepTakeaway">Loading educational concept...
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -194,7 +229,8 @@
                 <div class="anim-info-card complexity-card" id="complexityCard">
                     <div class="info-card-header">
                         <span class="complexity-icon" aria-hidden="true">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <polyline points="12 6 12 12 16 14"></polyline>
                             </svg>
@@ -207,14 +243,16 @@
                                 <span class="metric-name">Time Complexity</span>
                                 <span class="complexity-badge" id="badgeTimeComplexity">O(n)</span>
                             </div>
-                            <p class="metric-explanation" id="textTimeComplexity">Single pass through the input array doing constant work per element.</p>
+                            <p class="metric-explanation" id="textTimeComplexity">Single pass through the input array
+                                doing constant work per element.</p>
                         </div>
                         <div class="complexity-metric-row">
                             <div class="metric-label-group">
                                 <span class="metric-name">Space Complexity</span>
                                 <span class="complexity-badge badge-space" id="badgeSpaceComplexity">O(n)</span>
                             </div>
-                            <p class="metric-explanation" id="textSpaceComplexity">Auxiliary space stores elements in hash map for constant time lookup.</p>
+                            <p class="metric-explanation" id="textSpaceComplexity">Auxiliary space stores elements in
+                                hash map for constant time lookup.</p>
                         </div>
                     </div>
                 </div>
@@ -223,7 +261,8 @@
                 <div class="anim-info-card java-code-card" id="javaCodeCard">
                     <div class="info-card-header">
                         <span class="java-icon" aria-hidden="true">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="16 18 22 12 16 6"></polyline>
                                 <polyline points="8 6 2 12 8 18"></polyline>
                             </svg>
@@ -237,11 +276,13 @@
                         </div>
                         <p class="java-sync-note" id="javaSyncNote">
                             <span class="sync-icon" aria-hidden="true">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                                 </svg>
                             </span>
-                            <span id="javaLineExplanation">Highlighted line corresponds to active algorithmic step.</span>
+                            <span id="javaLineExplanation">Highlighted line corresponds to active algorithmic
+                                step.</span>
                         </p>
                     </div>
                 </div>
@@ -249,7 +290,8 @@
                 <!-- Card 4: Return to Workspace -->
                 <div class="anim-info-card back-workspace-card">
                     <h4 class="back-card-title">Ready to code?</h4>
-                    <p class="back-card-desc">Apply what you learned directly in the CodeArena problem-solving workspace.</p>
+                    <p class="back-card-desc">Apply what you learned directly in the CodeArena problem-solving
+                        workspace.</p>
                     <a href="#" id="btnSidebarBack" class="btn-sidebar-workspace">
                         <span>Return to Problem Workspace →</span>
                     </a>
@@ -259,18 +301,45 @@
 
         </div>
 
+        <!-- ANIMATION LOCKED GATE VIEW -->
+        <div class="anim-coming-soon-layout" id="viewAnimationLocked" style="display: none;">
+            <div class="coming-soon-card locked-gate-card">
+                <div class="coming-soon-icon locked-icon" aria-hidden="true" style="color: #F59E0B; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3);">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                </div>
+                <span class="coming-soon-tag" style="color: #F59E0B; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.25);">🔒 Restricted Access</span>
+                <h2 class="coming-soon-title" id="lockedGateTitle">Animation Locked</h2>
+                <p class="coming-soon-desc" id="lockedGateDesc">
+                    Solve this problem successfully to unlock its interactive algorithm walkthrough.
+                </p>
+                <p style="font-size: 0.82rem; color: var(--color-text-muted); margin-bottom: 24px; max-width: 460px; line-height: 1.5;">
+                    A verified server-side <code style="color: #10B981; font-weight: 700; background: rgba(16, 185, 129, 0.1); padding: 2px 6px; border-radius: 4px;">ACCEPTED</code> verdict across all test cases is required to access the visual algorithm execution walkthrough.
+                </p>
+                <div class="coming-soon-actions">
+                    <a href="#" id="btnLockedGateBack" class="btn-coming-soon-primary">
+                        <span>← Back to Problem Workspace</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- COMING SOON VIEW (For problems without a bespoke animation) -->
         <div class="anim-coming-soon-layout" id="viewComingSoon" style="display: none;">
             <div class="coming-soon-card">
                 <div class="coming-soon-icon" aria-hidden="true">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="5 3 19 12 5 21 5 3"></polygon>
                     </svg>
                 </div>
                 <span class="coming-soon-tag">Interactive Animation Studio</span>
                 <h2 class="coming-soon-title" id="comingSoonTitle">Visualization In Development</h2>
                 <p class="coming-soon-desc" id="comingSoonDesc">
-                    An interactive step-by-step animation for this challenge is currently being crafted by our curriculum team.
+                    An interactive step-by-step animation for this challenge is currently being crafted by our
+                    curriculum team.
                 </p>
                 <div class="coming-soon-actions">
                     <a href="#" id="btnComingSoonBack" class="btn-coming-soon-primary">
@@ -343,9 +412,10 @@
 
     <!-- Scripts -->
     <script src="../js/api.js"></script>
-    <script src="../js/theme.js"></script>
     <script src="../js/animation_visualizers.js"></script>
     <script src="../js/animation_engine.js"></script>
+    <script src="../js/basic_animations.js"></script>
     <script src="../js/solution_animation.js"></script>
 </body>
+
 </html>

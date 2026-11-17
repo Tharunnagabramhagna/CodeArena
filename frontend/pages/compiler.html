@@ -78,7 +78,7 @@
 
         <div class="toolbar-group-right">
             <!-- Dominant Primary Action: Run Code -->
-            <button id="btnRunCode" class="btn-compiler btn-compiler-run" type="button" title="Run simulated preview (Ctrl + Enter)">
+            <button id="btnRunCode" class="btn-compiler btn-compiler-run" type="button" title="Compile and run Java code (Ctrl + Enter)">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                 </svg>
@@ -87,6 +87,14 @@
             </button>
 
             <!-- Secondary Actions -->
+            <button id="btnToolbarShortcuts" class="btn-compiler btn-compiler-secondary" type="button" title="View keyboard shortcuts (or press F1)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                    <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"></path>
+                </svg>
+                <span>Shortcuts</span>
+            </button>
+
             <button id="btnResetCode" class="btn-compiler btn-compiler-secondary" type="button" title="Reset editor to default Java template">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <polyline points="23 4 23 10 17 10"></polyline>
@@ -114,7 +122,7 @@
             <!-- Status Indicator -->
             <div id="compilerStatusIndicator" class="compiler-status-indicator" role="status" aria-live="polite">
                 <span class="status-dot"></span>
-                <span id="compilerStatusText">Ready · Preview Mode</span>
+                <span id="compilerStatusText">Checking Sandbox...</span>
             </div>
         </div>
     </div>
@@ -232,7 +240,40 @@
             </div>
 
             <!-- Editor Target Container -->
-            <div class="editor-canvas-container" id="editorCanvasContainer">
+            <div class="editor-canvas-container" id="editorCanvasContainer" style="position: relative;">
+                <!-- Floating Find & Replace Bar -->
+                <div class="compiler-find-bar" id="compilerFindBar" style="display: none;" role="search" aria-label="Find and Replace in Editor">
+                    <div class="find-bar-row">
+                        <div class="find-input-wrap">
+                            <input type="text" id="findInput" class="find-input" placeholder="Find..." aria-label="Find text">
+                            <span id="findMatchCount" class="find-match-count">No matches</span>
+                        </div>
+                        <div class="find-actions">
+                            <button type="button" id="btnFindPrev" class="btn-find-action" title="Previous match (Shift + Enter)">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                            </button>
+                            <button type="button" id="btnFindNext" class="btn-find-action" title="Next match (Enter)">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+                            <button type="button" id="btnToggleReplace" class="btn-find-action" title="Toggle Replace Row (Ctrl + H)">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            </button>
+                            <button type="button" id="btnCloseFind" class="btn-find-action btn-find-close" title="Close (Escape)">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="find-bar-row replace-row" id="replaceRow" style="display: none;">
+                        <div class="find-input-wrap">
+                            <input type="text" id="replaceInput" class="find-input" placeholder="Replace with..." aria-label="Replace with text">
+                        </div>
+                        <div class="find-actions">
+                            <button type="button" id="btnReplaceOne" class="btn-find-action" title="Replace next match">Replace</button>
+                            <button type="button" id="btnReplaceAll" class="btn-find-action" title="Replace all occurrences">All</button>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="codeMirrorTarget" style="height: 100%; display: flex; flex-direction: column;"></div>
 
                 <!-- Textarea Fallback for non-CodeMirror environments -->
@@ -255,7 +296,7 @@
                     <span class="status-item">Spaces: 4</span>
                 </div>
                 <div class="footer-status-right">
-                    <span class="status-item">Target: OpenJDK 17 (Preview)</span>
+                    <span class="status-item">Target: OpenJDK 17 (Isolated Sandbox)</span>
                 </div>
             </footer>
         </section>
@@ -293,7 +334,7 @@
                             <line x1="12" y1="9" x2="12" y2="13"></line>
                             <line x1="12" y1="17" x2="12.01" y2="17"></line>
                         </svg>
-                        <span>Diagnostics (Preview)</span>
+                        <span>Diagnostics</span>
                         <span class="badge-count badge-error" id="stderrCountBadge" style="display: none;">0</span>
                     </button>
                 </div>
@@ -305,10 +346,10 @@
                 </div>
             </div>
 
-            <!-- Honest & Elegant Preview Disclaimer Banner -->
-            <div class="compiler-preview-banner" role="note">
-                <span class="preview-tag">Preview Mode</span>
-                <span class="preview-text">Client-side simulated preview. Genuine OpenJDK 17 remote compilation engine connects in Phase 4.</span>
+            <!-- Live Compiler Sandbox Status Banner -->
+            <div class="compiler-preview-banner" id="compilerRuntimeBanner" role="note">
+                <span class="preview-tag" id="compilerRuntimeTag">Java Sandbox</span>
+                <span class="preview-text" id="compilerRuntimeText">Code compiles and executes via isolated OpenJDK containers on the backend server.</span>
             </div>
 
             <!-- Console Panels -->
@@ -316,11 +357,12 @@
 
                 <!-- Panel 1: stdout -->
                 <div class="console-panel active" id="panelStdout" role="tabpanel" aria-labelledby="tabBtnStdout">
-                    <!-- Honest Preview Metadata Strip (No fake runtime ms, memory MB, or exit codes) -->
+                    <!-- Genuine Execution Metadata Strip -->
                     <div class="terminal-stats-bar" id="terminalStatsBar" style="display: none;">
-                        <span class="stat-pill"><span class="stat-label">Environment:</span> <strong>Client-Side Preview</strong></span>
-                        <span class="stat-pill"><span class="stat-label">Target Runtime:</span> <strong>Java 17 (Phase 4 Backend)</strong></span>
-                        <span class="stat-pill"><span class="stat-label">Preview State:</span> <strong id="statStatus" class="stat-badge-preview">Preview Completed</strong></span>
+                        <span class="stat-pill"><span class="stat-label">Environment:</span> <strong id="statEnv">Isolated OpenJDK Sandbox</strong></span>
+                        <span class="stat-pill"><span class="stat-label">Time:</span> <strong id="statTime">0 ms</strong></span>
+                        <span class="stat-pill"><span class="stat-label">Exit Code:</span> <strong id="statExitCode">0</strong></span>
+                        <span class="stat-pill"><span class="stat-label">Status:</span> <strong id="statStatus" class="stat-badge-preview">Completed</strong></span>
                     </div>
 
                     <pre class="terminal-output" id="stdoutTerminal"><span class="terminal-empty">Click &quot;Run Code&quot; or press Ctrl + Enter to compile and run your Java program.</span></pre>
@@ -330,7 +372,7 @@
                 <div class="console-panel" id="panelStdin" role="tabpanel" aria-labelledby="tabBtnStdin">
                     <div class="stdin-container">
                         <p class="stdin-hint">
-                            <strong>Simulated Standard Input:</strong> Supply values below to simulate <code>System.in</code> (e.g. <code>Scanner</code>). In this preview phase, input handling is demonstrated client-side. Live input stream processing will be executed by OpenJDK 17 in Phase 4.
+                            <strong>Standard Input (stdin):</strong> Supply input lines passed directly to <code>System.in</code> (for <code>Scanner</code> / <code>BufferedReader</code>) during execution.
                         </p>
                         <textarea id="stdinTextarea" class="stdin-textarea" placeholder="Enter standard input values here (one value per line)..."></textarea>
                         <div style="display: flex; justify-content: flex-end;">
@@ -343,12 +385,12 @@
                 <div class="console-panel" id="panelStderr" role="tabpanel" aria-labelledby="tabBtnStderr">
                     <div class="diagnostics-container">
                         <div id="diagnosticsErrorList"></div>
-                        <pre class="terminal-output" id="stderrTerminal"><span class="terminal-empty">No structural issues detected in client preview. (Full Java compiler checks connect in Phase 4).</span></pre>
+                        <pre class="terminal-output" id="stderrTerminal"><span class="terminal-empty">No compilation or runtime errors.</span></pre>
 
                         <div class="diagnostics-notice-box">
-                            <strong>Client-Side Preview Diagnostics:</strong>
+                            <strong>OpenJDK Compiler &amp; Runtime Diagnostics:</strong>
                             <p style="margin: 4px 0 0 0;">
-                                Structural checks on the frontend (such as brace balancing and class structure) provide immediate syntax assistance in the browser before code is submitted to a remote compiler. In Phase 4, the genuine OpenJDK <code>javac</code> compiler will provide byte-accurate compilation logs.
+                                Compiler errors (<code>javac</code>) and runtime stderr output from container execution appear here.
                             </p>
                         </div>
                     </div>
@@ -373,40 +415,211 @@
         </div>
     </div>
 
+    <!-- Go to Line Modal -->
+    <div class="compiler-modal-overlay" id="gotoLineModalOverlay" role="dialog" aria-modal="true" aria-labelledby="gotoLineTitle">
+        <div class="compiler-modal compiler-modal-sm">
+            <h2 class="compiler-modal-title" id="gotoLineTitle">Go to Line</h2>
+            <div class="compiler-modal-text">
+                <p style="margin-bottom: 8px; font-size: 0.84rem; color: var(--color-text-secondary);">
+                    Enter target line number (1 – <span id="gotoLineMax">1</span>):
+                </p>
+                <input type="number" id="gotoLineInput" class="goto-line-input" min="1" placeholder="Line number" autocomplete="off">
+            </div>
+            <div class="compiler-modal-actions">
+                <button id="btnCancelGotoLine" class="btn-compiler btn-compiler-secondary" type="button">Cancel</button>
+                <button id="btnConfirmGotoLine" class="btn-compiler btn-compiler-run" type="button">Go to Line</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Keyboard Shortcuts Modal -->
     <div class="compiler-modal-overlay" id="shortcutsModalOverlay" role="dialog" aria-modal="true" aria-labelledby="shortcutsModalTitle">
-        <div class="compiler-modal">
-            <h2 class="compiler-modal-title" id="shortcutsModalTitle">Keyboard Shortcuts</h2>
-            <div class="compiler-modal-text">
+        <div class="compiler-modal compiler-modal-lg">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:8px; flex-wrap:wrap;">
+                <h2 class="compiler-modal-title" id="shortcutsModalTitle" style="margin:0;">Keyboard Shortcuts</h2>
+                <div class="shortcuts-platform-toggle" id="shortcutsPlatformToggle" role="tablist" aria-label="Operating system shortcut variant">
+                    <button type="button" class="btn-platform-pill active" id="btnPlatformWin" role="tab" aria-selected="true">Windows / Linux</button>
+                    <button type="button" class="btn-platform-pill" id="btnPlatformMac" role="tab" aria-selected="false">macOS</button>
+                </div>
+            </div>
+
+            <div class="compiler-modal-text" style="max-height: 440px; overflow-y: auto; padding-right: 4px;">
+
+                <!-- 1. Execution -->
+                <div class="shortcuts-category-title">Execution</div>
                 <table class="shortcuts-table">
                     <tbody>
                         <tr>
-                            <td><kbd class="key-badge-modal">Ctrl + Enter</kbd> / <kbd class="key-badge-modal">Cmd + Enter</kbd></td>
-                            <td>Run simulated preview</td>
+                            <td class="shortcut-col-keys">
+                                <span class="shortcut-win"><kbd class="key-badge-modal">Ctrl + Enter</kbd></span>
+                                <span class="shortcut-mac" style="display:none;"><kbd class="key-badge-modal">Cmd + Enter</kbd></span>
+                            </td>
+                            <td class="shortcut-col-desc">Run Java code in isolated OpenJDK 17 container</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- 2. Editing -->
+                <div class="shortcuts-category-title">Editing</div>
+                <table class="shortcuts-table">
+                    <tbody>
+                        <tr>
+                            <td class="shortcut-col-keys">
+                                <span class="shortcut-win"><kbd class="key-badge-modal">Ctrl + S</kbd></span>
+                                <span class="shortcut-mac" style="display:none;"><kbd class="key-badge-modal">Cmd + S</kbd></span>
+                            </td>
+                            <td class="shortcut-col-desc">Save source code to local browser storage</td>
                         </tr>
                         <tr>
-                            <td><kbd class="key-badge-modal">Tab</kbd></td>
-                            <td>Indent 4 spaces (smart indent)</td>
+                            <td class="shortcut-col-keys">
+                                <span class="shortcut-win"><kbd class="key-badge-modal">Ctrl + Z</kbd></span>
+                                <span class="shortcut-mac" style="display:none;"><kbd class="key-badge-modal">Cmd + Z</kbd></span>
+                            </td>
+                            <td class="shortcut-col-desc">Undo last edit</td>
                         </tr>
                         <tr>
-                            <td><kbd class="key-badge-modal">Ctrl + F</kbd> / <kbd class="key-badge-modal">Cmd + F</kbd></td>
-                            <td>Find in code</td>
+                            <td class="shortcut-col-keys">
+                                <span class="shortcut-win"><kbd class="key-badge-modal">Ctrl + Y</kbd> / <kbd class="key-badge-modal">Ctrl + Shift + Z</kbd></span>
+                                <span class="shortcut-mac" style="display:none;"><kbd class="key-badge-modal">Cmd + Shift + Z</kbd></span>
+                            </td>
+                            <td class="shortcut-col-desc">Redo edit</td>
                         </tr>
                         <tr>
-                            <td><kbd class="key-badge-modal">Ctrl + /</kbd> / <kbd class="key-badge-modal">Cmd + /</kbd></td>
-                            <td>Toggle line comment</td>
+                            <td class="shortcut-col-keys">
+                                <span class="shortcut-win"><kbd class="key-badge-modal">Ctrl + /</kbd></span>
+                                <span class="shortcut-mac" style="display:none;"><kbd class="key-badge-modal">Cmd + /</kbd></span>
+                            </td>
+                            <td class="shortcut-col-desc">Toggle line comment (<code>//</code>)</td>
                         </tr>
                         <tr>
-                            <td><kbd class="key-badge-modal">Ctrl + S</kbd> / <kbd class="key-badge-modal">Cmd + S</kbd></td>
-                            <td>Prevent browser save &amp; prompt Run</td>
+                            <td class="shortcut-col-keys">
+                                <span class="shortcut-win"><kbd class="key-badge-modal">Alt + Up</kbd></span>
+                                <span class="shortcut-mac" style="display:none;"><kbd class="key-badge-modal">Option + Up</kbd></span>
+                            </td>
+                            <td class="shortcut-col-desc">Move current line up</td>
                         </tr>
                         <tr>
-                            <td><kbd class="key-badge-modal">Esc</kbd></td>
-                            <td>Close active dialog or modal</td>
+                            <td class="shortcut-col-keys">
+                                <span class="shortcut-win"><kbd class="key-badge-modal">Alt + Down</kbd></span>
+                                <span class="shortcut-mac" style="display:none;"><kbd class="key-badge-modal">Option + Down</kbd></span>
+                            </td>
+                            <td class="shortcut-col-desc">Move current line down</td>
+                        </tr>
+                        <tr>
+                            <td class="shortcut-col-keys">
+                                <span class="shortcut-win"><kbd class="key-badge-modal">Ctrl + Space</kbd></span>
+                                <span class="shortcut-mac" style="display:none;"><kbd class="key-badge-modal">Ctrl + Space</kbd></span>
+                            </td>
+                            <td class="shortcut-col-desc">Trigger Java keyword and library autocomplete</td>
+                        </tr>
+                        <tr>
+                            <td class="shortcut-col-keys">
+                                <span class="shortcut-win"><kbd class="key-badge-modal">Ctrl + A</kbd></span>
+                                <span class="shortcut-mac" style="display:none;"><kbd class="key-badge-modal">Cmd + A</kbd></span>
+                            </td>
+                            <td class="shortcut-col-desc">Select all code</td>
+                        </tr>
+                        <tr>
+                            <td class="shortcut-col-keys">
+                                <span class="shortcut-win"><kbd class="key-badge-modal">Ctrl + C</kbd> / <kbd class="key-badge-modal">Ctrl + X</kbd> / <kbd class="key-badge-modal">Ctrl + V</kbd></span>
+                                <span class="shortcut-mac" style="display:none;"><kbd class="key-badge-modal">Cmd + C</kbd> / <kbd class="key-badge-modal">Cmd + X</kbd> / <kbd class="key-badge-modal">Cmd + V</kbd></span>
+                            </td>
+                            <td class="shortcut-col-desc">Copy, Cut, Paste (native clipboard)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- 3. Navigation -->
+                <div class="shortcuts-category-title">Navigation</div>
+                <table class="shortcuts-table">
+                    <tbody>
+                        <tr>
+                            <td class="shortcut-col-keys">
+                                <span class="shortcut-win"><kbd class="key-badge-modal">Ctrl + G</kbd></span>
+                                <span class="shortcut-mac" style="display:none;"><kbd class="key-badge-modal">Cmd + G</kbd></span>
+                            </td>
+                            <td class="shortcut-col-desc">Go to line number</td>
+                        </tr>
+                        <tr>
+                            <td class="shortcut-col-keys">
+                                <span class="shortcut-win"><kbd class="key-badge-modal">Home</kbd> / <kbd class="key-badge-modal">End</kbd></span>
+                                <span class="shortcut-mac" style="display:none;"><kbd class="key-badge-modal">Cmd + Left</kbd> / <kbd class="key-badge-modal">Cmd + Right</kbd></span>
+                            </td>
+                            <td class="shortcut-col-desc">Go to line start / line end</td>
+                        </tr>
+                        <tr>
+                            <td class="shortcut-col-keys">
+                                <span class="shortcut-win"><kbd class="key-badge-modal">Ctrl + Home</kbd> / <kbd class="key-badge-modal">Ctrl + End</kbd></span>
+                                <span class="shortcut-mac" style="display:none;"><kbd class="key-badge-modal">Cmd + Up</kbd> / <kbd class="key-badge-modal">Cmd + Down</kbd></span>
+                            </td>
+                            <td class="shortcut-col-desc">Go to document start / document end</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- 4. Search & Replace -->
+                <div class="shortcuts-category-title">Search &amp; Replace</div>
+                <table class="shortcuts-table">
+                    <tbody>
+                        <tr>
+                            <td class="shortcut-col-keys">
+                                <span class="shortcut-win"><kbd class="key-badge-modal">Ctrl + F</kbd></span>
+                                <span class="shortcut-mac" style="display:none;"><kbd class="key-badge-modal">Cmd + F</kbd></span>
+                            </td>
+                            <td class="shortcut-col-desc">Open Find bar</td>
+                        </tr>
+                        <tr>
+                            <td class="shortcut-col-keys">
+                                <span class="shortcut-win"><kbd class="key-badge-modal">Ctrl + H</kbd></span>
+                                <span class="shortcut-mac" style="display:none;"><kbd class="key-badge-modal">Cmd + H</kbd></span>
+                            </td>
+                            <td class="shortcut-col-desc">Open Find and Replace bar</td>
+                        </tr>
+                        <tr>
+                            <td class="shortcut-col-keys">
+                                <kbd class="key-badge-modal">Enter</kbd> / <kbd class="key-badge-modal">Shift + Enter</kbd>
+                            </td>
+                            <td class="shortcut-col-desc">Next match / Previous match (in Find bar)</td>
+                        </tr>
+                        <tr>
+                            <td class="shortcut-col-keys">
+                                <kbd class="key-badge-modal">Esc</kbd>
+                            </td>
+                            <td class="shortcut-col-desc">Close Find bar or active modal dialog</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- 5. Code Formatting & Indentation -->
+                <div class="shortcuts-category-title">Code Formatting &amp; Indentation</div>
+                <table class="shortcuts-table">
+                    <tbody>
+                        <tr>
+                            <td class="shortcut-col-keys"><kbd class="key-badge-modal">Tab</kbd></td>
+                            <td class="shortcut-col-desc">Indent selected lines or insert 4 spaces</td>
+                        </tr>
+                        <tr>
+                            <td class="shortcut-col-keys"><kbd class="key-badge-modal">Shift + Tab</kbd></td>
+                            <td class="shortcut-col-desc">Outdent selected lines</td>
+                        </tr>
+                        <tr>
+                            <td class="shortcut-col-keys">
+                                <span class="shortcut-win"><kbd class="key-badge-modal">Ctrl + ]</kbd></span>
+                                <span class="shortcut-mac" style="display:none;"><kbd class="key-badge-modal">Cmd + ]</kbd></span>
+                            </td>
+                            <td class="shortcut-col-desc">Indent current line or selection</td>
+                        </tr>
+                        <tr>
+                            <td class="shortcut-col-keys">
+                                <span class="shortcut-win"><kbd class="key-badge-modal">Ctrl + [</kbd></span>
+                                <span class="shortcut-mac" style="display:none;"><kbd class="key-badge-modal">Cmd + [</kbd></span>
+                            </td>
+                            <td class="shortcut-col-desc">Outdent current line or selection</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+
             <div class="compiler-modal-actions">
                 <button id="btnCloseShortcuts" class="btn-compiler btn-compiler-secondary" type="button">Close</button>
             </div>
