@@ -43,10 +43,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const forgotPasswordLink = document.getElementById('forgotPasswordLink');
-    if (forgotPasswordLink && loginFeedback) {
+    if (forgotPasswordLink) {
         forgotPasswordLink.addEventListener('click', function (e) {
             e.preventDefault();
-            showFeedback(loginFeedback, 'Password reset will be enabled when backend email service is connected.', 'info');
+            if (window.CodeArenaAuthModal && typeof window.CodeArenaAuthModal.open === 'function') {
+                window.CodeArenaAuthModal.open('forgot');
+            } else {
+                window.location.href = '../pages/dashboard.html?auth=forgot';
+            }
         });
     }
 
@@ -93,20 +97,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (window.CodeArenaAPI && window.CodeArenaAPI.authService) {
                     const result = await window.CodeArenaAPI.authService.login({ email, password, rememberMe });
                     if (result.success) {
-                        showFeedback(loginFeedback, 'Authentication successful (Preview Session). Redirecting...', 'info');
+                        showFeedback(loginFeedback, 'Signed in successfully! Redirecting...', 'info');
                         const urlParams = new URLSearchParams(window.location.search);
                         const redirectUrl = urlParams.get('redirect') || 'dashboard.html';
                         setTimeout(function () {
                             window.location.href = redirectUrl;
                         }, 500);
                     } else {
-                        showFeedback(loginFeedback, result.message, 'info');
+                        showFeedback(loginFeedback, result.message || 'Authentication failed. Please check your credentials.', 'error');
                     }
                 } else {
                     showFeedback(
                         loginFeedback,
-                        'Frontend validation passed. Backend authentication will be connected via Java Servlets & JDBC in the upcoming development phase.',
-                        'info'
+                        'CodeArena authentication service failed to load. Please refresh the page.',
+                        'error'
                     );
                 }
             } catch (err) {
@@ -183,20 +187,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (window.CodeArenaAPI && window.CodeArenaAPI.authService) {
                     const result = await window.CodeArenaAPI.authService.register({ fullName: name, email, password });
                     if (result.success) {
-                        showFeedback(signupFeedback, 'Registration successful (Preview Session). Redirecting...', 'info');
+                        showFeedback(signupFeedback, 'Account created successfully! Redirecting...', 'info');
                         const urlParams = new URLSearchParams(window.location.search);
                         const redirectUrl = urlParams.get('redirect') || 'dashboard.html';
                         setTimeout(function () {
                             window.location.href = redirectUrl;
                         }, 500);
                     } else {
-                        showFeedback(signupFeedback, result.message, 'info');
+                        showFeedback(signupFeedback, result.message || 'Registration failed. Please review your details.', 'error');
                     }
                 } else {
                     showFeedback(
                         signupFeedback,
-                        'Frontend registration form validated successfully. User persistence to the MySQL database will be activated in the backend integration phase.',
-                        'info'
+                        'CodeArena registration service failed to load. Please refresh the page.',
+                        'error'
                     );
                 }
             } catch (err) {
@@ -211,21 +215,109 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // --------------------------------------------------------------------------
-    // 4. Social Authentication Preview Handlers (Google & Facebook)
+    // 4. Social Authentication Handlers (Google & Facebook)
     // --------------------------------------------------------------------------
+    let oauthConfig = { google: { enabled: false }, facebook: { enabled: false } };
+
+    // Check for callback errors in URL (reuses urlParams initialized on line 39)
+    const errParam = urlParams.get('error');
+    if (errParam) {
+        const feedbackEl = document.getElementById('authFeedback') || document.getElementById('signupFeedback');
+        if (feedbackEl) {
+            showFeedback(feedbackEl, decodeURIComponent(errParam), 'error');
+        }
+    }
+
+    // Fetch OAuth server status
+    async function loadOAuthConfig() {
+        try {
+            if (window.CodeArenaAPI && window.CodeArenaAPI.authService && window.CodeArenaAPI.authService.getOAuthConfig) {
+                const res = await window.CodeArenaAPI.authService.getOAuthConfig();
+                if (res && res.success && res.data) {
+                    oauthConfig = res.data;
+                    updateOAuthUI();
+                    return;
+                }
+            }
+            const apiBase = (typeof resolveDefaultApiBase === 'function') ? resolveDefaultApiBase() : '/api';
+            const res = await fetch(apiBase + '/auth/oauth/config');
+            const data = await res.json();
+            if (data && data.success && data.data) {
+                oauthConfig = data.data;
+            }
+        } catch (e) {
+            // Keep graceful fallback
+        } finally {
+            updateOAuthUI();
+        }
+    }
+    loadOAuthConfig();
+
+    function updateOAuthUI() {
+        const socialButtons = document.querySelectorAll('.btn-auth-social');
+        socialButtons.forEach(function (btn) {
+            const provider = (btn.getAttribute('data-provider') || '').toLowerCase();
+            const isConfigured = oauthConfig && oauthConfig[provider] && oauthConfig[provider].enabled;
+            if (!isConfigured) {
+                btn.style.opacity = '0.65';
+                btn.title = (btn.getAttribute('data-provider') || 'Social') + ' sign-in is not configured on this server.';
+            } else {
+                btn.style.opacity = '1';
+                btn.title = 'Continue with ' + (btn.getAttribute('data-provider') || 'Social');
+            }
+        });
+    }
+
     const socialButtons = document.querySelectorAll('.btn-auth-social');
     socialButtons.forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
+        btn.addEventListener('click', async function (e) {
             e.preventDefault();
-            const provider = btn.getAttribute('data-provider') || 'Social';
-            const feedbackEl = document.getElementById('authFeedback');
-            if (feedbackEl) {
-                showFeedback(
-                    feedbackEl,
-                    `${provider} authentication will be available when the authentication backend is integrated.`,
-                    'info'
-                );
-                feedbackEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            const providerName = btn.getAttribute('data-provider') || 'Social';
+            const provider = providerName.toLowerCase();
+            const feedbackEl = document.getElementById('authFeedback') || document.getElementById('signupFeedback');
+
+            let isConfigured = oauthConfig && oauthConfig[provider] && oauthConfig[provider].enabled;
+            if (!isConfigured) {
+                try {
+                    await loadOAuthConfig();
+                    isConfigured = oauthConfig && oauthConfig[provider] && oauthConfig[provider].enabled;
+                } catch (ignored) { }
+            }
+            if (!isConfigured) {
+                if (feedbackEl) {
+                    const msg = `${providerName} OAuth sign-in is not configured on this server. Please register or log in with email and password.`;
+                    showFeedback(feedbackEl, msg, 'info');
+                    feedbackEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+                return;
+            }
+
+            try {
+                btn.disabled = true;
+                const returnDest = (typeof window !== 'undefined' && window.location) ? window.location.href : '/pages/dashboard.html';
+                let data = null;
+                if (window.CodeArenaAPI && window.CodeArenaAPI.authService && window.CodeArenaAPI.authService.getOAuthUrl) {
+                    data = await window.CodeArenaAPI.authService.getOAuthUrl(provider, returnDest);
+                } else {
+                    const apiBase = (typeof resolveDefaultApiBase === 'function') ? resolveDefaultApiBase() : '/api';
+                    const res = await fetch(`${apiBase}/auth/oauth/${provider}/url?returnUrl=` + encodeURIComponent(returnDest));
+                    data = await res.json();
+                }
+
+                const authUrl = data && data.data && data.data.authorizationUrl;
+                if (data && data.success && authUrl) {
+                    window.location.href = authUrl;
+                } else {
+                    if (feedbackEl) {
+                        showFeedback(feedbackEl, (data && data.message) ? data.message : `Failed to initiate ${providerName} sign-in.`, 'error');
+                    }
+                }
+            } catch (err) {
+                if (feedbackEl) {
+                    showFeedback(feedbackEl, `Unable to reach OAuth service. Please try again.`, 'error');
+                }
+            } finally {
+                btn.disabled = false;
             }
         });
     });
